@@ -7,7 +7,7 @@
 	(title_block
 		(title "Raspberry Pi Pico Logger")
 		(date "2025-06-21")
-		(rev "1.0")
+		(rev "2.0")
 		(company "Creator: Piotr Kłyś")
 	)
 	(lib_symbols
