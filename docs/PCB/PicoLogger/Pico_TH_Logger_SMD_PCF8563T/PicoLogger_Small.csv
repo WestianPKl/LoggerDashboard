@@ -1,0 +1,17 @@
+"Id";"Oznaczenie";"Footprint";"Liczba";"Oznaczenie";"Dostawca i numer artykułu";
+1;"SW1,SW2";"SW_PUSH_6mm";2;"SW_Push";;;
+2;"R5,R4,R6";"R_0805_2012Metric";3;"4K7";;;
+3;"Y1";"Crystal_SMD_3215-2Pin_3.2x1.5mm";1;"Crystal";;;
+4;"D1";"LED_Avago_PLCC4_3.2x2.8mm_CW";1;"APA-106-F5";;;
+5;"R7,R2,R3,R1";"R_0805_2012Metric";4;"220";;;
+6;"BZ1";"Buzzer_12x9.5RM7.6";1;"Buzzer";;;
+7;"R8";"R_0805_2012Metric";1;"10K";;;
+8;"J4";"PinHeader_1x07_P2.54mm_Horizontal";1;"SPI";;;
+9;"D4,D3";"D_MiniMELF";2;"LL4148";;;
+10;"J1";"PinHeader_1x04_P2.54mm_Vertical";1;"Sensor";;;
+11;"D2";"LED_0805_2012Metric";1;"LED";;;
+12;"J2";"PinHeader_1x04_P2.54mm_Vertical";1;"LCD 16x2";;;
+13;"A1";"RaspberryPi_Pico_Common_THT";1;"RaspberryPi_Pico";;;
+14;"J3";"PinHeader_1x08_P2.54mm_Horizontal";1;"Additional connector";;;
+15;"U1";"SOIC-8_3.9x4.9mm_P1.27mm";1;"PCF8563T";;;
+16;"BT1";"BatteryHolder_Keystone_104_1x23mm";1;"Battery_Cell";;;

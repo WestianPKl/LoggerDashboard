@@ -1,5 +1,6 @@
 import time
 
+
 class RTC_Clock:
     def __init__(self, i2c, addr=0x68):
         if i2c == None:

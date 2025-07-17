@@ -5,12 +5,12 @@ import ntptime
 import urequests as requests
 import json
 
-TOKEN_URL = "http://xxx/api/data/data-token"
-DATA_URL = "http://xxx/api/data/data-log"
-ERROR_URL = "http://xxx/api/common/error-log"
+TOKEN_URL = "http://192.168.18.6/api/data/data-token"
+DATA_URL = "http://192.168.18.6/api/data/data-log"
+ERROR_URL = "http://192.168.18.6/api/common/error-log"
 
-LOGGER_ID = 0
-SENSOR_ID = 0
+LOGGER_ID = 1
+SENSOR_ID = 4
 i = 0
 TEMPERATURE = 1
 HUMIDITY = 1

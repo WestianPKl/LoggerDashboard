@@ -14,10 +14,10 @@ extern "C" {
 #include "rtc_clock.hpp"
 #include "main.hpp"
 
-#define LED_BLUE    6
-#define LED_GREEN   7
+#define LED_BLUE    7
+#define LED_GREEN   6
 #define LED_RED     8
-#define BUZZER      13
+#define BUZZER      11
 
 using namespace std;
 
@@ -128,8 +128,8 @@ void ProgramMain::init_equipment() {
 }
 
 uint8_t ProgramMain::init_wifi() {
-    const char *SSID = "";
-    const char *PASSWORD = "";
+    const char *SSID = "TP-Link_0A7B";
+    const char *PASSWORD = "12345678";
 
     set_rgb_color(255, 255, 255);
     if (cyw43_arch_init()) {

@@ -1,6 +1,7 @@
 from i2c_lcd import I2cLcd
 from bme280 import *
 import sht30
+import sht40
 import rtc_clock
 import time
 import network
@@ -8,10 +9,12 @@ import ntptime
 import urequests as requests
 
 
-SSID = ""
-PASSWORD = ""
-CLOCK = 0
+SSID = "TP-Link_0A7B"
+PASSWORD = "12345678"
+CLOCK = 1
 SET = 1
+SHT = 30  # or 40
+
 
 class Program:
     def __init__(self, leds, buzzer, i2c, logger_id, error_url):
@@ -27,11 +30,14 @@ class Program:
         self.sensor = None
         try:
             self.sensor = BME280(i2c=i2c)
-            self.sensor_type = 'BME'
+            self.sensor_type = "BME"
         except Exception as e:
             try:
-                self.sensor = sht30.SHT30(self.__i2c)
-                self.sensor_type = 'SHT'
+                if SHT == 30:
+                    self.sensor = sht30.SHT30(self.__i2c)
+                elif SHT == 40:
+                    self.sensor = sht40.SHT40(self.__i2c)
+                self.sensor_type = "SHT"
             except Exception as e:
                 self.send_error_log("No sensor detected", str(e))
                 self.sensor = None
@@ -45,7 +51,7 @@ class Program:
                 print("Cannot connect to WiFi!")
         except Exception as e:
             self.send_error_log("Program initialization error", str(e))
-    
+
     def __network_connection(self):
         ssid = SSID
         password = PASSWORD
@@ -144,7 +150,7 @@ class Program:
             self.buzzer.duty_u16(0)
         except Exception as e:
             self.send_error_log("Cannot set BUZZER", str(e))
-            
+
     def send_error_log(self, message, details=None):
         try:
             payload = {
@@ -152,7 +158,7 @@ class Program:
                 "message": message,
                 "details": details,
                 "severity": "error",
-                "type": 'Equipment',
+                "type": "Equipment",
             }
             requests.post(self.error_url, json=payload, timeout=3)
         except Exception as e:

@@ -5611,10 +5611,10 @@
 		(uuid "332b7a62-a239-4fcf-8e48-c13636736d29")
 	)
 	(junction
-		(at 118.11 68.58)
+		(at 118.11 86.36)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "33c3e042-0f9c-437a-8166-754fb42ba6f2")
+		(uuid "3361359a-1698-4b05-b05c-52f652600047")
 	)
 	(junction
 		(at 130.81 33.02)
@@ -5629,16 +5629,10 @@
 		(uuid "545ad10f-5478-46f3-8ccc-77e802d716a0")
 	)
 	(junction
-		(at 118.11 50.8)
+		(at 118.11 68.58)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "7d01a9b0-8dce-4e20-bdab-b3d6ee07f392")
-	)
-	(junction
-		(at 118.11 86.36)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "80a6586c-dadb-4fb2-ac45-dfbeb575c244")
+		(uuid "9110ca5c-6af2-46ca-9198-31045567943a")
 	)
 	(junction
 		(at 255.27 31.75)
@@ -5653,12 +5647,6 @@
 		(uuid "a985b64d-8654-4d2e-b1fc-399cb9495c92")
 	)
 	(junction
-		(at 118.11 33.02)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "bfec4abb-c459-4335-90a7-9708148060bd")
-	)
-	(junction
 		(at 130.81 86.36)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5669,6 +5657,18 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "e90e6377-40b0-4f28-9396-cc8abf05ad53")
+	)
+	(junction
+		(at 118.11 50.8)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f7526a9e-27a2-48d2-9aa9-772ab94340c0")
+	)
+	(junction
+		(at 118.11 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "fa192f47-bcdb-4f3a-8759-71a035a3f8d9")
 	)
 	(wire
 		(pts
@@ -5702,6 +5702,16 @@
 	)
 	(wire
 		(pts
+			(xy 118.11 29.21) (xy 118.11 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "06a1a84c-faff-4516-85dc-86d4e0e96af9")
+	)
+	(wire
+		(pts
 			(xy 107.95 35.56) (xy 118.11 35.56)
 		)
 		(stroke
@@ -5709,16 +5719,6 @@
 			(type default)
 		)
 		(uuid "0d35f782-3c98-4bf5-9167-df7997c2e11f")
-	)
-	(wire
-		(pts
-			(xy 118.11 17.78) (xy 118.11 21.59)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0f054758-1f38-47c1-a032-e2633a6dfeb7")
 	)
 	(wire
 		(pts
@@ -5739,26 +5739,6 @@
 			(type default)
 		)
 		(uuid "12430442-bb12-47ab-9d39-b5839d7faca6")
-	)
-	(wire
-		(pts
-			(xy 118.11 29.21) (xy 118.11 33.02)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "13bc81d6-b4cf-4e8a-8270-998720e0d4f0")
-	)
-	(wire
-		(pts
-			(xy 118.11 68.58) (xy 130.81 68.58)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "14063746-ec5a-468b-8a7b-e5547995c53c")
 	)
 	(wire
 		(pts
@@ -5792,6 +5772,16 @@
 	)
 	(wire
 		(pts
+			(xy 118.11 50.8) (xy 130.81 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1ade2c0c-956b-4212-a94a-ca36be294cba")
+	)
+	(wire
+		(pts
 			(xy 100.33 87.63) (xy 81.28 87.63)
 		)
 		(stroke
@@ -5799,6 +5789,16 @@
 			(type default)
 		)
 		(uuid "1b30ee51-22cb-4492-b378-c4758253349b")
+	)
+	(wire
+		(pts
+			(xy 118.11 86.36) (xy 130.81 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1bdfc9cb-1aac-4d28-9d6a-5bc9751a1e0a")
 	)
 	(wire
 		(pts
@@ -5822,16 +5822,6 @@
 	)
 	(wire
 		(pts
-			(xy 118.11 53.34) (xy 118.11 57.15)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "233e8061-417a-4243-b6f3-4e390d773e0f")
-	)
-	(wire
-		(pts
 			(xy 21.59 73.66) (xy 21.59 72.39)
 		)
 		(stroke
@@ -5849,6 +5839,26 @@
 			(type default)
 		)
 		(uuid "286e8aef-8b8f-4714-b926-503c8016da27")
+	)
+	(wire
+		(pts
+			(xy 118.11 46.99) (xy 118.11 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "28a9594c-2000-4e45-a01e-ee190b807dbe")
+	)
+	(wire
+		(pts
+			(xy 118.11 82.55) (xy 118.11 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "29d1e625-81e3-4aef-8ad4-2dd5b9e0a466")
 	)
 	(wire
 		(pts
@@ -6012,6 +6022,26 @@
 	)
 	(wire
 		(pts
+			(xy 118.11 35.56) (xy 118.11 39.37)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "51322749-bb1f-451c-be19-00adb3e97d13")
+	)
+	(wire
+		(pts
+			(xy 118.11 17.78) (xy 118.11 21.59)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "55d49416-23a7-4b43-8a71-41650e7d3d04")
+	)
+	(wire
+		(pts
 			(xy 74.93 175.26) (xy 76.2 175.26)
 		)
 		(stroke
@@ -6069,26 +6099,6 @@
 			(type default)
 		)
 		(uuid "5ff87fa6-2c34-451b-84ee-0a83fabee762")
-	)
-	(wire
-		(pts
-			(xy 107.95 50.8) (xy 118.11 50.8)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6301c17a-e417-4ca6-9f57-5faca010a03c")
-	)
-	(wire
-		(pts
-			(xy 118.11 82.55) (xy 118.11 86.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "63a75313-0de3-4112-8037-81d37014568f")
 	)
 	(wire
 		(pts
@@ -6232,6 +6242,16 @@
 	)
 	(wire
 		(pts
+			(xy 118.11 64.77) (xy 118.11 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "72a12d15-5866-4862-98e7-f5e80a723ae3")
+	)
+	(wire
+		(pts
 			(xy 82.55 86.36) (xy 95.25 86.36)
 		)
 		(stroke
@@ -6242,16 +6262,6 @@
 	)
 	(wire
 		(pts
-			(xy 118.11 35.56) (xy 118.11 39.37)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "73e46442-b52f-4c1b-bd5e-a36c16fa663a")
-	)
-	(wire
-		(pts
 			(xy 82.55 43.18) (xy 80.01 43.18)
 		)
 		(stroke
@@ -6259,16 +6269,6 @@
 			(type default)
 		)
 		(uuid "74b56fd8-cf9c-4d1e-af59-100b01bd16a5")
-	)
-	(wire
-		(pts
-			(xy 118.11 33.02) (xy 130.81 33.02)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "78a68f01-8625-4964-a8eb-7bbeef421b2d")
 	)
 	(wire
 		(pts
@@ -6452,6 +6452,16 @@
 	)
 	(wire
 		(pts
+			(xy 118.11 71.12) (xy 118.11 74.93)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9e73149a-60ba-460c-9562-3aef7db7c572")
+	)
+	(wire
+		(pts
 			(xy 20.32 69.85) (xy 24.13 69.85)
 		)
 		(stroke
@@ -6469,16 +6479,6 @@
 			(type default)
 		)
 		(uuid "a030594f-14a2-4278-b212-31b57f9abe6e")
-	)
-	(wire
-		(pts
-			(xy 118.11 71.12) (xy 118.11 74.93)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a21b1c69-7301-4716-bfe9-a3ae4acfdf7e")
 	)
 	(wire
 		(pts
@@ -6672,6 +6672,16 @@
 	)
 	(wire
 		(pts
+			(xy 118.11 33.02) (xy 130.81 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c35b8e95-2820-4fa9-bc05-bf69b62ba633")
+	)
+	(wire
+		(pts
 			(xy 86.36 186.69) (xy 83.82 186.69)
 		)
 		(stroke
@@ -6712,6 +6722,26 @@
 	)
 	(wire
 		(pts
+			(xy 118.11 68.58) (xy 130.81 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cc38ce7e-a8ef-4055-9075-6c0a0a2272b7")
+	)
+	(wire
+		(pts
+			(xy 118.11 53.34) (xy 118.11 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cd17507c-c0f8-4851-aa7d-9502e6d824cd")
+	)
+	(wire
+		(pts
 			(xy 83.82 182.88) (xy 74.93 182.88)
 		)
 		(stroke
@@ -6719,16 +6749,6 @@
 			(type default)
 		)
 		(uuid "d0243fa2-117a-417f-9e63-4e0786ef9bd3")
-	)
-	(wire
-		(pts
-			(xy 118.11 64.77) (xy 118.11 68.58)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d3bf5222-4b49-40d0-8757-9109a216154d")
 	)
 	(wire
 		(pts
@@ -6759,16 +6779,6 @@
 			(type default)
 		)
 		(uuid "d5947b79-78cb-4749-9d85-b26d1d7596fc")
-	)
-	(wire
-		(pts
-			(xy 118.11 46.99) (xy 118.11 50.8)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d61357de-9ef9-4a13-86ec-8143fd232c8c")
 	)
 	(wire
 		(pts
@@ -6882,7 +6892,7 @@
 	)
 	(wire
 		(pts
-			(xy 118.11 50.8) (xy 130.81 50.8)
+			(xy 107.95 50.8) (xy 118.11 50.8)
 		)
 		(stroke
 			(width 0)
@@ -6919,16 +6929,6 @@
 			(type default)
 		)
 		(uuid "ee42c68c-3ce6-4214-8de6-8b1612a62a5a")
-	)
-	(wire
-		(pts
-			(xy 118.11 86.36) (xy 130.81 86.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "eecf3099-ca70-48b4-b686-3dbefc628b9c")
 	)
 	(wire
 		(pts
@@ -9271,7 +9271,7 @@
 	)
 	(symbol
 		(lib_id "Diode:SM4007")
-		(at 118.11 78.74 270)
+		(at 118.11 78.74 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9285,7 +9285,7 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Value" "SM4007"
@@ -9294,11 +9294,11 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Footprint" "Diode_SMD:D_SMA"
-			(at 113.665 78.74 0)
+			(at 122.555 78.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10495,7 +10495,7 @@
 	)
 	(symbol
 		(lib_id "Diode:SM4007")
-		(at 118.11 25.4 270)
+		(at 118.11 25.4 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -10503,7 +10503,7 @@
 		(dnp no)
 		(uuid "3a6387f6-9f97-4506-8801-9daf4c3be802")
 		(property "Reference" "D6"
-			(at 121.92 25.146 90)
+			(at 122.174 24.13 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10511,7 +10511,7 @@
 			)
 		)
 		(property "Value" "SM4007"
-			(at 124.46 27.178 90)
+			(at 124.46 26.67 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10519,7 +10519,7 @@
 			)
 		)
 		(property "Footprint" "Diode_SMD:D_SMA"
-			(at 113.665 25.4 0)
+			(at 122.555 25.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10586,7 +10586,6 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "3f2129f7-2d81-4f42-819e-3157d555aef4")
 		(property "Reference" "K3"
 			(at 114.3 59.6899 0)
@@ -11145,7 +11144,6 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "48c9e7d5-dce9-4cbc-be37-89448da5b2dc")
 		(property "Reference" "K4"
 			(at 114.3 77.4699 0)
@@ -12714,7 +12712,7 @@
 	)
 	(symbol
 		(lib_id "Diode:SM4007")
-		(at 118.11 60.96 270)
+		(at 118.11 60.96 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12728,7 +12726,7 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Value" "SM4007"
@@ -12737,11 +12735,11 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Footprint" "Diode_SMD:D_SMA"
-			(at 113.665 60.96 0)
+			(at 122.555 60.96 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13357,7 +13355,6 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "acb62562-ef6f-48c4-9428-0e225c997e77")
 		(property "Reference" "K1"
 			(at 114.3 24.1299 0)
@@ -15215,7 +15212,7 @@
 	)
 	(symbol
 		(lib_id "Diode:SM4007")
-		(at 118.11 43.18 270)
+		(at 118.11 43.18 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -15229,7 +15226,7 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Value" "SM4007"
@@ -15238,11 +15235,11 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 			)
 		)
 		(property "Footprint" "Diode_SMD:D_SMA"
-			(at 113.665 43.18 0)
+			(at 122.555 43.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)

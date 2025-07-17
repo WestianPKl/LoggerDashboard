@@ -1,7 +1,7 @@
 import time
 
 
-class SHT30:
+class SHT40:
     def __init__(self, i2c, addr=0x44):
         if i2c == None:
             raise ValueError("No I2C argument!")
