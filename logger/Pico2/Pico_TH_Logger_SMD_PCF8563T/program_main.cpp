@@ -14,8 +14,8 @@ extern "C" {
 #include "main.hpp"
 
 #define LED_BLUE    18
-#define LED_GREEN   19
-#define LED_RED     20
+#define LED_GREEN   20
+#define LED_RED     19
 #define BUZZER      11
 
 using namespace std;

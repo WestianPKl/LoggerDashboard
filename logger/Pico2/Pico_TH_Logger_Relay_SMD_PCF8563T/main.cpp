@@ -59,26 +59,26 @@ int main() {
             program_main.send_data();
         }
         sleep_ms(10);
-        // sleep_ms(3000);
-        // gpio_put(RELAY_1, 1);
-        // gpio_put(RELAY_2, 0);
-        // gpio_put(RELAY_3, 0);
-        // gpio_put(RELAY_4, 0);
-        // sleep_ms(3000);
-        // gpio_put(RELAY_1, 0);
-        // gpio_put(RELAY_2, 1);
-        // gpio_put(RELAY_3, 0);
-        // gpio_put(RELAY_4, 0);
-        // sleep_ms(3000);
-        // gpio_put(RELAY_1, 0);
-        // gpio_put(RELAY_2, 0);
-        // gpio_put(RELAY_3, 1);
-        // gpio_put(RELAY_4, 0);
-        // sleep_ms(3000);
-        // gpio_put(RELAY_1, 0);
-        // gpio_put(RELAY_2, 0);
-        // gpio_put(RELAY_3, 0);
-        // gpio_put(RELAY_4, 1);
+        sleep_ms(300);
+        gpio_put(RELAY_1, 1);
+        gpio_put(RELAY_2, 0);
+        gpio_put(RELAY_3, 0);
+        gpio_put(RELAY_4, 0);
+        sleep_ms(300);
+        gpio_put(RELAY_1, 0);
+        gpio_put(RELAY_2, 1);
+        gpio_put(RELAY_3, 0);
+        gpio_put(RELAY_4, 0);
+        sleep_ms(300);
+        gpio_put(RELAY_1, 0);
+        gpio_put(RELAY_2, 0);
+        gpio_put(RELAY_3, 1);
+        gpio_put(RELAY_4, 0);
+        sleep_ms(300);
+        gpio_put(RELAY_1, 0);
+        gpio_put(RELAY_2, 0);
+        gpio_put(RELAY_3, 0);
+        gpio_put(RELAY_4, 1);
     }
 }
 

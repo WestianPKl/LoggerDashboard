@@ -13,9 +13,9 @@ extern "C" {
 #include "rtc_clock.hpp"
 #include "main.hpp"
 
-#define LED_BLUE    7
-#define LED_GREEN   6
-#define LED_RED     8
+#define LED_BLUE    6
+#define LED_GREEN   8
+#define LED_RED     7
 #define BUZZER      11
 
 using namespace std;
