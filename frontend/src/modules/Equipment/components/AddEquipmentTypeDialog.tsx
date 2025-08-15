@@ -10,8 +10,24 @@ import {
 	useMediaQuery,
 	useTheme,
 } from '@mui/material'
-import type { IAddEquipmentType, IAddEquipmentTypeProps } from '../scripts/IEquipment'
+import type { IAddEquipmentTypeProps } from '../scripts/IEquipment'
 
+/**
+ * A dialog component for adding or editing equipment types.
+ *
+ * This component displays a modal dialog that allows users to add a new equipment type
+ * or edit existing equipment types. It supports both single and multiple selection editing.
+ *
+ * @component
+ * @param {Object} props - The component props.
+ * @param {boolean} props.edit - Indicates if the dialog is in edit mode.
+ * @param {Array<IAddEquipmentType>} [props.selectedItems] - The currently selected equipment types for editing.
+ * @param {boolean} props.openAddDialog - Controls whether the dialog is open.
+ * @param {() => void} props.handleCloseAdd - Handler to close the dialog.
+ * @param {(data: IAddEquipmentType | IAddEquipmentType[]) => void} props.addItemHandler - Handler to add or update equipment types.
+ *
+ * @returns {JSX.Element} The rendered dialog component.
+ */
 export default function AddEquipmentTypeDialog({
 	edit,
 	selectedItems,
@@ -44,29 +60,49 @@ export default function AddEquipmentTypeDialog({
 		}
 	}, [openAddDialog, edit, selectedItems])
 
-	function onNameChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
+	/**
+	 * Handles the change event for the equipment type name input field.
+	 * Updates the local state with the new value entered by the user.
+	 *
+	 * @param e - The change event from the input element.
+	 */
+	function onNameChangeHandler(e: React.ChangeEvent<HTMLInputElement>): void {
 		setName(e.target.value)
 	}
 
-	function closeDialog() {
+	/**
+	 * Closes the Add Equipment Type dialog by invoking the provided close handler.
+	 *
+	 * Calls the `handleCloseAdd` function to perform any necessary cleanup or state updates
+	 * when the dialog is dismissed.
+	 */
+	function closeDialog(): void {
 		handleCloseAdd()
 	}
 
-	function onSubmitHandler(e: React.FormEvent) {
+	/**
+	 * Handles the form submission for adding or editing equipment types.
+	 *
+	 * - If not in edit mode, adds a single equipment type with the provided name.
+	 * - If in edit mode and multiple selection is enabled, updates multiple equipment types based on selected items.
+	 * - If in edit mode and multiple selection is not enabled, updates a single equipment type with the provided id and name.
+	 * - Closes the dialog after handling the submission.
+	 *
+	 * @param e - The form event triggered by the submission.
+	 */
+	function onSubmitHandler(e: React.FormEvent): void {
 		e.preventDefault()
 		if (!edit) {
-			const data: IAddEquipmentType = { name }
-			addItemHandler(data)
+			addItemHandler({ name })
 		} else if (edit && multiple) {
-			const items: IAddEquipmentType[] =
+			addItemHandler(
 				selectedItems?.map(e => ({
 					id: e.id,
 					name: e.name,
 				})) || []
-			addItemHandler(items)
+			)
 		} else if (edit && !multiple) {
-			const data: IAddEquipmentType = { id: itemId, name }
-			addItemHandler([data])
+			addItemHandler([{ id: itemId, name }])
 		}
 		closeDialog()
 	}

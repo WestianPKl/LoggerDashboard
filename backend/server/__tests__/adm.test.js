@@ -1,3 +1,28 @@
+/**
+ * Integration tests for the Admin API.
+ *
+ * This file covers the following scenarios:
+ * - Creating, editing, fetching and deleting admin functionality definitions, object definitions, access level definitions, roles, role users, and permissions
+ * - Validation and authorization for all endpoints
+ * - Filtering and listing admin entities
+ *
+ * @param {string} tokenFullAccess JWT token for a user with full permissions (used for most authorized requests)
+ * @param {string} tokenNoPermissions JWT token for a user with no permissions (used to test authorization failures)
+ * @param {number} adminFunctionalityDefinitionId Stores the ID of the created admin functionality definition
+ * @param {number} adminObjectDefinitionId Stores the ID of the created admin object definition
+ * @param {number} adminAccessLevelDefinitionId Stores the ID of the created admin access level definition
+ * @param {number} adminPermissionIdOne Stores the ID of the first created admin permission
+ * @param {number} adminPermissionIdTwo Stores the ID of the second created admin permission
+ * @param {number} adminRoleId Stores the ID of the created admin role
+ * @param {number} userId Stores the ID of the user used in tests
+ *
+ * Structure:
+ * - beforeAll: Logs in two users and stores their tokens for use in tests
+ * - Each 'it' block tests a specific API endpoint or scenario, including both positive and negative cases
+ * - Uses supertest for HTTP requests
+ *
+ * The tests ensure that the Admin API endpoints behave correctly, handle errors, and enforce validation and authorization rules.
+ */
 import request from 'supertest'
 import app from '../app.js'
 import jwt from 'jsonwebtoken'

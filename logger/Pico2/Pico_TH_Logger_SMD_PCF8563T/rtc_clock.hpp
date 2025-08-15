@@ -1,4 +1,22 @@
 
+/**
+ * @file rtc_clock.hpp
+ * @brief Interface for PCF8563T RTC clock functions using I2C on Raspberry Pi Pico.
+ *
+ * Provides initialization, time setting/reading, clock output, and alarm management
+ * for the PCF8563T real-time clock via I2C.
+ *
+ * Functions:
+ * - pcf8563t_init: Initialize the PCF8563T RTC on the specified I2C instance.
+ * - pcf8563t_set_time: Set the current time and date on the RTC.
+ * - pcf8563t_read_time: Read the current time and date from the RTC.
+ * - pcf8563t_set_clkout_1hz: Enable or disable the 1Hz clock output.
+ * - rtc_alarm_set: Configure the RTC alarm with specified time and enable/disable status.
+ * - rtc_alarm_enable: Enable or disable the RTC alarm.
+ * - rtc_alarm_flag_clear: Clear the RTC alarm flag.
+ *
+ * @note All functions require a pointer to the I2C instance used for communication.
+ */
 #ifndef __RTC_CLOCK_HPP__
 #define __RTC_CLOCK_HPP__
 

@@ -1,3 +1,33 @@
+/**
+ * Integration tests for the Data API.
+ *
+ * This file covers the following scenarios:
+ * - Creating, editing, fetching and deleting data definitions, data logs, and last values
+ * - Validation and authorization for all endpoints
+ * - Filtering and listing data-related entities
+ *
+ * @param {object} app The Express app instance used for testing
+ * @param {string} tokenFullAccess JWT token for a user with full permissions (used for most authorized requests)
+ * @param {string} tokenNoPermissions JWT token for a user with no permissions (used to test authorization failures)
+ * @param {number} dataDefinitionId Stores the ID of the created data definition
+ * @param {number} loggerId Stores the ID of the logger used in tests
+ * @param {number} sensorId Stores the ID of the sensor used in tests
+ * @param {number} sensorTypeId Stores the ID of the sensor type
+ * @param {number} loggerTypeId Stores the ID of the logger type
+ * @param {string} loggerToken JWT token for logger authentication
+ * @param {number} dataLogIdOne Stores the ID of the first created data log
+ * @param {number} dataLogIdTwo Stores the ID of the second created data log
+ * @param {number} dataLastValueId Stores the ID of the last value entry
+ * @param {number} temperatureDataDefinitionId Stores the ID of the temperature data definition
+ * @param {number} humidityDataDefinitionId Stores the ID of the humidity data definition
+ *
+ * Structure:
+ * - beforeAll: Sets up mocks, imports app, logs in users and stores tokens
+ * - Each 'it' block tests a specific API endpoint or scenario, including both positive and negative cases
+ * - Uses supertest for HTTP requests
+ *
+ * The tests ensure that the Data API endpoints behave correctly, handle errors, and enforce validation and authorization rules.
+ */
 import request from 'supertest'
 import { jest } from '@jest/globals'
 let app

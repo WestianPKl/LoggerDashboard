@@ -21,6 +21,19 @@ import User from '../model/users/user.model.js'
 
 const Op = Sequelize.Op
 
+/**
+ * Handles the retrieval of admin functionality definitions.
+ *
+ * Checks if the user has the required 'READ' permission for 'adm'.
+ * Decodes the query object from the request body and fetches matching
+ * functionality definitions from the database.
+ *
+ * @async
+ * @function
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends the HTTP response with the result or error.
+ */
 export async function getAdmFunctionalityDefinitions(req, res) {
     try {
         let permissionGranted = await checkPermission(req, 'adm', null, 'READ')
@@ -37,6 +50,15 @@ export async function getAdmFunctionalityDefinitions(req, res) {
     }
 }
 
+/**
+ * Retrieves a functionality definition by its ID for the admin module.
+ *
+ * @async
+ * @function getAdmFunctionalityDefinition
+ * @param {import('express').Request} req - Express request object, expects `admFunctionalityDefinitionId` in params.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with the functionality definition data or an error message.
+ */
 export async function getAdmFunctionalityDefinition(req, res) {
     try {
         let permissionGranted = await checkPermission(req, 'adm', null, 'READ')
@@ -54,6 +76,18 @@ export async function getAdmFunctionalityDefinition(req, res) {
     }
 }
 
+/**
+ * Adds a new functionality definition for the admin module.
+ *
+ * Handles permission checks, request validation, and database transaction management.
+ * Responds with appropriate HTTP status and messages based on the operation outcome.
+ *
+ * @async
+ * @function addAdmFunctionalityDefinition
+ * @param {import('express').Request} req - Express request object containing the functionality definition data.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends HTTP response with the result of the operation.
+ */
 export async function addAdmFunctionalityDefinition(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -83,6 +117,25 @@ export async function addAdmFunctionalityDefinition(req, res) {
     }
 }
 
+/**
+ * Updates an existing admFunctionalityDefinition record by its ID.
+ *
+ * @async
+ * @function updateAdmFunctionalityDefinition
+ * @param {import('express').Request} req - Express request object, expects `admFunctionalityDefinitionId` in params and `name`, `description` in body.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with the result of the update operation.
+ *
+ * @throws {Error} Returns a 500 error response if an exception occurs during the process.
+ *
+ * @description
+ * - Checks user permissions for updating admFunctionalityDefinition.
+ * - Validates request body.
+ * - Finds the functionality definition by primary key.
+ * - Updates the name and description fields.
+ * - Saves the changes within a transaction.
+ * - Handles errors and transaction rollbacks.
+ */
 export async function updateAdmFunctionalityDefinition(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -119,6 +172,17 @@ export async function updateAdmFunctionalityDefinition(req, res) {
     }
 }
 
+/**
+ * Deletes a functionality definition from the database.
+ *
+ * @async
+ * @function deleteAdmFunctionalityDefinition
+ * @param {import('express').Request} req - Express request object containing the ID of the functionality definition to delete in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a response indicating the result of the delete operation.
+ *
+ * @throws {Error} If an error occurs during the transaction or database operation.
+ */
 export async function deleteAdmFunctionalityDefinition(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -148,6 +212,19 @@ export async function deleteAdmFunctionalityDefinition(req, res) {
     }
 }
 
+/**
+ * Handles the retrieval of admin object definitions.
+ *
+ * Checks user permissions, decodes the query from the request body, and fetches
+ * object definitions from the database. Responds with the data if successful,
+ * or with an appropriate error message otherwise.
+ *
+ * @async
+ * @function
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with the result or error.
+ */
 export async function getAdmObjectDefinitions(req, res) {
     try {
         let permissionGranted = await checkPermission(req, 'adm', null, 'READ')
@@ -162,6 +239,15 @@ export async function getAdmObjectDefinitions(req, res) {
     }
 }
 
+/**
+ * Retrieves an Object Definition by its ID for the admin module.
+ *
+ * @async
+ * @function getAdmObjectDefinition
+ * @param {import('express').Request} req - Express request object, expects `admObjectDefinitionId` in params.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with the object definition data or an error message.
+ */
 export async function getAdmObjectDefinition(req, res) {
     try {
         let permissionGranted = await checkPermission(req, 'adm', null, 'READ')
@@ -176,6 +262,17 @@ export async function getAdmObjectDefinition(req, res) {
     }
 }
 
+/**
+ * Adds a new Object Definition to the database within a transaction.
+ *
+ * @async
+ * @function addAdmObjectDefinition
+ * @param {import('express').Request} req - Express request object containing the body with object definition data.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends an HTTP response indicating the result of the operation.
+ *
+ * @throws {Error} If an error occurs during the transaction or database operation.
+ */
 export async function addAdmObjectDefinition(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -203,6 +300,25 @@ export async function addAdmObjectDefinition(req, res) {
     }
 }
 
+/**
+ * Updates an existing AdmObjectDefinition record by its ID.
+ *
+ * @async
+ * @function updateAdmObjectDefinition
+ * @param {import('express').Request} req - Express request object, expects `admObjectDefinitionId` in params and `name`, `description` in body.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with the update result or error information.
+ *
+ * @throws {Error} If a database or server error occurs.
+ *
+ * @description
+ * - Checks user permission for WRITE access on 'admObjectDefinition'.
+ * - Validates request body.
+ * - Finds the object definition by primary key.
+ * - Updates the name and description fields.
+ * - Saves changes within a transaction.
+ * - Handles errors and rolls back transaction if needed.
+ */
 export async function updateAdmObjectDefinition(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -239,6 +355,22 @@ export async function updateAdmObjectDefinition(req, res) {
     }
 }
 
+/**
+ * Deletes an ObjectDefinition entry from the database.
+ *
+ * @async
+ * @function deleteAdmObjectDefinition
+ * @param {import('express').Request} req - Express request object, expects `id` in `req.body`.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends an HTTP response indicating the result of the operation.
+ *
+ * @throws {Error} Returns a 500 Internal Server Error response if an exception occurs.
+ *
+ * @description
+ * Checks user permissions for deleting an ObjectDefinition. If permitted and a valid ID is provided,
+ * attempts to delete the entry within a transaction. Rolls back the transaction and returns an error
+ * response if deletion fails or an error occurs.
+ */
 export async function deleteAdmObjectDefinition(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -268,6 +400,15 @@ export async function deleteAdmObjectDefinition(req, res) {
     }
 }
 
+/**
+ * Retrieves access level definitions based on the provided query object.
+ *
+ * @async
+ * @function getAdmAccessLevelDefinitions
+ * @param {import('express').Request} req - Express request object containing the query in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a JSON response with the retrieved data or an error message.
+ */
 export async function getAdmAccessLevelDefinitions(req, res) {
     try {
         let queryObject = decodeSequelizeQuery(req.body)
@@ -280,6 +421,17 @@ export async function getAdmAccessLevelDefinitions(req, res) {
     }
 }
 
+/**
+ * Retrieves an Access Level Definition by its ID.
+ *
+ * @async
+ * @function getAdmAccessLevelDefinition
+ * @param {import('express').Request} req - Express request object, expects `admAccessLevelDefinitionId` in `req.params`.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with the access level definition data or an error message.
+ *
+ * @throws {Error} If an unexpected error occurs during the process.
+ */
 export async function getAdmAccessLevelDefinition(req, res) {
     try {
         let permissionGranted = await checkPermission(req, 'adm', null, 'READ')
@@ -296,6 +448,18 @@ export async function getAdmAccessLevelDefinition(req, res) {
     }
 }
 
+/**
+ * Adds a new Access Level Definition for admin users.
+ *
+ * Handles permission checks, request validation, and database transaction management.
+ * Responds with appropriate HTTP status and messages based on the operation outcome.
+ *
+ * @async
+ * @function addAdmAccessLevelDefinition
+ * @param {import('express').Request} req - Express request object containing the access level definition data in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a JSON response indicating success or failure.
+ */
 export async function addAdmAccessLevelDefinition(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -325,6 +489,17 @@ export async function addAdmAccessLevelDefinition(req, res) {
     }
 }
 
+/**
+ * Updates an Access Level Definition for the admin module.
+ *
+ * @async
+ * @function
+ * @param {import('express').Request} req - Express request object, expects `admAccessLevelDefinitionId` in params and `name`, `accessLevel` in body.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response indicating success or failure.
+ *
+ * @throws {Error} Returns 500 Internal Server Error if an exception occurs.
+ */
 export async function updateAdmAccessLevelDefinition(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -361,6 +536,22 @@ export async function updateAdmAccessLevelDefinition(req, res) {
     }
 }
 
+/**
+ * Deletes an Access Level Definition entry from the database.
+ *
+ * @async
+ * @function deleteAdmAccessLevelDefinition
+ * @param {import('express').Request} req - Express request object, expects `id` in `req.body`.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends an HTTP response indicating the result of the operation.
+ *
+ * @throws {Error} If an error occurs during the deletion process.
+ *
+ * @description
+ * Checks user permissions for deleting an access level definition.
+ * If permission is granted and a valid ID is provided, attempts to delete the entry within a transaction.
+ * Rolls back the transaction and returns an error response if deletion fails or an exception occurs.
+ */
 export async function deleteAdmAccessLevelDefinition(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -390,6 +581,19 @@ export async function deleteAdmAccessLevelDefinition(req, res) {
     }
 }
 
+/**
+ * Retrieves administrative roles from the database.
+ *
+ * Checks if the requesting user has the required 'READ' permission for 'adm'.
+ * Decodes the query object from the request body and fetches roles with related
+ * 'createdBy', 'updatedBy', and 'users' associations.
+ *
+ * @async
+ * @function getAdmRoles
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with the retrieved data or an error message.
+ */
 export async function getAdmRoles(req, res) {
     try {
         let permissionGranted = await checkPermission(req, 'adm', null, 'READ')
@@ -407,6 +611,16 @@ export async function getAdmRoles(req, res) {
     }
 }
 
+/**
+ * Retrieves an administrative role by its ID, including related createdBy, updatedBy, and users.
+ * Checks if the requesting user has 'READ' permission for 'adm'.
+ *
+ * @async
+ * @function getAdmRole
+ * @param {import('express').Request} req - Express request object, expects admRoleId in params.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with the role data or an error message.
+ */
 export async function getAdmRole(req, res) {
     try {
         let permissionGranted = await checkPermission(req, 'adm', null, 'READ')
@@ -423,6 +637,17 @@ export async function getAdmRole(req, res) {
     }
 }
 
+/**
+ * Adds a new admin role to the system.
+ *
+ * @async
+ * @function addAdmRole
+ * @param {import('express').Request} req - Express request object containing the role data in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a JSON response indicating the result of the operation.
+ *
+ * @throws {Error} If an error occurs during the transaction or database operation.
+ */
 export async function addAdmRole(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -456,6 +681,24 @@ export async function addAdmRole(req, res) {
     }
 }
 
+/**
+ * Updates an admin role with the provided data.
+ *
+ * @async
+ * @function updateAdmRole
+ * @param {import('express').Request} req - Express request object containing parameters and body data.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a JSON response indicating success or failure.
+ *
+ * @throws {Error} Returns an internal server error response if an exception occurs.
+ *
+ * @description
+ * - Checks if the user has permission to update admin roles.
+ * - Validates the request body.
+ * - Finds the admin role by ID and updates its name and description.
+ * - Saves the changes within a transaction.
+ * - Handles errors and sends appropriate HTTP responses.
+ */
 export async function updateAdmRole(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -492,6 +735,17 @@ export async function updateAdmRole(req, res) {
     }
 }
 
+/**
+ * Deletes an admin role by its ID.
+ *
+ * @async
+ * @function deleteAdmRole
+ * @param {import('express').Request} req - Express request object containing the role ID in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a response indicating the result of the deletion operation.
+ *
+ * @throws {Error} If an error occurs during the transaction or deletion process.
+ */
 export async function deleteAdmRole(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -521,6 +775,15 @@ export async function deleteAdmRole(req, res) {
     }
 }
 
+/**
+ * Retrieves users with administrative roles based on the provided query.
+ *
+ * @async
+ * @function getAdmRoleUsers
+ * @param {import('express').Request} req - Express request object containing the query in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a JSON response with the retrieved data or an error message.
+ */
 export async function getAdmRoleUsers(req, res) {
     try {
         let queryObject = decodeSequelizeQuery(req.body)
@@ -536,6 +799,20 @@ export async function getAdmRoleUsers(req, res) {
     }
 }
 
+/**
+ * Adds a user to an admin role.
+ *
+ * This controller function checks permissions, validates the request body,
+ * ensures the specified admin role and user exist, and then creates a new
+ * AdmRolesUser entry within a transaction. Rolls back the transaction and
+ * returns appropriate error responses if any step fails.
+ *
+ * @async
+ * @function addAdmRoleUser
+ * @param {import('express').Request} req - Express request object, expected to contain `body.roleId` and `body.userId`.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response indicating success or failure.
+ */
 export async function addAdmRoleUser(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -567,6 +844,17 @@ export async function addAdmRoleUser(req, res) {
     }
 }
 
+/**
+ * Deletes a user-role association from the AdmRolesUser table.
+ *
+ * @async
+ * @function deleteAdmRoleUser
+ * @param {import('express').Request} req - Express request object containing roleId and userId in the body.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a response indicating the result of the deletion operation.
+ *
+ * @throws {Error} If an error occurs during the transaction or database operation.
+ */
 export async function deleteAdmRoleUser(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -596,6 +884,19 @@ export async function deleteAdmRoleUser(req, res) {
     }
 }
 
+/**
+ * Adds a new admin permission to the system.
+ *
+ * This controller function validates the request, checks permissions, and creates a new
+ * admin permission entry in the database within a transaction. It supports assigning permissions
+ * to either a user or a role, and validates the existence of all referenced entities.
+ *
+ * @async
+ * @function addAdmPermission
+ * @param {import('express').Request} req - Express request object containing permission data in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a JSON response indicating success or failure.
+ */
 export async function addAdmPermission(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -650,6 +951,19 @@ export async function addAdmPermission(req, res) {
     }
 }
 
+/**
+ * Deletes an admin permission by ID.
+ *
+ * This function checks if the user has the required permission to delete an admin permission.
+ * If authorized and a valid ID is provided in the request body, it attempts to delete the permission
+ * within a transaction. Handles transaction commit/rollback and sends appropriate HTTP responses.
+ *
+ * @async
+ * @function deleteAdmPermission
+ * @param {import('express').Request} req - Express request object, expects `id` in `req.body`.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends HTTP response with the result of the operation.
+ */
 export async function deleteAdmPermission(req, res) {
     const t = await sequelize.transaction()
     try {

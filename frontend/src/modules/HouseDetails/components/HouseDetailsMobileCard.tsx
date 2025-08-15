@@ -8,6 +8,21 @@ import LoadingCircle from '../../../components/UI/LoadingCircle'
 import { showAlert } from '../../../store/application-store'
 import { useAppDispatch } from '../../../store/hooks'
 
+/**
+ * Renders a mobile-friendly card displaying details for a specific house logger.
+ *
+ * This component fetches and displays the latest sensor values and connected sensors for a given house floor and logger.
+ * It listens for real-time updates via a socket event and updates the UI accordingly.
+ * The card shows the logger's ID, vendor, model, and a status badge indicating if the logger is active based on recent data.
+ * If there are errors fetching data, an alert is dispatched.
+ *
+ * @param {Object} props - The component props.
+ * @param {ILogger} props.logger - The logger object containing details such as id, vendor, and model.
+ * @param {number | string} props.floorId - The identifier for the house floor.
+ * @param {number | string} props.houseLoggerId - The identifier for the house logger.
+ *
+ * @returns {JSX.Element} The rendered mobile card component with logger details and sensor data.
+ */
 export default function HouseDetailsMobileCard({ logger, floorId, houseLoggerId }: IHouseDetailsMobileCardProps) {
 	const [socketTrigger, setSocketTrigger] = useState(0)
 	const dispatch = useAppDispatch()

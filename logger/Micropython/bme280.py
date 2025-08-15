@@ -24,10 +24,57 @@ BME280_TIMEOUT = const(100)  # about 1 second timeout
 
 
 class BME280:
+    """
+    BME280 sensor driver for MicroPython.
+    This class provides an interface to the Bosch BME280 environmental sensor, allowing for reading temperature,
+    pressure, and humidity data, as well as calculating altitude and dew point.
+        mode (int or tuple): Oversampling mode for humidity, temperature, and pressure. Can be a single integer
+            or a tuple of three integers for each measurement type.
+        address (int): I2C address of the BME280 sensor.
+        i2c: An initialized I2C object for communication with the sensor.
+        **kwargs: Additional keyword arguments.
+    Raises:
+        ValueError: If the mode is not an int or a 3-element tuple, or if an invalid mode value is provided,
+            or if no I2C object is supplied.
+    Attributes:
+        address (int): I2C address of the sensor.
+        i2c: I2C communication object.
+        sealevel (int): Sea level pressure in Pascals (default 101325).
+        altitude (float): Calculated altitude in meters.
+        dew_point (float): Calculated dew point temperature in Celsius.
+        values (list): Human-readable list of [temperature (°C), humidity (%), pressure (Pa)].
+    Methods:
+        read_raw_data(result):
+            Reads raw (uncompensated) temperature, pressure, and humidity data from the sensor.
+        read_compensated_data(result=None):
+            Reads and returns compensated temperature (°C), pressure (Pa), and humidity (%) data.
+        temperature():
+            Returns the compensated temperature in Celsius.
+        relative_humidity():
+            Returns the compensated relative humidity in percent.
+        pressure():
+            Returns the compensated pressure in Pascals.
+    """
 
     def __init__(
         self, mode=BME280_OSAMPLE_8, address=BME280_I2CADDR, i2c=None, **kwargs
     ):
+        """
+        Initializes the BME280 sensor object with the specified configuration.
+        Parameters:
+            mode (int or tuple, optional): Oversampling mode for humidity, temperature, and pressure.
+                Can be a single integer applied to all, or a tuple of three integers for each measurement.
+                Must be one of BME280_OSAMPLE_1, BME280_OSAMPLE_2, BME280_OSAMPLE_4, BME280_OSAMPLE_8, or BME280_OSAMPLE_16.
+                Defaults to BME280_OSAMPLE_8.
+            address (int, optional): I2C address of the BME280 sensor. Defaults to BME280_I2CADDR.
+            i2c (object): An initialized I2C object for communication with the sensor. Required.
+            **kwargs: Additional keyword arguments (not used).
+        Raises:
+            ValueError: If the mode parameter is not an int or a 3-element tuple.
+            ValueError: If any mode value is not a supported oversampling value.
+            ValueError: If the i2c parameter is not provided.
+        Initializes calibration data and prepares the sensor for measurement.
+        """
         # Check that mode is valid.
         if type(mode) is tuple and len(mode) == 3:
             self._mode_hum, self._mode_temp, self._mode_press = mode
@@ -200,14 +247,33 @@ class BME280:
 
     @sealevel.setter
     def sealevel(self, value):
+        """
+        Sets the sea level pressure value used for altitude calculations.
+
+        Parameters:
+            value (int or float): The sea level pressure in Pascals. Must be between 30,000 and 120,000 Pa.
+
+        Raises:
+            ValueError: If the provided value is outside the acceptable range.
+
+        Note:
+            This value is used to calibrate altitude readings based on the current sea level pressure.
+        """
         if 30000 < value < 120000:  # just ensure some reasonable value
             self.__sealevel = value
 
     @property
     def altitude(self):
         """
-        Altitude in m.
+        Calculates the altitude based on the current pressure reading and the configured sea level pressure.
+        Returns:
+            float: The calculated altitude in meters. Returns 0.0 if the calculation fails.
+        Notes:
+            Uses the barometric formula to estimate altitude from pressure.
+            Relies on the `read_compensated_data()` method to obtain the current pressure.
+            The sea level pressure is taken from `self.__sealevel`.
         """
+
         from math import pow
 
         try:
@@ -221,18 +287,30 @@ class BME280:
     @property
     def dew_point(self):
         """
-        Compute the dew point temperature for the current Temperature
-        and Humidity measured pair
+        Calculates the dew point temperature based on current sensor readings.
+        Returns:
+            float: The dew point temperature in degrees Celsius.
+        Notes:
+            This method reads the compensated temperature, pressure, and humidity values from the sensor,
+            then applies the Magnus formula to estimate the dew point.
         """
+
         from math import log
 
         t, p, h = self.read_compensated_data()
-        h = (log(h, 10) - 2) / 0.4343 + (17.62 * t) / (243.12 + t)
+        h = (log(h, 10) - 2) / 0.4343 + (17.62 * t) / (243.12 + t)  # type: ignore
         return 243.12 * h / (17.62 - h)
 
     @property
     def values(self):
-        """human readable values"""
+        """
+        Returns the compensated sensor readings as a list.
+        Retrieves temperature, humidity, and pressure values from the sensor,
+        and returns them in a list in the following order:
+        [temperature, humidity, pressure].
+        Returns:
+            list: A list containing temperature, humidity, and pressure values.
+        """
 
         t, p, h = self.read_compensated_data()
 

@@ -26,6 +26,23 @@ import type { IRoleUserPermissionProps } from '../../Admin/scripts/IAdmin'
 import AddUserRoleDialog from '../../Admin/components/AddAdminRoleUserDialog'
 import { useRevalidator } from 'react-router'
 
+/**
+ * Displays a table of users assigned to a specific admin role, with options to add or remove users.
+ *
+ * @component
+ * @param {IRoleUserPermissionProps} props - The component props.
+ * @param {UserClass[]} props.usersData - Array of user data to display in the table.
+ * @param {number | string} props.roleId - The ID of the role for which users are being managed.
+ * @param {boolean} props.isAdmin - Indicates if the current user has admin privileges (enables add/delete actions).
+ *
+ * @returns {JSX.Element} The rendered admin role user table component.
+ *
+ * @remarks
+ * - Allows admins to add or remove users from a role.
+ * - Uses Material UI DataGrid for displaying user data.
+ * - Supports responsive design for mobile and desktop.
+ * - Shows dialogs for confirming add and delete actions.
+ */
 export default function AdminRoleUserTable({ usersData, roleId, isAdmin }: IRoleUserPermissionProps) {
 	const dispatch = useAppDispatch()
 	const revalidator = useRevalidator()
@@ -45,25 +62,6 @@ export default function AdminRoleUserTable({ usersData, roleId, isAdmin }: IRole
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	const columns = useMemo<GridColDef[]>(
-		() => [
-			{ field: 'id', headerName: 'ID', width: 50 },
-			{
-				field: 'username',
-				headerName: 'Username',
-				width: 300,
-				valueGetter: (_, row) => `${row.username ? row.username : '-'}`,
-			},
-			{
-				field: 'email',
-				headerName: 'Email',
-				width: 300,
-				valueGetter: (_, row) => `${row.email ? row.email : '-'}`,
-			},
-		],
-		[]
-	)
-
 	const usersDataMap = useMemo(() => {
 		const map = new Map()
 		usersData.forEach(item => {
@@ -77,7 +75,18 @@ export default function AdminRoleUserTable({ usersData, roleId, isAdmin }: IRole
 		setSelectedItems(selectedIds.map(id => usersDataMap.get(Number(id))).filter(Boolean))
 	}, [rowSelectionModel, usersDataMap])
 
-	async function addItemHandler(item: IAddAdminRoleUserDataDialog | IAddAdminRoleUserDataDialog[]) {
+	/**
+	 * Handles adding a new admin role user or multiple users to a role.
+	 *
+	 * Closes the add dialog, processes the provided item(s), and dispatches an alert on success or failure.
+	 * If a single item is provided and contains users, it adds each user to the specified role.
+	 * On success, shows a success alert and triggers a revalidation.
+	 * On error, shows an error alert with the error message.
+	 *
+	 * @param item - The user(s) and role data to add. Can be a single item or an array of items.
+	 * @returns A promise that resolves when the operation is complete.
+	 */
+	async function addItemHandler(item: IAddAdminRoleUserDataDialog | IAddAdminRoleUserDataDialog[]): Promise<void> {
 		try {
 			setOpenAddDialog(false)
 			if (!Array.isArray(item)) {
@@ -97,7 +106,19 @@ export default function AdminRoleUserTable({ usersData, roleId, isAdmin }: IRole
 		}
 	}
 
-	async function deleteItemHandler() {
+	/**
+	 * Handles the deletion of selected admin role users.
+	 *
+	 * Closes the delete confirmation dialog, then attempts to delete all selected users
+	 * associated with the specified role by calling the `deleteAdminRoleUser` API for each.
+	 * On successful deletion, displays a success alert and triggers a data revalidation.
+	 * If an error occurs during the process, displays an error alert with the relevant message.
+	 *
+	 * @async
+	 * @function
+	 * @returns {Promise<void>} A promise that resolves when the deletion process is complete.
+	 */
+	async function deleteItemHandler(): Promise<void> {
 		try {
 			setOpenDeleteDialog(false)
 			if (selectedItems.length >= 1) {
@@ -115,23 +136,41 @@ export default function AdminRoleUserTable({ usersData, roleId, isAdmin }: IRole
 		}
 	}
 
-	function handleClickAddOpen() {
+	/**
+	 * Opens the dialog for adding a new user by setting the `openAddDialog` state to true.
+	 */
+	function handleClickAddOpen(): void {
 		setOpenAddDialog(true)
 	}
 
-	function handleClickDeleteOpen() {
+	/**
+	 * Opens the delete confirmation dialog by setting the `openDeleteDialog` state to `true`.
+	 * Typically used as an event handler for delete actions.
+	 */
+	function handleClickDeleteOpen(): void {
 		setOpenDeleteDialog(true)
 	}
 
-	function handleCloseDelete() {
+	/**
+	 * Closes the delete confirmation dialog by setting its open state to false.
+	 *
+	 * This function is typically called when the user cancels or completes a delete action,
+	 * ensuring the dialog is no longer visible.
+	 */
+	function handleCloseDelete(): void {
 		setOpenDeleteDialog(false)
 	}
 
-	function handleCloseAdd() {
+	/**
+	 * Closes the "Add" dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler to close the dialog
+	 * when the user cancels or completes the add operation.
+	 */
+	function handleCloseAdd(): void {
 		setOpenAddDialog(false)
 	}
 
-	const paginationModel = { page: 0, pageSize: 15 }
 	return (
 		<Box sx={{ textAlign: 'center' }}>
 			<Box sx={{ textAlign: 'left' }}>
@@ -215,8 +254,25 @@ export default function AdminRoleUserTable({ usersData, roleId, isAdmin }: IRole
 			<Box sx={{ mt: '2rem' }}>
 				<DataGrid
 					rows={usersData}
-					columns={columns}
-					initialState={{ pagination: { paginationModel } }}
+					columns={useMemo<GridColDef[]>(
+						() => [
+							{ field: 'id', headerName: 'ID', width: 50 },
+							{
+								field: 'username',
+								headerName: 'Username',
+								width: 300,
+								valueGetter: (_, row) => `${row.username ? row.username : '-'}`,
+							},
+							{
+								field: 'email',
+								headerName: 'Email',
+								width: 300,
+								valueGetter: (_, row) => `${row.email ? row.email : '-'}`,
+							},
+						],
+						[]
+					)}
+					initialState={{ pagination: { paginationModel: { page: 0, pageSize: 15 } } }}
 					pageSizeOptions={[15, 30, 45]}
 					disableRowSelectionOnClick={true}
 					checkboxSelection={isAdmin && roleId ? true : false}

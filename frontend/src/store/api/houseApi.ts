@@ -1,3 +1,23 @@
+/**
+ * @file houseApi.ts
+ *
+ * This file defines API endpoints for managing houses, house floors, and house loggers using Redux Toolkit Query.
+ * It provides endpoints for CRUD operations on houses, floors, and loggers, including layout updates and error handling.
+ *
+ * @param {HouseClass} HouseClass - The class representing a house entity.
+ * @param {HouseFloorClass} HouseFloorClass - The class representing a house floor entity.
+ * @param {HouseLoggerClass} HouseLoggerClass - The class representing a house logger entity.
+ * @param {IAddHouseLoggerData} IAddHouseLoggerData - The interface for adding or updating a house logger.
+ *
+ * Endpoints:
+ * - getHouses, getHouse, addHouse, updateHouse, deleteHouse
+ * - getHouseFloors, getHouseFloor, addHouseFloor, updateHouseFloor, updateHouseFloorLayout, deleteHouseFloor
+ * - getHouseLoggers, getHouseLogger, addHouseLogger, updateHouseLogger, deleteHouseLogger
+ * - getErrorProne: Example endpoint for error handling demonstration.
+ *
+ * Exports:
+ * - React hooks for each endpoint for use in components.
+ */
 import { api } from './api'
 import type { HouseClass } from '../../modules/House/scripts/HouseClass'
 import type { HouseFloorClass } from '../../modules/House/scripts/HouseFloorClass'

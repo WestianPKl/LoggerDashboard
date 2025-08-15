@@ -27,6 +27,23 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { useAddHouseMutation, useUpdateHouseMutation, useDeleteHouseMutation } from '../../../store/api/houseApi'
 import { useRevalidator } from 'react-router'
 
+/**
+ * Renders a table displaying a list of houses with CRUD (Create, Read, Update, Delete) operations.
+ *
+ * Features:
+ * - Displays house data in a Material-UI DataGrid with columns for ID, name, address, creation and update info.
+ * - Supports adding, editing, and deleting houses via dialogs.
+ * - Allows row selection for batch editing or deletion.
+ * - Responsive UI with different controls for mobile and desktop.
+ * - Integrates with Redux for permissions and alert notifications.
+ * - Uses RTK Query mutations for API interactions.
+ *
+ * Props:
+ * @param {IHouseTableProps} props - The props for the HouseTable component.
+ * @param {HouseClass[]} props.houses - The array of house objects to display in the table.
+ *
+ * @returns {JSX.Element} The rendered HouseTable component.
+ */
 export default function HouseTable({ houses }: IHouseTableProps) {
 	const dispatch = useAppDispatch()
 	const revalidator = useRevalidator()
@@ -99,7 +116,13 @@ export default function HouseTable({ houses }: IHouseTableProps) {
 		setSelectedItems(selectedIds.map(id => housesMap.get(Number(id))).filter(Boolean))
 	}, [rowSelectionModel, housesMap])
 
-	function clearObject() {
+	/**
+	 * Clears the current selection by resetting the selected items array
+	 * and the row selection model to their initial empty states.
+	 *
+	 * This function is typically used to deselect all items in the house table.
+	 */
+	function clearObject(): void {
 		setSelectedItems([])
 		setRowSelectionModel({
 			type: 'include',
@@ -107,7 +130,17 @@ export default function HouseTable({ houses }: IHouseTableProps) {
 		})
 	}
 
-	async function addItemHandler(item: IAddHouseData | IAddHouseData[]) {
+	/**
+	 * Handles adding a new house item or multiple items.
+	 *
+	 * If a single item is provided, constructs a FormData object with the item's properties
+	 * and sends it to the `addHouse` API. After a successful addition, shows a success alert
+	 * and triggers a revalidation. If an error occurs, displays an error alert with the message.
+	 *
+	 * @param item - The house data to add, either a single `IAddHouseData` object or an array of them.
+	 * @returns A Promise that resolves when the operation is complete.
+	 */
+	async function addItemHandler(item: IAddHouseData | IAddHouseData[]): Promise<void> {
 		try {
 			setOpenAddDialog(false)
 			if (!Array.isArray(item)) {
@@ -140,7 +173,18 @@ export default function HouseTable({ houses }: IHouseTableProps) {
 		}
 	}
 
-	async function editItemHandler(items: IAddHouseData | IAddHouseData[]) {
+	/**
+	 * Handles editing one or multiple house items.
+	 *
+	 * This function closes the edit dialog, processes each item (single or array),
+	 * constructs a FormData object for each, and sends an update request if the item has an ID.
+	 * On success, it shows a success alert, clears the form, and triggers a revalidation.
+	 * On failure, it dispatches an error alert with the error message.
+	 *
+	 * @param items - A single house data object or an array of house data objects to be edited.
+	 * @returns A Promise that resolves when all updates are complete.
+	 */
+	async function editItemHandler(items: IAddHouseData | IAddHouseData[]): Promise<void> {
 		try {
 			setOpenEditDialog(false)
 			if (Array.isArray(items) && items.length >= 1) {
@@ -180,7 +224,16 @@ export default function HouseTable({ houses }: IHouseTableProps) {
 		}
 	}
 
-	async function deleteItemHandler() {
+	/**
+	 * Handles the deletion of selected house items.
+	 *
+	 * Closes the delete confirmation dialog, deletes all selected houses asynchronously,
+	 * shows a success alert upon completion, and triggers a data revalidation.
+	 * If an error occurs during deletion, displays an error alert with the appropriate message.
+	 *
+	 * @returns {Promise<void>} A promise that resolves when the deletion process is complete.
+	 */
+	async function deleteItemHandler(): Promise<void> {
 		try {
 			setOpenDeleteDialog(false)
 			if (selectedItems.length >= 1) {
@@ -198,31 +251,59 @@ export default function HouseTable({ houses }: IHouseTableProps) {
 		}
 	}
 
-	function handleClickAddOpen() {
+	/**
+	 * Opens the dialog for adding a new house entry by setting the `openAddDialog` state to true.
+	 *
+	 * @remarks
+	 * This function is typically used as an event handler for UI elements that trigger the add dialog.
+	 */
+	function handleClickAddOpen(): void {
 		setOpenAddDialog(true)
 	}
 
-	function handleClickEditOpen() {
+	/**
+	 * Opens the edit dialog by setting the `openEditDialog` state to `true`.
+	 * Typically used as an event handler for edit actions in the house table component.
+	 */
+	function handleClickEditOpen(): void {
 		setOpenEditDialog(true)
 	}
 
-	function handleClickDeleteOpen() {
+	/**
+	 * Opens the delete confirmation dialog by setting the `openDeleteDialog` state to `true`.
+	 * Typically used as an event handler for delete actions in the UI.
+	 */
+	function handleClickDeleteOpen(): void {
 		setOpenDeleteDialog(true)
 	}
 
-	function handleCloseDelete() {
+	/**
+	 * Closes the delete confirmation dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler for dialog close actions.
+	 */
+	function handleCloseDelete(): void {
 		setOpenDeleteDialog(false)
 	}
 
-	function handleCloseAdd() {
+	/**
+	 * Closes the "Add" dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler to close the dialog
+	 * for adding a new item in the house table component.
+	 */
+	function handleCloseAdd(): void {
 		setOpenAddDialog(false)
 	}
 
-	function handleCloseEdit() {
+	/**
+	 * Closes the edit dialog by setting the `openEditDialog` state to false.
+	 * Typically used as a handler for dialog close events.
+	 */
+	function handleCloseEdit(): void {
 		setOpenEditDialog(false)
 	}
 
-	const paginationModel = { page: 0, pageSize: 15 }
 	return (
 		<Box sx={{ textAlign: 'center' }}>
 			<Box sx={{ textAlign: 'left' }}>
@@ -340,7 +421,7 @@ export default function HouseTable({ houses }: IHouseTableProps) {
 				<DataGrid
 					rows={houses}
 					columns={columns}
-					initialState={{ pagination: { paginationModel } }}
+					initialState={{ pagination: { paginationModel: { page: 0, pageSize: 15 } } }}
 					pageSizeOptions={[15, 30, 45]}
 					checkboxSelection={isWritable ? true : false}
 					disableRowSelectionOnClick={true}

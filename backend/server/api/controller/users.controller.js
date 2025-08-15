@@ -28,6 +28,17 @@ import sharp from 'sharp'
 
 const Op = Sequelize.Op
 
+/**
+ * Retrieves a list of users from the database, excluding their passwords.
+ * Checks if the requesting user has 'READ' permission for 'common' resources.
+ * Decodes the query from the request body and applies it to the database query.
+ *
+ * @async
+ * @function
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with the user data or an error message.
+ */
 export async function getUsers(req, res) {
     try {
         let permissionGranded = await checkPermission(
@@ -54,6 +65,15 @@ export async function getUsers(req, res) {
     }
 }
 
+/**
+ * Retrieves a user by their ID, excluding the password field.
+ *
+ * @async
+ * @function getUser
+ * @param {import('express').Request} req - Express request object, expects `userId` param.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with user data or an error message.
+ */
 export async function getUser(req, res) {
     try {
         const userId = req.params.userId
@@ -70,6 +90,19 @@ export async function getUser(req, res) {
     }
 }
 
+/**
+ * Registers a new user in the system.
+ *
+ * Validates the request body, hashes the user's password, creates the user,
+ * assigns the default "Common" role, and commits the transaction.
+ * Rolls back the transaction and returns appropriate error responses if any step fails.
+ *
+ * @async
+ * @function registerUser
+ * @param {import('express').Request} req - Express request object containing user registration data.
+ * @param {import('express').Response} res - Express response object used to send responses.
+ * @returns {Promise<void>} Sends a JSON response indicating success or failure.
+ */
 export async function registerUser(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -112,6 +145,16 @@ export async function registerUser(req, res) {
     }
 }
 
+/**
+ * Handles user login by validating credentials, generating authentication and permission tokens,
+ * and returning user information along with tokens upon successful authentication.
+ *
+ * @async
+ * @function loginUser
+ * @param {import('express').Request} req - Express request object containing username and password in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a JSON response with tokens and user info on success, or an error message on failure.
+ */
 export async function loginUser(req, res) {
     try {
         const errors = validationResult(req)
@@ -171,6 +214,18 @@ export async function loginUser(req, res) {
     }
 }
 
+/**
+ * Updates a user's profile information, including username, email, password, and avatar.
+ *
+ * Validates input, checks for unique username and email, handles avatar file upload and thumbnail creation,
+ * and updates the user's record in the database within a transaction.
+ *
+ * @async
+ * @function
+ * @param {import('express').Request} req - Express request object, expects `params.userId`, `body.username`, `body.email`, optional `body.password`, and optional `file`.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response indicating success or failure.
+ */
 export async function updateUserProfile(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -253,6 +308,18 @@ export async function updateUserProfile(req, res) {
     }
 }
 
+/**
+ * Handles the password reset link generation and email sending process.
+ *
+ * Validates the request, checks if the user exists, generates a reset token,
+ * saves it to the user, and sends a password reset link via email (or logs it in development).
+ *
+ * @async
+ * @function
+ * @param {import('express').Request} req - Express request object containing the user's email in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a JSON response indicating success or failure.
+ */
 export async function passwordResetLink(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -307,6 +374,18 @@ export async function passwordResetLink(req, res) {
     }
 }
 
+/**
+ * Handles password reset requests.
+ *
+ * Validates the request, checks the reset token, updates the user's password,
+ * and clears the reset token and expiration. Uses a transaction to ensure atomicity.
+ *
+ * @async
+ * @function passwordReset
+ * @param {import('express').Request} req - Express request object, expects `params.token` and `body.password`.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends an HTTP response with the result of the password reset operation.
+ */
 export async function passwordReset(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -345,6 +424,23 @@ export async function passwordReset(req, res) {
     }
 }
 
+/**
+ * Deletes a user and associated data from the database.
+ *
+ * This function performs the following steps:
+ * 1. Checks if the requester has permission to delete users.
+ * 2. Validates the presence of a user ID in the request body.
+ * 3. Deletes related permissions and role-user associations within a transaction.
+ * 4. Deletes the user's avatar files if they exist.
+ * 5. Deletes the user record from the database.
+ * 6. Commits the transaction if successful, or rolls back on error.
+ *
+ * @async
+ * @function deleteUser
+ * @param {import('express').Request} req - Express request object containing user ID in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends an HTTP response indicating the result of the operation.
+ */
 export async function deleteUser(req, res) {
     const t = await sequelize.transaction()
     try {

@@ -1,3 +1,29 @@
+/**
+ * @file program_main.hpp
+ * @brief Main program class for the Pico_TH_Logger_SMD_PCF8563T project.
+ *
+ * This header defines the ProgramMain class, which manages the initialization and operation
+ * of the BME280 sensor and TCP communication, as well as WiFi connectivity, RGB LED control,
+ * and data display/transmission functionalities.
+ *
+ * Macros are provided for I2C port and pin configuration, as well as WiFi status codes.
+ *
+ * Classes:
+ *  - ProgramMain: Handles equipment initialization, WiFi setup, RGB LED control, measurement display,
+ *    and data transmission.
+ *
+ * Dependencies:
+ *  - bme280.hpp: For BME280 sensor interaction.
+ *  - tcp.hpp: For TCP communication.
+ *
+ * Macros:
+ *  - I2C_PORT: I2C port used for sensor communication.
+ *  - I2C_SDA: I2C data pin.
+ *  - I2C_SCL: I2C clock pin.
+ *  - WIFI_INIT_FAIL: WiFi initialization failure code.
+ *  - WIFI_CONN_FAIL: WiFi connection failure code.
+ *  - WIFI_OK: WiFi success code.
+ */
 #ifndef __PROGRAM_MAIN_HPP__
 #define __PROGRAM_MAIN_HPP__
 

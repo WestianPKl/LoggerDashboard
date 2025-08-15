@@ -6,6 +6,12 @@ const ioMock = {
     sockets: { emit: () => {} },
 }
 
+/**
+ * Initializes and configures a Socket.IO server instance with CORS settings.
+ *
+ * @param {import('http').Server} server - The HTTP server to attach Socket.IO to.
+ * @returns {import('socket.io').Server} The initialized Socket.IO server instance.
+ */
 export function initSocket(server) {
     io = new Server(server, {
         cors: {
@@ -18,6 +24,12 @@ export function initSocket(server) {
     return io
 }
 
+/**
+ * Retrieves the initialized Socket.io instance.
+ *
+ * @throws {Error} If Socket.io is not initialized and not in test environment.
+ * @returns {Object} The Socket.io instance, or a mock object with an `emit` method in test environment.
+ */
 export function getIo() {
     if (!io) {
         if (process.env.NODE_ENV === 'test')

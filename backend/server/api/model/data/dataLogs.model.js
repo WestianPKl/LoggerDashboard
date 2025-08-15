@@ -3,6 +3,17 @@ import sequelize from '../../../util/database.js'
 import Equipment from '../equipment/equipment.model.js'
 import DataDefinitions from './dataDefinitions.model.js'
 
+/**
+ * Sequelize model for the 'data_logs' table.
+ *
+ * @typedef {Object} DataLogs
+ * @property {number} id - Primary key, auto-incremented integer.
+ * @property {string} time - Timestamp of the log entry.
+ * @property {string} value - Value recorded in the log.
+ * @property {number} dataDefinitionId - Foreign key referencing the data definition (data_definition_id).
+ * @property {number} equLoggerId - Foreign key referencing the equipment logger (equ_logger_id).
+ * @property {number} equSensorId - Foreign key referencing the equipment sensor (equ_sensor_id).
+ */
 const DataLogs = sequelize.define(
     'data_logs',
     {

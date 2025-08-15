@@ -35,6 +35,25 @@ import {
 } from '../../../store/api/adminApi'
 import { useRevalidator } from 'react-router'
 
+/**
+ * Renders a table displaying a list of admin roles with CRUD operations and assignment features.
+ *
+ * @component
+ * @param {IAdminRolesTableProps} props - The props for the component.
+ * @param {AdminRoleClass[]} props.admRoles - Array of admin role objects to display in the table.
+ *
+ * @remarks
+ * - Provides actions for adding, editing, deleting, assigning users, and assigning permissions to roles.
+ * - Supports responsive UI for mobile and desktop.
+ * - Integrates with Redux for permissions and alert handling.
+ * - Uses Material-UI DataGrid for tabular display and selection.
+ * - Dialogs are used for add, edit, assign, permission, and delete operations.
+ *
+ * @example
+ * ```tsx
+ * <AdminAdmRoleTable admRoles={rolesArray} />
+ * ```
+ */
 export default function AdminAdmRoleTable({ admRoles }: IAdminRolesTableProps) {
 	const dispatch = useAppDispatch()
 	const revalidator = useRevalidator()
@@ -60,39 +79,6 @@ export default function AdminAdmRoleTable({ admRoles }: IAdminRolesTableProps) {
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	const columns = useMemo<GridColDef[]>(
-		() => [
-			{ field: 'id', headerName: 'ID', width: 100 },
-			{ field: 'name', headerName: 'Name', width: 360 },
-			{ field: 'description', headerName: 'Description', width: 360 },
-			{
-				field: 'createdBy.username',
-				headerName: 'Created by',
-				width: 155,
-				valueGetter: (_, row) => `${row.createdBy.username}`,
-			},
-			{
-				field: 'updatedBy.username',
-				headerName: 'Updated by',
-				width: 155,
-				valueGetter: (_, row) => `${row.updatedBy.username}`,
-			},
-			{
-				field: 'createdAt',
-				headerName: 'Creation date',
-				width: 150,
-				valueGetter: (_, row) => `${row.createdAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
-			},
-			{
-				field: 'updatedAt',
-				headerName: 'Update date',
-				width: 150,
-				valueGetter: (_, row) => `${row.updatedAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
-			},
-		],
-		[]
-	)
-
 	const admRolesMap = useMemo(() => {
 		const map = new Map()
 		admRoles.forEach(item => {
@@ -106,7 +92,13 @@ export default function AdminAdmRoleTable({ admRoles }: IAdminRolesTableProps) {
 		setSelectedItems(selectedIds.map(id => admRolesMap.get(Number(id))).filter(Boolean))
 	}, [rowSelectionModel, admRolesMap])
 
-	function clearObject() {
+	/**
+	 * Clears the current selection by resetting the selected items array
+	 * and updating the row selection model to an empty state.
+	 *
+	 * This function is typically used to deselect all items in the admin role table.
+	 */
+	function clearObject(): void {
 		setSelectedItems([])
 		setRowSelectionModel({
 			type: 'include',
@@ -114,7 +106,17 @@ export default function AdminAdmRoleTable({ admRoles }: IAdminRolesTableProps) {
 		})
 	}
 
-	async function addItemHandler(item: IAddAdminRoleData | IAddAdminRoleData[]) {
+	/**
+	 * Handles adding a new admin role or multiple roles.
+	 *
+	 * Closes the add dialog, attempts to add the provided role(s) via the API,
+	 * shows a success alert on completion, and triggers a data revalidation.
+	 * If an error occurs, displays an error alert with the relevant message.
+	 *
+	 * @param item - The admin role data to add, either a single object or an array of objects.
+	 * @returns A promise that resolves when the operation is complete.
+	 */
+	async function addItemHandler(item: IAddAdminRoleData | IAddAdminRoleData[]): Promise<void> {
 		try {
 			setOpenAddDialog(false)
 			if (!Array.isArray(item)) {
@@ -128,7 +130,17 @@ export default function AdminAdmRoleTable({ admRoles }: IAdminRolesTableProps) {
 		}
 	}
 
-	async function editItemHandler(items: IAddAdminRoleData | IAddAdminRoleData[]) {
+	/**
+	 * Handles editing of one or multiple admin roles.
+	 *
+	 * Closes the edit dialog, updates the provided admin role(s) via API,
+	 * shows a success alert on completion, clears the form object, and triggers a revalidation.
+	 * If an error occurs, displays an error alert with the relevant message.
+	 *
+	 * @param items - A single admin role data object or an array of such objects to be updated.
+	 * @returns A Promise that resolves when the operation is complete.
+	 */
+	async function editItemHandler(items: IAddAdminRoleData | IAddAdminRoleData[]): Promise<void> {
 		try {
 			setOpenEditDialog(false)
 			if (Array.isArray(items) && items.length >= 1) {
@@ -147,7 +159,19 @@ export default function AdminAdmRoleTable({ admRoles }: IAdminRolesTableProps) {
 		}
 	}
 
-	async function deleteItemHandler() {
+	/**
+	 * Handles the deletion of selected admin roles.
+	 *
+	 * Closes the delete confirmation dialog, then attempts to delete all selected roles
+	 * by calling the `deleteAdminRole` API for each selected item. If all deletions succeed,
+	 * shows a success alert and triggers a revalidation. If any error occurs during deletion,
+	 * displays an error alert with the appropriate message.
+	 *
+	 * @async
+	 * @function
+	 * @returns {Promise<void>} A promise that resolves when the deletion process is complete.
+	 */
+	async function deleteItemHandler(): Promise<void> {
 		try {
 			setOpenDeleteDialog(false)
 			if (selectedItems.length >= 1) {
@@ -165,47 +189,93 @@ export default function AdminAdmRoleTable({ admRoles }: IAdminRolesTableProps) {
 		}
 	}
 
-	function handleClickAddOpen() {
+	/**
+	 * Opens the "Add" dialog by setting the `openAddDialog` state to `true`.
+	 * Typically used as an event handler for triggering the addition of a new item or entry.
+	 */
+	function handleClickAddOpen(): void {
 		setOpenAddDialog(true)
 	}
 
-	function handleClickEditOpen() {
+	/**
+	 * Opens the edit dialog by setting the `openEditDialog` state to `true`.
+	 * Typically used as an event handler for edit actions in the admin role table.
+	 */
+	function handleClickEditOpen(): void {
 		setOpenEditDialog(true)
 	}
 
-	function handleClickAssignOpen() {
+	/**
+	 * Opens the assign dialog by setting the `openAssignDialog` state to `true`.
+	 * Typically used as an event handler for triggering the assignment UI.
+	 */
+	function handleClickAssignOpen(): void {
 		setOpenAssignDialog(true)
 	}
 
-	function handleClickPermissionOpen() {
+	/**
+	 * Opens the permission dialog by setting the `openPermissionDialog` state to `true`.
+	 *
+	 * This function is typically used as an event handler to trigger the display
+	 * of the permission dialog in the admin role table component.
+	 */
+	function handleClickPermissionOpen(): void {
 		setOpenPermissionDialog(true)
 	}
 
-	function handleClickDeleteOpen() {
+	/**
+	 * Opens the delete confirmation dialog by setting the `openDeleteDialog` state to `true`.
+	 * Typically used as an event handler for delete actions in the admin role table.
+	 */
+	function handleClickDeleteOpen(): void {
 		setOpenDeleteDialog(true)
 	}
 
-	function handleCloseDelete() {
+	/**
+	 * Closes the delete confirmation dialog by setting its open state to false.
+	 */
+	function handleCloseDelete(): void {
 		setOpenDeleteDialog(false)
 	}
 
-	function handleCloseAdd() {
+	/**
+	 * Closes the "Add" dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler to hide the dialog
+	 * when the user cancels or completes the add operation.
+	 */
+	function handleCloseAdd(): void {
 		setOpenAddDialog(false)
 	}
 
-	function handleCloseEdit() {
+	/**
+	 * Closes the edit dialog by setting the `openEditDialog` state to false.
+	 * Typically used as a handler for dialog close events.
+	 */
+	function handleCloseEdit(): void {
 		setOpenEditDialog(false)
 	}
 
-	function handleCloseAssign() {
+	/**
+	 * Closes the assign dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler to close
+	 * the assignment dialog in the admin role table component.
+	 */
+	function handleCloseAssign(): void {
 		setOpenAssignDialog(false)
 	}
 
-	function handleClosePermission() {
+	/**
+	 * Closes the permission dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler to close
+	 * the permission dialog in the admin role table component.
+	 */
+	function handleClosePermission(): void {
 		setOpenPermissionDialog(false)
 	}
 
-	const paginationModel = { page: 0, pageSize: 15 }
 	return (
 		<Box sx={{ textAlign: 'center' }}>
 			<Box sx={{ textAlign: 'left' }}>
@@ -379,8 +449,39 @@ export default function AdminAdmRoleTable({ admRoles }: IAdminRolesTableProps) {
 				</Box>
 				<DataGrid
 					rows={admRoles}
-					columns={columns}
-					initialState={{ pagination: { paginationModel } }}
+					columns={useMemo<GridColDef[]>(
+						() => [
+							{ field: 'id', headerName: 'ID', width: 100 },
+							{ field: 'name', headerName: 'Name', width: 360 },
+							{ field: 'description', headerName: 'Description', width: 360 },
+							{
+								field: 'createdBy.username',
+								headerName: 'Created by',
+								width: 155,
+								valueGetter: (_, row) => `${row.createdBy.username}`,
+							},
+							{
+								field: 'updatedBy.username',
+								headerName: 'Updated by',
+								width: 155,
+								valueGetter: (_, row) => `${row.updatedBy.username}`,
+							},
+							{
+								field: 'createdAt',
+								headerName: 'Creation date',
+								width: 150,
+								valueGetter: (_, row) => `${row.createdAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
+							},
+							{
+								field: 'updatedAt',
+								headerName: 'Update date',
+								width: 150,
+								valueGetter: (_, row) => `${row.updatedAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
+							},
+						],
+						[]
+					)}
+					initialState={{ pagination: { paginationModel: { page: 0, pageSize: 15 } } }}
 					pageSizeOptions={[15, 30, 45]}
 					checkboxSelection={isWritable ? true : false}
 					disableRowSelectionOnClick={true}

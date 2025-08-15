@@ -1,6 +1,21 @@
 import { Sequelize } from 'sequelize'
 import sequelize from '../../../util/database.js'
 
+/**
+ * Sequelize model for the 'data_view_connected_sensor' view.
+ *
+ * Represents a connected sensor with the following fields:
+ * @typedef {Object} DataConnectedSensorView
+ * @property {number} equLoggerId - Equipment logger ID (not null).
+ * @property {number} equSensorId - Equipment sensor ID (primary key, not null).
+ * @property {number} houseFloorId - House floor ID (not null).
+ * @property {number} houseLoggerId - House logger ID (not null).
+ * @property {string} sensorVendor - Sensor vendor name (not null).
+ * @property {string} sensorModel - Sensor model name (not null).
+ * @property {string} sensorSerialNumber - Sensor serial number (not null).
+ *
+ * @see {@link https://sequelize.org/master/manual/model-basics.html|Sequelize Model Basics}
+ */
 const DataConnectedSensorView = sequelize.define(
     'data_view_connected_sensor',
     {

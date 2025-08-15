@@ -8,6 +8,15 @@ import LoadingCircle from '../../components/UI/LoadingCircle'
 import { store } from '../../store/store'
 import { data, useLoaderData, Await } from 'react-router'
 
+/**
+ * Renders the main view for displaying a list of houses.
+ *
+ * This component fetches house data using `useLoaderData`, determines the current theme and device size,
+ * and displays the `HouseTable` component with the loaded house data. While the data is loading,
+ * a loading spinner (`LoadingCircle`) is shown. The container's maximum width adapts to mobile or desktop screens.
+ *
+ * @returns {JSX.Element} The rendered HouseView component.
+ */
 export default function HouseView() {
 	const { houses } = useLoaderData() as { houses: HouseClass[] }
 
@@ -23,7 +32,17 @@ export default function HouseView() {
 	)
 }
 
-export async function loader() {
+/**
+ * Asynchronously loads a list of houses from the API and returns them.
+ *
+ * Dispatches the `getHouses` endpoint using Redux Toolkit's RTK Query, unwraps the result,
+ * and returns the houses in an object. If no data is found, throws a 404 error.
+ * In case of an error during the fetch, dispatches an alert with the error message and rethrows the error.
+ *
+ * @returns {Promise<{ houses: HouseClass[] }>} A promise that resolves to an object containing an array of `HouseClass` instances.
+ * @throws Will throw an error if the data is not found or if the API call fails.
+ */
+export async function loader(): Promise<{ houses: HouseClass[] }> {
 	try {
 		const promise = await store.dispatch(houseApi.endpoints.getHouses.initiate({})).unwrap()
 		if (!promise) {

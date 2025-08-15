@@ -34,6 +34,17 @@ volatile bool time_synced = false;
 static volatile bool dns_resolved = false;
 static ip_addr_t resolved_ip;
 
+/**
+ * @brief DNS resolution callback function.
+ *
+ * This function is called when a DNS query completes. If the IP address is successfully resolved,
+ * it updates the global variable `resolved_ip` with the resolved address and sets the `dns_resolved`
+ * flag to true.
+ *
+ * @param name         The hostname that was resolved.
+ * @param ipaddr       Pointer to the resolved IP address, or nullptr if resolution failed.
+ * @param callback_arg User-defined argument passed to the callback (unused).
+ */
 static void dns_callback(const char* name, const ip_addr_t* ipaddr, void* callback_arg) {
     if (ipaddr) {
         resolved_ip = *ipaddr;
@@ -41,18 +52,49 @@ static void dns_callback(const char* name, const ip_addr_t* ipaddr, void* callba
     }
 }
 
+/**
+ * @brief Configures the specified GPIO pin for PWM output and enables the corresponding PWM slice.
+ *
+ * This function sets the function of the given GPIO pin to PWM, determines the PWM slice
+ * associated with the pin, and enables PWM output on that slice.
+ *
+ * @param gpio The GPIO pin number to configure for PWM output.
+ */
 void ProgramMain::setup_pwm(uint gpio) {
     gpio_set_function(gpio, GPIO_FUNC_PWM);
     uint slice_num = pwm_gpio_to_slice_num(gpio);
     pwm_set_enabled(slice_num, true);
 }
 
+/**
+ * @brief Sets the PWM duty cycle for a specified GPIO pin.
+ *
+ * This function configures the PWM hardware to set the duty cycle for the given GPIO pin.
+ * It determines the PWM slice and channel associated with the pin and updates the channel's
+ * output level accordingly.
+ *
+ * @param gpio The GPIO pin number to set the PWM duty cycle for.
+ * @param duty The duty cycle value to set (typically between 0 and the PWM wrap value).
+ */
 void ProgramMain::set_pwm_duty(uint gpio, uint16_t duty) {
     uint slice_num = pwm_gpio_to_slice_num(gpio);
     uint channel = pwm_gpio_to_channel(gpio);
     pwm_set_chan_level(slice_num, channel, duty);
 }
 
+/**
+ * @brief Synchronizes the system time using SNTP and a DNS-resolved NTP server.
+ *
+ * This function performs the following steps:
+ * 1. Sets the timezone environment variable for Central European Time (CET/CEST).
+ * 2. Resolves the IP address of the NTP server "tempus1.gum.gov.pl" using DNS.
+ *    - Waits for DNS resolution with a timeout.
+ * 3. Initializes the SNTP client with the resolved server address.
+ * 4. Waits for the SNTP time synchronization to be confirmed via a callback, with a timeout.
+ * 5. Stops the SNTP client after successful synchronization or on timeout.
+ *
+ * @return true if time synchronization was successful, false otherwise.
+ */
 bool ProgramMain::synchronize_time() {
     setenv("TZ", "CET-1CEST,M3.5.0/2,M10.5.0/3", 1);
     tzset();
@@ -95,6 +137,23 @@ bool ProgramMain::synchronize_time() {
     return false;
 }
 
+/**
+ * @brief Initializes all equipment and peripherals required for the program.
+ *
+ * This function sets up PWM for LEDs and buzzer, configures I2C communication,
+ * initializes the LCD display, and creates instances of sensor and network classes.
+ * It also initializes the real-time clock if enabled, and provides visual feedback
+ * via RGB LEDs and the LCD display.
+ *
+ * Steps performed:
+ * - Configures PWM for RGB LEDs and buzzer, sets initial duty cycles.
+ * - Sets the RGB LED to white, then green upon successful initialization.
+ * - Initializes I2C at 400kHz and configures SDA/SCL pins with pull-ups.
+ * - Initializes and clears the LCD, displaying a startup message.
+ * - Instantiates BME280 sensor and TCP communication objects.
+ * - Initializes the PCF8563T RTC if the CLOCK flag is set.
+ * - Prints a confirmation message to the console.
+ */
 void ProgramMain::init_equipment() {
     setup_pwm(LED_RED);
     setup_pwm(LED_GREEN);
@@ -134,6 +193,19 @@ void ProgramMain::init_equipment() {
     printf("✅ Equipment initialized correctly\n");
 }
 
+/**
+ * @brief Initializes the Wi-Fi connection for the program.
+ *
+ * This function attempts to initialize the Wi-Fi hardware and connect to a predefined
+ * Wi-Fi network using the specified SSID and password. It provides visual feedback
+ * using RGB LEDs and updates the LCD display with the connection status.
+ * If the connection is successful, it synchronizes the system time.
+ *
+ * @return uint8_t Status code indicating the result of the operation:
+ *         - WIFI_OK on successful connection
+ *         - WIFI_INIT_FAIL if Wi-Fi initialization fails
+ *         - WIFI_CONN_FAIL if Wi-Fi connection fails
+ */
 uint8_t ProgramMain::init_wifi() {
     const char *SSID = "TP-Link_0A7B";
     const char *PASSWORD = "12345678";
@@ -161,12 +233,46 @@ uint8_t ProgramMain::init_wifi() {
     return WIFI_OK;
 }
 
+/**
+ * @brief Sets the RGB LED color by adjusting the PWM duty cycle for each color channel.
+ *
+ * This function sets the intensity of the red, green, and blue channels of an RGB LED
+ * by configuring the PWM duty cycle for each channel. The values for each color should
+ * be in the range 0-255, where 0 is off and 255 is maximum brightness.
+ *
+ * @param red   The intensity of the red channel (0-255).
+ * @param green The intensity of the green channel (0-255).
+ * @param blue  The intensity of the blue channel (0-255).
+ */
 void ProgramMain::set_rgb_color(uint8_t red, uint8_t green, uint8_t blue) {
     set_pwm_duty(LED_RED, red);
     set_pwm_duty(LED_GREEN, green);
     set_pwm_duty(LED_BLUE, blue);
 }
 
+/**
+ * @brief Displays sensor measurements and current time on the LCD.
+ *
+ * This function reads the current time from the RTC (if enabled) and obtains
+ * environmental measurements (temperature, humidity, pressure) from the BME280 sensor.
+ * It validates the sensor readings and displays them on a two-line LCD display,
+ * alternating between temperature/humidity and pressure on subsequent calls.
+ * If the time cannot be read or sensor values are out of range, error messages
+ * are printed and sent via TCP.
+ *
+ * LCD line 1: Date and time in "YYYY-MM-DD HH:MM" format.
+ * LCD line 2: Alternates between "T:xx.xC H:xx.x%" and "P:xxxxhPa".
+ *
+ * Error handling:
+ * - If time cannot be read, logs and displays an error.
+ * - If sensor values are out of range, logs and displays an error.
+ *
+ * Visual feedback:
+ * - Sets RGB color to green for valid temperature/humidity display.
+ * - Turns off RGB color for pressure display.
+ *
+ * The display alternates every call, cycling through options.
+ */
 void ProgramMain::display_measurement() {
     static uint8_t option = 0;
     bool time_ok = false;
@@ -220,6 +326,22 @@ void ProgramMain::display_measurement() {
     printf("✅ Data OK\n");
 }
 
+/**
+ * @brief Sends sensor data along with the current time to a remote server.
+ *
+ * This function performs the following steps:
+ * 1. Attempts to read the current time from the configured clock (PCF8563 or RTC).
+ *    - If the time cannot be read, logs an error and aborts.
+ * 2. Formats the read time into a string suitable for transmission.
+ * 3. Measures temperature, humidity, and pressure using the BME280 sensor.
+ *    - If sensor values are out of expected range, logs an error and aborts.
+ * 4. Requests an authentication token from the server.
+ *    - If token retrieval fails or the token is invalid, logs an error and aborts.
+ * 5. Sends the time and sensor data to the server via a POST request.
+ *    - If data transmission fails, logs an error.
+ *
+ * Error conditions at each step are logged using the TCP error logging mechanism.
+ */
 void ProgramMain::send_data() {
     bool time_ok = false;
     uint16_t time[7];
@@ -257,6 +379,16 @@ void ProgramMain::send_data() {
     }
 }
 
+/**
+ * @brief Sets the system time using the provided SNTP seconds value.
+ *
+ * This function is intended to be called from an SNTP client when a new time value is received.
+ * It converts the given seconds since the Unix epoch to a local time structure, updates the
+ * global time synchronization flag, and prints the new system time. If both CLOCK and SET
+ * are enabled, it also updates the external PCF8563T RTC via I2C.
+ *
+ * @param secs The number of seconds since the Unix epoch (time_t).
+ */
 extern "C" void sntp_set_system_time(uint32_t secs) {
     time_synced = true;
     time_t rawtime = secs;

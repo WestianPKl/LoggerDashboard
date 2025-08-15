@@ -18,6 +18,18 @@ volatile bool post_flag = false;
 bool screen_update_callback(repeating_timer_t *);
 bool post_request_callback(repeating_timer_t *);
 
+/**
+ * @brief Entry point for the Pico_TH_Logger_Relay_SMD_PCF8563T application.
+ *
+ * Initializes hardware, WiFi, and timers for periodic screen updates and data posting.
+ * Sets up GPIO pins for four relays and enters the main loop, which:
+ *   - Handles system timeouts and WiFi polling.
+ *   - Updates the display and sends data when corresponding flags are set.
+ *   - Cycles through activating each relay in sequence, with delays between each state.
+ *   - If WiFi initialization fails, flashes the RGB LED red indefinitely.
+ *
+ * @return int Exit status (never returns under normal operation).
+ */
 int main() {
     repeating_timer_t screen_timer;
     repeating_timer_t post_timer;
@@ -82,11 +94,33 @@ int main() {
     }
 }
 
+/**
+ * @brief Callback function for a repeating timer to signal a screen update.
+ *
+ * This function is intended to be used as a callback for a repeating timer.
+ * When called, it sets the global flag `update_screen_flag` to true, indicating
+ * that the screen should be updated. The function always returns true to keep
+ * the timer running.
+ *
+ * @param rt Pointer to the repeating_timer_t structure (unused in this function).
+ * @return true Always returns true to continue the timer.
+ */
 bool screen_update_callback(repeating_timer_t *rt) {
     update_screen_flag = true;
     return true;
 }
 
+/**
+ * @brief Callback function for a repeating timer to set the post_flag.
+ *
+ * This function is intended to be used as a callback for a repeating timer.
+ * When invoked, it sets the global variable `post_flag` to true, indicating
+ * that a POST request should be made or processed. The function always returns
+ * true to keep the timer active.
+ *
+ * @param rt Pointer to the repeating_timer_t structure associated with the timer event.
+ * @return true Always returns true to continue the timer.
+ */
 bool post_request_callback(repeating_timer_t *rt) {
     post_flag = true;
     return true;

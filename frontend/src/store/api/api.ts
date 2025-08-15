@@ -1,3 +1,18 @@
+/**
+ * @file api.ts
+ *
+ * This file sets up the base API configuration for the application using Redux Toolkit Query.
+ * It defines the base query with authentication header handling, configures retry logic, and exports the main API instance.
+ *
+ * @param {string} baseUrl - The base URL for all API requests, taken from environment variables.
+ * @param {function} prepareHeaders - Prepares headers for each request, including the Authorization header if a token is present in localStorage.
+ * @param {object} tagTypes - List of tag types used for cache management and invalidation in RTK Query endpoints.
+ * @param {object} endpoints - Placeholder for endpoints, to be injected in feature-specific API files.
+ *
+ * Exports:
+ * - api: The main API instance for endpoint injection.
+ * - enhancedApi: An enhanced version of the API with a sample endpoint.
+ */
 import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
 

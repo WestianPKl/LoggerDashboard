@@ -26,6 +26,24 @@ import type { IAddAdminRolePermissionData } from '../../Admin/scripts/IAdmin'
 import AddUserPermissionDialog from '../../Admin/components/AddAdminUserPermissionDialog'
 import { useRevalidator } from 'react-router'
 
+/**
+ * Renders a table displaying user or role permissions with options to add or delete permissions.
+ *
+ * @component
+ * @param {IUserPermissionProps} props - The props for the UserPermissionTable component.
+ * @param {PermissionClass[]} props.permissionData - Array of permission objects to display in the table.
+ * @param {boolean} props.isAdmin - Indicates if the current user has admin privileges, enabling add/delete actions.
+ * @param {number | undefined} [props.userId] - The ID of the user whose permissions are being managed (optional).
+ * @param {number | undefined} [props.roleId] - The ID of the role whose permissions are being managed (optional).
+ *
+ * @returns {JSX.Element} The rendered UserPermissionTable component.
+ *
+ * @remarks
+ * - Allows admins to add or delete permissions for a user or role.
+ * - Uses Material UI DataGrid for displaying permissions.
+ * - Responsive design adapts controls for mobile and desktop.
+ * - Integrates with Redux for dispatching alerts and RTK Query for mutations.
+ */
 export default function UserPermissionTable({ permissionData, isAdmin, userId, roleId }: IUserPermissionProps) {
 	const dispatch = useAppDispatch()
 	const revalidator = useRevalidator()
@@ -86,7 +104,17 @@ export default function UserPermissionTable({ permissionData, isAdmin, userId, r
 		setSelectedItems(selectedIds.map(id => permissionDataMap.get(Number(id))).filter(Boolean))
 	}, [rowSelectionModel, permissionDataMap])
 
-	async function addItemHandler(item: IAddAdminRolePermissionData | IAddAdminRolePermissionData[]) {
+	/**
+	 * Handles adding a new permission item or an array of items.
+	 *
+	 * Closes the add dialog, attempts to add the permission(s) via the `addPermission` API,
+	 * and shows a success alert upon completion. If an error occurs, displays an error alert.
+	 * After a successful addition, triggers a revalidation of the data.
+	 *
+	 * @param item - The permission data to add, either a single item or an array of items.
+	 * @returns A promise that resolves when the operation is complete.
+	 */
+	async function addItemHandler(item: IAddAdminRolePermissionData | IAddAdminRolePermissionData[]): Promise<void> {
 		try {
 			setOpenAddDialog(false)
 			if (!Array.isArray(item)) {
@@ -99,7 +127,17 @@ export default function UserPermissionTable({ permissionData, isAdmin, userId, r
 		}
 	}
 
-	async function deleteItemHandler() {
+	/**
+	 * Handles the deletion of selected permission items.
+	 *
+	 * Closes the delete confirmation dialog, then attempts to delete all selected items in parallel.
+	 * On successful deletion, displays a success alert and triggers a data revalidation.
+	 * If an error occurs during deletion, displays an error alert with the error message.
+	 *
+	 * @async
+	 * @returns {Promise<void>} A promise that resolves when the deletion process is complete.
+	 */
+	async function deleteItemHandler(): Promise<void> {
 		try {
 			setOpenDeleteDialog(false)
 			if (selectedItems.length >= 1) {
@@ -116,23 +154,43 @@ export default function UserPermissionTable({ permissionData, isAdmin, userId, r
 		}
 	}
 
-	function handleClickAddOpen() {
+	/**
+	 * Opens the dialog for adding a new user permission by setting the `openAddDialog` state to true.
+	 */
+	function handleClickAddOpen(): void {
 		setOpenAddDialog(true)
 	}
 
-	function handleClickDeleteOpen() {
+	/**
+	 * Opens the delete confirmation dialog by setting the `openDeleteDialog` state to `true`.
+	 *
+	 * This function is typically called when the user initiates a delete action,
+	 * such as clicking a "Delete" button in the UI.
+	 */
+	function handleClickDeleteOpen(): void {
 		setOpenDeleteDialog(true)
 	}
 
-	function handleCloseDelete() {
+	/**
+	 * Closes the delete confirmation dialog by setting its open state to false.
+	 *
+	 * This function is typically called when the user cancels or completes a delete action,
+	 * ensuring the dialog is no longer visible.
+	 */
+	function handleCloseDelete(): void {
 		setOpenDeleteDialog(false)
 	}
 
-	function handleCloseAdd() {
+	/**
+	 * Closes the "Add" dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler to close
+	 * the dialog for adding new items or permissions in the user interface.
+	 */
+	function handleCloseAdd(): void {
 		setOpenAddDialog(false)
 	}
 
-	const paginationModel = { page: 0, pageSize: 15 }
 	return (
 		<Box sx={{ textAlign: 'center' }}>
 			<Box sx={{ textAlign: 'left' }}>
@@ -218,7 +276,7 @@ export default function UserPermissionTable({ permissionData, isAdmin, userId, r
 				<DataGrid
 					rows={permissionData}
 					columns={columns}
-					initialState={{ pagination: { paginationModel } }}
+					initialState={{ pagination: { paginationModel: { page: 0, pageSize: 15 } } }}
 					pageSizeOptions={[15, 30, 45]}
 					disableRowSelectionOnClick={true}
 					checkboxSelection={isAdmin && (userId || roleId) ? true : false}

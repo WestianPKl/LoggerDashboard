@@ -502,7 +502,7 @@
       "plot": "Pico_TH_Logger_Relay_1_0/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "PicoLogger.step",
       "svg": "",
       "vrml": ""
     },

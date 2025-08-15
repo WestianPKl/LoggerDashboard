@@ -5,11 +5,29 @@ import { useGetFunctionalityDefinitionsQuery } from '../store/api/adminApi'
 import { useAppDispatch } from '../store/hooks'
 import { showAlert } from '../store/application-store'
 
+/**
+ * Props for the AdminFunctionalityDefinitionSelect component.
+ *
+ * @property getItem - Callback function invoked when a functionality definition is selected or cleared.
+ *   Receives the selected `FunctionalityDefinitionClass` instance or `null` if no selection.
+ * @property item - The currently selected functionality definition, or `null`/`undefined` if none is selected.
+ */
 interface ISelectProps {
 	getItem: (item: FunctionalityDefinitionClass | null) => void
 	item: FunctionalityDefinitionClass | null | undefined
 }
 
+/**
+ * Renders an autocomplete select component for choosing a functionality definition in the admin panel.
+ *
+ * Fetches available functionality definitions using a query hook and displays them as selectable options.
+ * Handles errors by dispatching an alert message. Adapts its width based on the current screen size.
+ *
+ * @param getItem - Callback function invoked when a functionality definition is selected.
+ * @param item - The currently selected functionality definition.
+ *
+ * @returns A Material-UI Autocomplete component for selecting a functionality definition.
+ */
 export default function AdminFunctionalityDefinitionSelect({ getItem, item }: ISelectProps) {
 	const dispatch = useAppDispatch()
 
@@ -29,7 +47,13 @@ export default function AdminFunctionalityDefinitionSelect({ getItem, item }: IS
 		}
 	}, [dispatch, functionalityDefinitionError])
 
-	function getOptionLabel(functionality: FunctionalityDefinitionClass) {
+	/**
+	 * Returns the display label for a given `FunctionalityDefinitionClass` option.
+	 *
+	 * @param functionality - The functionality definition object to extract the label from.
+	 * @returns The name of the functionality if available, otherwise an empty string.
+	 */
+	function getOptionLabel(functionality: FunctionalityDefinitionClass): string {
 		let value: string = ''
 		if (functionality.name) {
 			value = functionality.name

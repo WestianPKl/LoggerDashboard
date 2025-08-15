@@ -15,6 +15,16 @@ import {
 
 const Op = Sequelize.Op
 
+/**
+ * Handles retrieving permissions based on userId or roleId from the request body.
+ * Responds with the permissions data if found, or an error message otherwise.
+ *
+ * @async
+ * @function getPermissions
+ * @param {import('express').Request} req - Express request object containing userId or roleId in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a JSON response with the permissions data or an error message.
+ */
 export async function getPermissions(req, res) {
     try {
         const queryObject = req.body
@@ -33,6 +43,15 @@ export async function getPermissions(req, res) {
     }
 }
 
+/**
+ * Retrieves all permissions associated with a given role.
+ *
+ * @async
+ * @function getRoleAllPermission
+ * @param {number|string} roleId - The ID of the role to retrieve permissions for.
+ * @returns {Promise<Array>} A promise that resolves to an array of permission objects.
+ * @throws {Error} If the roleId is not provided.
+ */
 async function getRoleAllPermission(roleId) {
     if (!roleId) throw new Error('Error - role must be set')
     let permission = []
@@ -50,6 +69,16 @@ async function getRoleAllPermission(roleId) {
     return permission
 }
 
+/**
+ * Retrieves all permissions for a given user, including direct user permissions,
+ * permissions inherited from user roles, and superuser permissions if applicable.
+ *
+ * @async
+ * @function getUserAllPermission
+ * @param {number|string} userId - The unique identifier of the user.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of permission objects.
+ * @throws {Error} If the userId is not provided.
+ */
 async function getUserAllPermission(userId) {
     if (!userId) throw new Error('Error - user must be set')
     let permission = []
@@ -102,6 +131,19 @@ async function getUserAllPermission(userId) {
     return permission
 }
 
+/**
+ * Retrieves the permissions for a user based on the specified criteria.
+ *
+ * @async
+ * @function
+ * @param {string|number} userId - The ID of the user whose permissions are being retrieved.
+ * @param {string|number} [functionalityId] - (Optional) The ID of the functionality to filter permissions by.
+ * @param {string|number} [objectId] - (Optional) The ID of the object to filter permissions by.
+ * @param {Object} requestedAccessLevel - The requested access level object.
+ * @param {number} requestedAccessLevel.accessLevel - The minimum access level required.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of permission objects matching the criteria.
+ * @throws {Error} If the userId is not provided.
+ */
 async function getUserPermissions(
     userId,
     functionalityId,
@@ -130,6 +172,16 @@ async function getUserPermissions(
     return permissions
 }
 
+/**
+ * Checks if the authenticated user has the required permission for a specific functionality, object, and access level.
+ *
+ * @async
+ * @param {object} req - The Express request object containing the Authorization header.
+ * @param {string} functionalityName - The name of the functionality to check permission for.
+ * @param {string|null} objectName - The name of the object to check permission for, or null if not applicable.
+ * @param {string} requestedAccessLevel - The access level required (e.g., 'read', 'write').
+ * @returns {Promise<boolean>} Returns true if the user has the required permission or is a superuser, otherwise false.
+ */
 export async function checkPermission(
     req,
     functionalityName,

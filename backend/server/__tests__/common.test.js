@@ -1,3 +1,21 @@
+/**
+ * Integration tests for the Common API (Error Log endpoints).
+ *
+ * This file covers the following scenarios:
+ * - Creating, editing, fetching and deleting error logs
+ * - Validation and authorization for all endpoints
+ * - Filtering and listing error logs
+ *
+ * @param {string} tokenFullAccess JWT token for a user with full permissions (used for most authorized requests)
+ * @param {number} errorLogId Stores the ID of the error log created during tests
+ *
+ * Structure:
+ * - beforeAll: Logs in a user and stores the token for use in tests
+ * - Each 'it' block tests a specific API endpoint or scenario, including both positive and negative cases
+ * - Uses supertest for HTTP requests
+ *
+ * The tests ensure that the Common API endpoints behave correctly, handle errors, and enforce validation and authorization rules.
+ */
 import request from 'supertest'
 import app from '../app.js'
 
@@ -39,7 +57,11 @@ describe('Common API', () => {
         const res = await request(app)
             .patch(`/api/common/error-log/${errorLogId}`)
             .set('Authorization', `Bearer ${tokenFullAccess}`)
-            .send({ message: 'TestMessageEdited', type: 'Equipment', severity: 'Info' })
+            .send({
+                message: 'TestMessageEdited',
+                type: 'Equipment',
+                severity: 'Info',
+            })
         expect(res.statusCode).toBe(200)
         expect(res.body.data.message).toBe('TestMessageEdited')
         expect(res.body.data.type).toBe('Equipment')

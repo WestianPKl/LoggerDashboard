@@ -5,6 +5,24 @@ import type { IAddHouseFloorData } from '../../House/scripts/IHouse'
 import classes from '../../House/components/AddHouseDialog.module.css'
 import AddHouseFloorDialog from '../../House/components/AddHouseFloorDialog'
 
+/**
+ * HouseEditForm component allows editing of house details such as name, address, and image.
+ *
+ * @component
+ * @param {IHouseEditFormProps} props - The props for the HouseEditForm component.
+ * @param {IHouse} props.house - The house object containing current house details.
+ * @param {(item: IAddHouseFloorData | IAddHouseFloorData[]) => void} props.addHouseFloorHandler - Handler to add a new floor to the house.
+ * @param {(data: any[]) => void} props.editHouseHandler - Handler to submit the edited house details.
+ *
+ * @returns {JSX.Element} The rendered HouseEditForm component.
+ *
+ * @example
+ * <HouseEditForm
+ *   house={house}
+ *   addHouseFloorHandler={addFloor}
+ *   editHouseHandler={editHouse}
+ * />
+ */
 export default function HouseEditForm({ house, addHouseFloorHandler, editHouseHandler }: IHouseEditFormProps) {
 	const [name, setName] = useState<string | undefined>('')
 	const [postalCode, setPostalCode] = useState<string | undefined>('')
@@ -19,11 +37,23 @@ export default function HouseEditForm({ house, addHouseFloorHandler, editHouseHa
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	function handleClickAddOpen() {
+	/**
+	 * Opens the "Add" dialog by setting the `openAddDialog` state to true.
+	 *
+	 * This function is typically used as an event handler for UI elements
+	 * that trigger the display of the add dialog in the house edit form.
+	 */
+	function handleClickAddOpen(): void {
 		setOpenAddDialog(true)
 	}
 
-	function handleCloseAdd() {
+	/**
+	 * Closes the "Add" dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler to close
+	 * the dialog for adding new items or entries in the form.
+	 */
+	function handleCloseAdd(): void {
 		setOpenAddDialog(false)
 	}
 
@@ -52,33 +82,91 @@ export default function HouseEditForm({ house, addHouseFloorHandler, editHouseHa
 		fileReader.readAsDataURL(enteredImg)
 	}, [enteredImg])
 
-	function onNameChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
+	/**
+	 * Handles the change event for the house name input field.
+	 *
+	 * Updates the local state with the new value entered by the user.
+	 *
+	 * @param e - The change event from the input element.
+	 */
+	function onNameChangeHandler(e: React.ChangeEvent<HTMLInputElement>): void {
 		setName(e.target.value)
 	}
-	function onPostalCodeChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
+	/**
+	 * Handles the change event for the postal code input field.
+	 *
+	 * Updates the postal code state with the current value from the input element.
+	 *
+	 * @param e - The change event triggered by the postal code input field.
+	 */
+	function onPostalCodeChangeHandler(e: React.ChangeEvent<HTMLInputElement>): void {
 		setPostalCode(e.target.value)
 	}
-	function onCityChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
+	/**
+	 * Handles the change event for the city input field.
+	 *
+	 * Updates the city state with the new value entered by the user.
+	 *
+	 * @param e - The change event from the city input field.
+	 */
+	function onCityChangeHandler(e: React.ChangeEvent<HTMLInputElement>): void {
 		setCity(e.target.value)
 	}
-	function onStreetChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
+	/**
+	 * Handles the change event for the street input field.
+	 * Updates the street state with the new value entered by the user.
+	 *
+	 * @param e - The change event from the street input element.
+	 */
+	function onStreetChangeHandler(e: React.ChangeEvent<HTMLInputElement>): void {
 		setStreet(e.target.value)
 	}
-	function onHouseNumberChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
+	/**
+	 * Handles the change event for the house number input field.
+	 * Updates the house number state with the new value entered by the user.
+	 *
+	 * @param e - The change event from the house number input element.
+	 */
+	function onHouseNumberChangeHandler(e: React.ChangeEvent<HTMLInputElement>): void {
 		setHouseNumber(e.target.value)
 	}
 
-	function pickImg() {
+	/**
+	 * Triggers the click event on the image picker input element.
+	 *
+	 * This function programmatically opens the file picker dialog by invoking
+	 * the `click` method on the referenced image picker input element.
+	 *
+	 * @remarks
+	 * Assumes that `imgPickerRef` is a valid React ref object pointing to an HTML input element.
+	 */
+	function pickImg(): void {
 		imgPickerRef.current.click()
 	}
 
-	function imgHandler(e: React.ChangeEvent<HTMLInputElement>) {
+	/**
+	 * Handles the image file input change event.
+	 *
+	 * When a file is selected, this function updates the state with the selected image file.
+	 *
+	 * @param e - The change event from the HTML input element of type "file".
+	 */
+	function imgHandler(e: React.ChangeEvent<HTMLInputElement>): void {
 		if (e.target.files && e.target.files[0]) {
 			setEnteredImg(e.target.files[0])
 		}
 	}
 
-	function onSubmitHandler(e: React.FormEvent) {
+	/**
+	 * Handles the form submission event for editing house details.
+	 *
+	 * Prevents the default form submission behavior, constructs a data object
+	 * containing the updated house information, and invokes the `editHouseHandler`
+	 * callback with the updated data.
+	 *
+	 * @param e - The form submission event.
+	 */
+	function onSubmitHandler(e: React.FormEvent): void {
 		e.preventDefault()
 		const data = {
 			id: house.id,
@@ -92,7 +180,13 @@ export default function HouseEditForm({ house, addHouseFloorHandler, editHouseHa
 		editHouseHandler([data])
 	}
 
-	function addItemHandler(item: IAddHouseFloorData | IAddHouseFloorData[]) {
+	/**
+	 * Handles the addition of a new house floor item or multiple items.
+	 * Invokes the `addHouseFloorHandler` with the provided item(s) and closes the add dialog.
+	 *
+	 * @param item - The house floor data to add, either a single item or an array of items.
+	 */
+	function addItemHandler(item: IAddHouseFloorData | IAddHouseFloorData[]): void {
 		addHouseFloorHandler(item)
 		setOpenAddDialog(false)
 	}

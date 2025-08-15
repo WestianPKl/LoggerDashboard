@@ -4,6 +4,19 @@ import FunctionalityDefinition from './admFunctionalityDefinition.model.js'
 import ObjectDefinition from './admObjectDefinition.model.js'
 import AccessLevelDefinition from './admAccessLevelDefinitions.model.js'
 
+/**
+ * Sequelize model for the 'adm_view_permission' table.
+ *
+ * Represents view permissions assigned to users and roles for specific functionalities, objects, and access levels.
+ *
+ * @typedef {Object} AdmViewPermissions
+ * @property {number} id - Primary key, auto-incremented.
+ * @property {number} userId - ID of the user associated with the permission (maps to 'user_id').
+ * @property {number} roleId - ID of the role associated with the permission (maps to 'role_id').
+ * @property {number} functionalityDefinitionId - ID of the functionality definition (maps to 'adm_functionality_definition_id').
+ * @property {number} objectDefinitionId - ID of the object definition (maps to 'adm_object_definition_id').
+ * @property {number} accessLevelDefinitionId - ID of the access level definition (maps to 'adm_access_level_definition_id').
+ */
 const AdmViewPermissions = sequelize.define(
     'adm_view_permission',
     {

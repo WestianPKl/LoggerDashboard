@@ -49,6 +49,15 @@ class LcdApi:
     LCD_RW_READ = 1
 
     def __init__(self, num_lines, num_columns):
+        """
+        Initializes the LCD API with the specified number of lines and columns.
+
+        Parameters:
+            num_lines (int): The number of display lines for the LCD. Maximum is 4.
+            num_columns (int): The number of display columns for the LCD. Maximum is 40.
+
+        Initializes internal state, sets display and backlight on, clears the display, sets entry mode, hides the cursor, and turns the display on.
+        """
         self.num_lines = num_lines
         if self.num_lines > 4:
             self.num_lines = 4

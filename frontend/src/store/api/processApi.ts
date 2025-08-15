@@ -1,3 +1,20 @@
+/**
+ * @file processApi.ts
+ *
+ * This file defines API endpoints for managing process types and process definitions using Redux Toolkit Query.
+ * It provides endpoints for CRUD operations on process types and definitions, with error handling and cache management.
+ *
+ * @param {ProcessTypeClass} ProcessTypeClass - The class representing a process type entity.
+ * @param {ProcessDefinitionClass} ProcessDefinitionClass - The class representing a process definition entity.
+ *
+ * Endpoints:
+ * - getProcessTypes, getProcessType, addProcessType, updateProcessType, deleteProcessType
+ * - getProcessDefinitions, getProcessDefinition, addProcessDefinition, updateProcessDefinition, deleteProcessDefinition
+ * - getErrorProne: Example endpoint for error handling demonstration.
+ *
+ * Exports:
+ * - React hooks for each endpoint for use in components.
+ */
 import { api } from './api'
 import type { ProcessDefinitionClass } from '../../modules/Process/scripts/ProcessDefinitionClass'
 import type { ProcessTypeClass } from '../../modules/Process/scripts/ProcessTypeClass'

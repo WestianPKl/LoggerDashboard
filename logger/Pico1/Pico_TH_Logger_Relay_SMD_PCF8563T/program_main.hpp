@@ -1,3 +1,22 @@
+/**
+ * @file program_main.hpp
+ * @brief Main program class for the Pico TH Logger with relay and PCF8563T RTC.
+ *
+ * This header defines the ProgramMain class, which manages the initialization and operation
+ * of the BME280 sensor, TCP communication, WiFi connectivity, RGB LED control, data display,
+ * and data transmission functionalities for the logger device.
+ *
+ * Macros are provided for I2C port and pin configuration, as well as WiFi status codes.
+ *
+ * Dependencies:
+ *  - bme280.hpp: BME280 sensor interface
+ *  - tcp.hpp: TCP communication interface
+ *
+ * Class ProgramMain:
+ *  - Handles sensor and communication module initialization.
+ *  - Provides methods for WiFi setup, RGB LED color control, measurement display, and data sending.
+ *  - Contains private methods for PWM setup and time synchronization.
+ */
 #ifndef __PROGRAM_MAIN_HPP__
 #define __PROGRAM_MAIN_HPP__
 

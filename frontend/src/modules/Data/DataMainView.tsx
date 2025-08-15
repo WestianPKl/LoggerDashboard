@@ -56,7 +56,21 @@ export default function DataMainView() {
 	)
 }
 
-export async function loader() {
+/**
+ * Asynchronously loads equipment and their latest data values for the "Logger" equipment type.
+ *
+ * This function performs the following steps:
+ * 1. Fetches equipment types filtered by the name "Logger".
+ * 2. Retrieves all equipment instances of the found equipment type.
+ * 3. Fetches the latest data values for each equipment.
+ * 4. Handles errors by dispatching an alert and rethrowing the error.
+ *
+ * @returns A promise that resolves to an object containing:
+ *   - `equipments`: An array of `EquipmentClass` instances.
+ *   - `lastValues`: An array of `DataLastValueViewClass` instances representing the latest values for each equipment.
+ * @throws Throws an error if any of the data fetching steps fail.
+ */
+export async function loader(): Promise<{ equipments: EquipmentClass[]; lastValues: DataLastValueViewClass[] }> {
 	try {
 		const equType = await store.dispatch(equipmentApi.endpoints.getEquipmentTypes.initiate({ name: 'Logger' })).unwrap()
 		if (!equType) {

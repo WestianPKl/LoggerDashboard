@@ -31,6 +31,19 @@ import {
 } from '../../../store/api/adminApi'
 import { useRevalidator } from 'react-router'
 
+/**
+ * Renders a table displaying a list of functionality definitions for the admin module.
+ *
+ * Provides features for adding, editing, and deleting functionality definitions, with
+ * permissions-based controls for write and delete actions. Supports selection of items,
+ * responsive UI for mobile and desktop, and displays dialogs for add, edit, and delete operations.
+ *
+ * @component
+ * @param {IFunctionalityDefinitionTableProps} props - The props for the table component.
+ * @param {FunctionalityDefinitionClass[]} props.functionalityDefinitions - The array of functionality definitions to display.
+ *
+ * @returns {JSX.Element} The rendered admin functionality definition table component.
+ */
 export default function AdminFunctionalityDefinitionTable({
 	functionalityDefinitions,
 }: IFunctionalityDefinitionTableProps) {
@@ -56,15 +69,6 @@ export default function AdminFunctionalityDefinitionTable({
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	const columns = useMemo<GridColDef[]>(
-		() => [
-			{ field: 'id', headerName: 'ID', width: 100 },
-			{ field: 'name', headerName: 'Name', width: 360 },
-			{ field: 'description', headerName: 'Description', width: 360 },
-		],
-		[]
-	)
-
 	const functionalityDefinitionsMap = useMemo(() => {
 		const map = new Map()
 		functionalityDefinitions.forEach(item => {
@@ -78,7 +82,15 @@ export default function AdminFunctionalityDefinitionTable({
 		setSelectedItems(selectedIds.map(id => functionalityDefinitionsMap.get(Number(id))).filter(Boolean))
 	}, [rowSelectionModel, functionalityDefinitionsMap])
 
-	function clearObject() {
+	/**
+	 * Clears the current selection by resetting the selected items array
+	 * and updating the row selection model to an empty state.
+	 *
+	 * This function sets the selected items to an empty array and
+	 * initializes the row selection model with an empty set of IDs,
+	 * effectively deselecting all rows.
+	 */
+	function clearObject(): void {
 		setSelectedItems([])
 		setRowSelectionModel({
 			type: 'include',
@@ -86,7 +98,18 @@ export default function AdminFunctionalityDefinitionTable({
 		})
 	}
 
-	async function addItemHandler(item: IAddFunctionalityDefinitionData | IAddFunctionalityDefinitionData[]) {
+	/**
+	 * Handles the addition of a new functionality definition item or an array of items.
+	 * Closes the add dialog, attempts to add the item(s) via an API call, and displays a success alert on success.
+	 * If an error occurs, displays an error alert with the error message.
+	 * Also triggers a revalidation of the data after a successful addition.
+	 *
+	 * @param item - The functionality definition data to add, either a single item or an array of items.
+	 * @returns A Promise that resolves when the operation is complete.
+	 */
+	async function addItemHandler(
+		item: IAddFunctionalityDefinitionData | IAddFunctionalityDefinitionData[]
+	): Promise<void> {
 		try {
 			setOpenAddDialog(false)
 			if (!Array.isArray(item)) {
@@ -100,7 +123,19 @@ export default function AdminFunctionalityDefinitionTable({
 		}
 	}
 
-	async function editItemHandler(items: IAddFunctionalityDefinitionData | IAddFunctionalityDefinitionData[]) {
+	/**
+	 * Handles editing of one or multiple functionality definition items.
+	 *
+	 * Closes the edit dialog, updates each provided item using the `updateFunctionalityDefinition` API,
+	 * and displays a success alert upon completion. If an error occurs during the update process,
+	 * an error alert is shown with the relevant message.
+	 *
+	 * @param items - A single functionality definition data object or an array of such objects to be edited.
+	 * @returns A promise that resolves when all updates are complete.
+	 */
+	async function editItemHandler(
+		items: IAddFunctionalityDefinitionData | IAddFunctionalityDefinitionData[]
+	): Promise<void> {
 		try {
 			setOpenEditDialog(false)
 			if (Array.isArray(items) && items.length >= 1) {
@@ -119,7 +154,17 @@ export default function AdminFunctionalityDefinitionTable({
 		}
 	}
 
-	async function deleteItemHandler() {
+	/**
+	 * Handles the deletion of selected functionality definitions.
+	 *
+	 * Closes the delete confirmation dialog, then attempts to delete all selected items in parallel.
+	 * On successful deletion, shows a success alert and triggers a revalidation.
+	 * If an error occurs during deletion, displays an error alert with the relevant message.
+	 *
+	 * @async
+	 * @returns {Promise<void>} A promise that resolves when the deletion process is complete.
+	 */
+	async function deleteItemHandler(): Promise<void> {
 		try {
 			setOpenDeleteDialog(false)
 			if (selectedItems.length >= 1) {
@@ -137,31 +182,61 @@ export default function AdminFunctionalityDefinitionTable({
 		}
 	}
 
-	function handleClickAddOpen() {
+	/**
+	 * Opens the dialog for adding a new functionality definition by setting the `openAddDialog` state to `true`.
+	 *
+	 * @remarks
+	 * This function is typically used as an event handler for UI elements (e.g., a button) that trigger the display of the add dialog.
+	 */
+	function handleClickAddOpen(): void {
 		setOpenAddDialog(true)
 	}
 
-	function handleClickEditOpen() {
+	/**
+	 * Opens the edit dialog by setting the `openEditDialog` state to `true`.
+	 * Typically used as an event handler for edit actions in the UI.
+	 */
+	function handleClickEditOpen(): void {
 		setOpenEditDialog(true)
 	}
 
-	function handleClickDeleteOpen() {
+	/**
+	 * Opens the delete confirmation dialog by setting the `openDeleteDialog` state to `true`.
+	 * Typically used as an event handler for delete actions in the admin functionality definition table.
+	 */
+	function handleClickDeleteOpen(): void {
 		setOpenDeleteDialog(true)
 	}
 
-	function handleCloseDelete() {
+	/**
+	 * Closes the delete confirmation dialog by setting its open state to false.
+	 *
+	 * This function is typically called when the user cancels or completes a delete action,
+	 * ensuring the dialog is no longer visible.
+	 */
+	function handleCloseDelete(): void {
 		setOpenDeleteDialog(false)
 	}
 
-	function handleCloseAdd() {
+	/**
+	 * Closes the "Add" dialog by setting its open state to false.
+	 *
+	 * Typically used as an event handler to hide the dialog when the user cancels or completes an add operation.
+	 */
+	function handleCloseAdd(): void {
 		setOpenAddDialog(false)
 	}
 
-	function handleCloseEdit() {
+	/**
+	 * Closes the edit dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler to close
+	 * the edit dialog in the AdminFunctionalityDefinitionTable component.
+	 */
+	function handleCloseEdit(): void {
 		setOpenEditDialog(false)
 	}
 
-	const paginationModel = { page: 0, pageSize: 15 }
 	return (
 		<Box sx={{ textAlign: 'center' }}>
 			<Box sx={{ textAlign: 'left' }}>
@@ -279,8 +354,15 @@ export default function AdminFunctionalityDefinitionTable({
 				</Box>
 				<DataGrid
 					rows={functionalityDefinitions}
-					columns={columns}
-					initialState={{ pagination: { paginationModel } }}
+					columns={useMemo<GridColDef[]>(
+						() => [
+							{ field: 'id', headerName: 'ID', width: 100 },
+							{ field: 'name', headerName: 'Name', width: 360 },
+							{ field: 'description', headerName: 'Description', width: 360 },
+						],
+						[]
+					)}
+					initialState={{ pagination: { paginationModel: { page: 0, pageSize: 15 } } }}
 					pageSizeOptions={[15, 30, 45]}
 					checkboxSelection={isWritable ? true : false}
 					disableRowSelectionOnClick={true}

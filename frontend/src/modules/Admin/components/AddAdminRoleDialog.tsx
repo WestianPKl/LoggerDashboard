@@ -10,8 +10,23 @@ import {
 	useMediaQuery,
 	useTheme,
 } from '@mui/material'
-import type { IAddAdminRoleProps, IAddAdminRoleData } from '../scripts/IAdmin'
+import type { IAddAdminRoleProps } from '../scripts/IAdmin'
 
+/**
+ * AdminAddAdminRoleDialog is a dialog component for adding or editing admin roles.
+ *
+ * @param edit - Indicates whether the dialog is in edit mode.
+ * @param selectedItems - The currently selected role items to edit (can be single or multiple).
+ * @param openAddDialog - Controls whether the dialog is open.
+ * @param handleCloseAdd - Callback to close the dialog.
+ * @param addItemHandler - Callback to handle adding or updating roles.
+ *
+ * @remarks
+ * - In add mode, allows entering a new role name and description.
+ * - In edit mode, supports editing a single role or handling multiple selected roles (with limited editing).
+ * - Uses Material-UI Dialog components for UI.
+ * - Disables form fields and submit button appropriately based on mode and selection.
+ */
 export default function AdminAddAdminRoleDialog({
 	edit,
 	selectedItems,
@@ -48,43 +63,69 @@ export default function AdminAddAdminRoleDialog({
 		}
 	}, [openAddDialog, selectedItems, edit])
 
-	function onNameChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
+	/**
+	 * Handles the change event for the name input field.
+	 * Updates the local state with the new value entered by the user.
+	 *
+	 * @param e - The change event from the input element.
+	 */
+	function onNameChangeHandler(e: React.ChangeEvent<HTMLInputElement>): void {
 		setName(e.target.value)
 	}
-	function onDescriptionChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
+	/**
+	 * Handles the change event for the description input field.
+	 * Updates the local state with the new value entered by the user.
+	 *
+	 * @param e - The change event from the description input element.
+	 */
+	function onDescriptionChangeHandler(e: React.ChangeEvent<HTMLInputElement>): void {
 		setDescription(e.target.value)
 	}
 
-	function onSubmitHandler(e: React.FormEvent) {
+	/**
+	 * Handles the form submission for adding or editing admin roles.
+	 *
+	 * - If not in edit mode, submits a single new role with `name` and `description`.
+	 * - If in edit mode and `multiple` is true, submits an array of selected roles for editing.
+	 * - If in edit mode and `multiple` is false, submits a single role for editing.
+	 *
+	 * Closes the dialog and calls the `addItemHandler` with the appropriate data.
+	 *
+	 * @param e - The form event triggered by submission.
+	 */
+	function onSubmitHandler(e: React.FormEvent): void {
 		e.preventDefault()
 		if (!edit) {
-			const data = { name, description }
 			closeDialog()
-			addItemHandler(data)
+			addItemHandler({ name, description })
 		} else if (edit && multiple) {
-			const items: IAddAdminRoleData[] =
+			closeDialog()
+			addItemHandler(
 				selectedItems?.map(e => ({
 					id: e.id,
 					name: e.name,
 					description: e.description,
 				})) || []
-			closeDialog()
-			addItemHandler(items)
+			)
 		} else if (edit && !multiple) {
-			const data = { id: itemId, name, description }
 			closeDialog()
-			addItemHandler([data])
+			addItemHandler([{ id: itemId, name, description }])
 		}
 	}
 
-	function closeDialog() {
+	/**
+	 * Resets the form fields and closes the Add Admin Role dialog.
+	 *
+	 * This function clears the `name` and `description` input fields,
+	 * resets the `itemId` to `undefined`, and invokes the handler to close
+	 * the Add Admin Role dialog.
+	 */
+	function closeDialog(): void {
 		setName('')
 		setDescription('')
 		setItemId(undefined)
 		handleCloseAdd()
 	}
-
-	const isSubmitDisabled = !name?.trim() || (edit && multiple)
 
 	return (
 		<Dialog sx={{ width: '100%' }} open={openAddDialog} onClose={closeDialog} closeAfterTransition={false}>
@@ -116,7 +157,11 @@ export default function AdminAddAdminRoleDialog({
 					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={closeDialog}>
 						Cancel
 					</Button>
-					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} type='submit' disabled={isSubmitDisabled}>
+					<Button
+						variant='outlined'
+						size={isMobile ? 'small' : 'medium'}
+						type='submit'
+						disabled={!name?.trim() || (edit && multiple)}>
 						{edit ? 'Save' : 'Add'}
 					</Button>
 				</DialogActions>

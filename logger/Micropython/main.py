@@ -18,6 +18,17 @@ PRESSURE = 1
 
 
 def main():
+    """
+    Main entry point for the Micropython logger application.
+    Initializes hardware components including LEDs, I2C, and buzzer, and sets up the main program logic.
+    Defines a periodic measurement function (`counter_measurement`) that:
+        - Reads temperature, humidity, and pressure from the sensor (if enabled).
+        - Handles sensor read errors and updates LED color to indicate status.
+        - Formats and displays measurement data.
+        - Every other cycle, sends measurement data to a remote server via HTTP POST, handling authentication and error logging.
+        - Updates LED color to indicate success or failure of data transmission.
+    Starts a periodic timer to invoke the measurement function every 3 seconds.
+    """
     pins = [8, 7, 6]
     leds = [PWM(Pin(pin)) for pin in pins]
     for led in leds:
@@ -28,6 +39,28 @@ def main():
     main_program.init_program()
 
     def counter_measurement(timer):
+        """
+        Callback function for periodic sensor measurement and data transmission.
+        This function is intended to be called by a timer interrupt. It performs the following tasks:
+        - Reads temperature, humidity, and pressure values from the sensor if enabled.
+        - Handles sensor reading errors and updates the device status LED accordingly.
+        - Formats and displays the measured values on the device.
+        - Every second invocation, synchronizes time via NTP, prepares a data payload, retrieves an API token, and sends the data to a remote server.
+        - Logs errors related to sensor readings, data formatting, or API communication.
+        Args:
+            timer: The timer object triggering this callback (not used directly).
+        Globals:
+            i (int): Counter to determine when to send data.
+            TEMPERATURE (int): Flag to enable temperature measurement.
+            HUMIDITY (int): Flag to enable humidity measurement.
+            PRESSURE (int): Flag to enable pressure measurement.
+            LOGGER_ID (str/int): Logger identifier for data payload.
+            SENSOR_ID (str/int): Sensor identifier for data payload.
+            TOKEN_URL (str): URL to retrieve API token.
+            DATA_URL (str): URL to send measurement data.
+        Raises:
+            None. All exceptions are caught and logged internally.
+        """
         global i
         temp_raw = hum_raw = pressure_raw = None
         temp_send = hum_send = pressure_send = None

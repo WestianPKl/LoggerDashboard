@@ -134,7 +134,17 @@ export default memo(
 			}
 		}, [lastValueError, connectedSensorsError, dispatch])
 
-		async function addItemHandler(item: IAddHouseLoggerData | IAddHouseLoggerData[]) {
+		/**
+		 * Handles the addition of a new house logger item or an array of items.
+		 *
+		 * This function manages the dialog state, determines the logger's position,
+		 * sends a request to add the logger, updates local state with the new logger data,
+		 * and triggers UI updates and alerts. It also handles error reporting.
+		 *
+		 * @param item - The house logger data or an array of such data to be added.
+		 * @returns A Promise that resolves when the operation is complete.
+		 */
+		async function addItemHandler(item: IAddHouseLoggerData | IAddHouseLoggerData[]): Promise<void> {
 			try {
 				setDetailsDialog(false)
 				if (!Array.isArray(item)) {
@@ -170,11 +180,30 @@ export default memo(
 			}
 		}
 
-		function onDoubleClickHandler(e: any) {
+		/**
+		 * Handles the double-click event on a component.
+		 *
+		 * If the event's detail property is greater than 1 (indicating a double-click or more),
+		 * it triggers the display of the details dialog by setting `setDetailsDialog` to true.
+		 *
+		 * @param e - The event object associated with the click event.
+		 */
+		function onDoubleClickHandler(e: any): void {
 			if (e.detail > 1) setDetailsDialog(true)
 		}
 
-		async function handleClickDeleteNode(data: any) {
+		/**
+		 * Handles the deletion of a logger node.
+		 *
+		 * If the provided data contains a `houseLoggerId`, it attempts to delete the logger node from the backend.
+		 * Upon successful deletion, it updates the local state to remove the node, shows a success alert, and triggers a revalidation.
+		 * If `houseLoggerId` is not present, it only updates the local state to remove the node.
+		 * In case of an error during deletion, it dispatches an error alert with the relevant message.
+		 *
+		 * @param data - The data object containing information about the node to be deleted. Should include `houseLoggerId` if the node exists in the backend.
+		 * @returns A Promise that resolves when the deletion process is complete.
+		 */
+		async function handleClickDeleteNode(data: any): Promise<void> {
 			try {
 				if (data.houseLoggerId) {
 					await deleteHouseLogger({ id: data.houseLoggerId }).unwrap()

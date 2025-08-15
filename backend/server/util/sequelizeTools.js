@@ -18,6 +18,13 @@ const opMap = {
     $col: Op.col,
 }
 
+/**
+ * Recursively decodes a query object by mapping operator keys using the `opMap` mapping.
+ * Handles nested objects and arrays, converting any recognized operator keys to their mapped values.
+ *
+ * @param {Object|Array} [queryObject={}] - The query object or array to decode.
+ * @returns {Object|Array} The decoded query object or array with operator keys mapped.
+ */
 export function decodeSequelizeQuery(queryObject = {}) {
     if (Array.isArray(queryObject)) {
         return queryObject.map((item) => decodeSequelizeQuery(item))

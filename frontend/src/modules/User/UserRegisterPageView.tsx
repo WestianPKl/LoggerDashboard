@@ -9,12 +9,37 @@ import { useAppDispatch } from '../../store/hooks'
 import { showAlert } from '../../store/application-store'
 import { useRegisterMutation } from '../../store/api/userApi'
 
+/**
+ * Renders the user registration page view.
+ *
+ * This component displays a registration form and handles the creation of a new user account.
+ * On successful registration, it shows a success alert and navigates to the login page.
+ * On failure, it displays error messages based on the server response.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered registration page view.
+ *
+ * @example
+ * ```tsx
+ * <RegisterPageView />
+ * ```
+ */
 export default function RegisterPageView() {
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
 	const [register] = useRegisterMutation()
 
-	async function createNewAccount(registerData: IRegisterData) {
+	/**
+	 * Attempts to create a new user account with the provided registration data.
+	 *
+	 * @param registerData - The registration data required to create a new account.
+	 * @returns A promise that resolves when the account is created or rejects with an error.
+	 *
+	 * @remarks
+	 * - On successful registration, shows a success alert and navigates to the login page.
+	 * - On failure, extracts error messages from the response and displays them in an error alert.
+	 */
+	async function createNewAccount(registerData: IRegisterData): Promise<void> {
 		try {
 			await register(registerData).unwrap()
 			dispatch(showAlert({ message: 'Account created successfully', severity: 'success' }))
@@ -47,9 +72,17 @@ export default function RegisterPageView() {
 	)
 }
 
-export function loader() {
-	const token = localStorage.getItem('token')
-	if (token) {
+/**
+ * Loader function for the User Register page.
+ *
+ * Checks if a user authentication token exists in localStorage.
+ * If a token is found, redirects the user to the home page ('/').
+ * Otherwise, allows the registration page to load.
+ *
+ * @returns A redirect Response to the home page if authenticated, otherwise undefined.
+ */
+export function loader(): Response | undefined {
+	if (localStorage.getItem('token')) {
 		return redirect('/')
 	}
 }

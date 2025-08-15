@@ -1,6 +1,17 @@
 import { Sequelize } from 'sequelize'
 import sequelize from '../../../util/database.js'
 
+/**
+ * Sequelize model for the 'equ_sensor_functions' table.
+ *
+ * Represents the association between equipment sensors and their data definitions.
+ *
+ * @typedef {Object} EquSensorFunctions
+ * @property {number} equSensorId - The ID of the equipment sensor (Primary Key).
+ * @property {number} dataDefinitionId - The ID of the data definition (Primary Key).
+ *
+ * @see {@link https://sequelize.org/master/manual/model-basics.html|Sequelize Model Basics}
+ */
 const EquSensorFunctions = sequelize.define(
     'equ_sensor_functions',
     {

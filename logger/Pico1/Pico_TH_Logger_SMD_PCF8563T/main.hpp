@@ -1,3 +1,28 @@
+/**
+ * @file main.hpp
+ * @brief Main configuration header for the Pico_TH_Logger_SMD_PCF8563T project.
+ *
+ * This file contains macro definitions for main settings, equipment settings,
+ * and server communication parameters. Adjust these values to configure the
+ * logger's identity, sensor types, server endpoints, and enabled features.
+ *
+ * Main settings:
+ * - LOGGER_ID:   Unique identifier for the logger device.
+ * - SENSOR_ID:   Identifier for the attached sensor.
+ * - TOKEN_PATH:  API endpoint for obtaining data tokens.
+ * - DATA_PATH:   API endpoint for logging data.
+ * - ERROR_PATH:  API endpoint for logging errors.
+ * - SERVER_IP:   IP address of the server.
+ * - SERVER_PORT: Port number for server communication.
+ *
+ * Equipment settings:
+ * - TEMPERATURE: Enable (1) or disable (0) temperature measurement.
+ * - HUMIDITY:    Enable (1) or disable (0) humidity measurement.
+ * - PRESSURE:    Enable (1) or disable (0) pressure measurement.
+ * - SHT:         Sensor type selection (0: BME280, 30: SHT30, 40: SHT40).
+ * - CLOCK:       Enable (1) or disable (0) real-time clock.
+ * - SET:         Enable (1) or disable (0) configuration set.
+ */
 #ifndef __MAIN_HPP__
 #define __MAIN_HPP__
 

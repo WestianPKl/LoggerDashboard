@@ -1,3 +1,103 @@
+/**
+ * @file bme280.hpp
+ * @brief BME280 sensor driver class for temperature, humidity, and pressure measurements using I2C on Raspberry Pi Pico.
+ *
+ * This header defines the BME280 class, which provides methods to initialize, configure, and read measurements from a BME280 environmental sensor.
+ * The class supports reading temperature, humidity, pressure, and calculating altitude, as well as configuring oversampling and operation modes.
+ *
+ * @author
+ * @date
+ */
+
+ /**
+    * @class BME280
+    * @brief Driver for the BME280 temperature, humidity, and pressure sensor.
+    *
+    * Provides methods for sensor initialization, configuration, and measurement retrieval.
+    */
+ 
+ /**
+    * @enum BME280::MODE
+    * @brief Operating modes for the BME280 sensor.
+    * - MODE_SLEEP: Sleep mode (lowest power consumption).
+    * - MODE_FORCED: Forced mode (single measurement).
+    * - MODE_NORMAL: Normal mode (continuous measurement).
+    */
+
+ /**
+    * @struct BME280::MeasurementControl_t
+    * @brief Structure for configuring measurement control register.
+    * - osrs_t: Temperature oversampling setting.
+    * - osrs_p: Pressure oversampling setting.
+    * - mode: Device operating mode.
+    * - get(): Returns the combined register value.
+    */
+
+ /**
+    * @struct BME280::Measurement_t
+    * @brief Structure to hold measurement results.
+    * - temperature: Measured temperature in degrees Celsius.
+    * - humidity: Measured relative humidity in percent.
+    * - pressure: Measured atmospheric pressure in Pascals.
+    * - altitude: Calculated altitude in meters.
+    */
+
+ /**
+    * @brief Constructs a BME280 object and initializes the sensor with the specified mode.
+    * @param mode The desired operating mode (sleep, forced, or normal).
+    */
+
+ /**
+    * @brief Reads and returns the latest sensor measurements.
+    * @return Measurement_t structure containing temperature, humidity, pressure, and altitude.
+    */
+
+ /**
+    * @brief Reads and returns the BME280 chip ID.
+    * @return The chip ID value.
+    */
+
+ /**
+    * @brief Reads raw sensor data for humidity, pressure, and temperature.
+    * @param humidity Pointer to store raw humidity value.
+    * @param pressure Pointer to store raw pressure value.
+    * @param temperature Pointer to store raw temperature value.
+    */
+
+ /**
+    * @brief Writes a value to a sensor register.
+    * @param reg Register address.
+    * @param data Data byte to write.
+    */
+
+ /**
+    * @brief Reads multiple bytes from sensor registers.
+    * @param reg Starting register address.
+    * @param buf Buffer to store read data.
+    * @param len Number of bytes to read.
+    */
+
+ /**
+    * @brief Reads sensor compensation parameters from the device.
+    */
+
+ /**
+    * @brief Compensates the raw temperature value.
+    * @param adc_T Raw temperature ADC value.
+    * @return Compensated temperature value.
+    */
+
+ /**
+    * @brief Compensates the raw pressure value.
+    * @param adc_P Raw pressure ADC value.
+    * @return Compensated pressure value.
+    */
+
+ /**
+    * @brief Compensates the raw humidity value.
+    * @param adc_H Raw humidity ADC value.
+    * @return Compensated humidity value.
+    */
 #ifndef __BME280_HPP__
 #define __BME280_HPP__
 

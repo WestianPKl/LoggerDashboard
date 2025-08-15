@@ -23,6 +23,10 @@ import {
 import { imageUpload } from '../../middleware/file.js'
 import validateToken from '../../middleware/jwtValidation.js'
 
+/**
+ * Express router instance for handling user-related API routes.
+ * @type {import('express').Router}
+ */
 const router = express.Router()
 
 router.post('/users', validateToken, getUsers)

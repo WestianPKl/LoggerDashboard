@@ -3,6 +3,18 @@ import sequelize from '../../../util/database.js'
 import User from '../users/user.model.js'
 import ProcessType from './processType.model.js'
 
+/**
+ * Sequelize model for the 'process_definition' table.
+ *
+ * @typedef {Object} ProcessDefinition
+ * @property {number} id - Primary key, auto-incremented.
+ * @property {number} processTypeId - Foreign key referencing the process type (process_type_id).
+ * @property {string} name - Name of the process definition.
+ * @property {number} createdById - ID of the user who created the record (created_by_id).
+ * @property {number} updatedById - ID of the user who last updated the record (updated_by_id).
+ * @property {Date} [createdAt] - Timestamp when the record was created (created_at).
+ * @property {Date} [updatedAt] - Timestamp when the record was last updated (updated_at).
+ */
 const ProcessDefinition = sequelize.define(
     'process_definition',
     {

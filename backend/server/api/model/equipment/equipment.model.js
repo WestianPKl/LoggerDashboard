@@ -7,6 +7,22 @@ import EquModel from './equModel.model.js'
 import EquSensorFunctions from './equSensorsFunctions.model.js'
 import DataDefinitions from '../data/dataDefinitions.model.js'
 
+/**
+ * Sequelize model definition for the 'equ_equipment' table.
+ *
+ * @typedef {Object} Equipment
+ * @property {number} id - Primary key, auto-incremented.
+ * @property {string} serialNumber - Serial number of the equipment.
+ * @property {number} equVendorId - Foreign key referencing the equipment vendor.
+ * @property {number} equModelId - Foreign key referencing the equipment model.
+ * @property {number} equTypeId - Foreign key referencing the equipment type.
+ * @property {number} createdById - ID of the user who created the record.
+ * @property {number} updatedById - ID of the user who last updated the record.
+ * @property {Date} [createdAt] - Timestamp when the record was created.
+ * @property {Date} [updatedAt] - Timestamp when the record was last updated.
+ * @property {Date} [deletedAt] - Timestamp when the record was deleted (paranoid mode).
+ * @property {number} [isDeleted] - Flag indicating if the record is deleted.
+ */
 const Equipment = sequelize.define(
     'equ_equipment',
     {

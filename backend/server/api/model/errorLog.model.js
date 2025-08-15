@@ -1,6 +1,19 @@
 import { Sequelize } from 'sequelize'
 import sequelize from '../../util/database.js'
 
+/**
+ * Sequelize model for the 'error_log' table.
+ *
+ * @typedef {Object} ErrorLog
+ * @property {number} id - Primary key, auto-incremented.
+ * @property {string} message - Error message (required).
+ * @property {string} [details] - Additional error details (optional).
+ * @property {'Equipment'|'DB'|'Other'} type - Type of error (required).
+ * @property {'Critical'|'Error'|'Warning'|'Info'} severity - Severity level (required).
+ * @property {number} [equipmentId] - Associated equipment ID (optional).
+ * @property {Date} [createdAt] - Timestamp when the error was created.
+ * @property {Date} [updatedAt] - Timestamp when the error was last updated.
+ */
 const ErrorLog = sequelize.define(
     'error_log',
     {

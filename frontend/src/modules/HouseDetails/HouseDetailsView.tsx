@@ -14,6 +14,27 @@ import { store } from '../../store/store'
 import { showAlert } from '../../store/application-store'
 import { socket } from '../../socket/socket'
 
+/**
+ * Renders the main view for displaying and editing house details, including its floors.
+ *
+ * This component fetches house data using `useLoaderData`, listens for real-time updates via a socket,
+ * and displays a tabbed interface for each floor of the house. If the user has write permissions,
+ * an additional tab for editing the house is shown. The component adapts its layout for mobile devices.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered HouseDetailsView component.
+ *
+ * @remarks
+ * - Uses Material-UI for layout and tabs.
+ * - Handles real-time updates by listening to the 'house' socket event.
+ * - Displays a loading indicator while awaiting house data.
+ * - Shows a message if no floors are present.
+ *
+ * @example
+ * ```tsx
+ * <HouseDetailsView />
+ * ```
+ */
 export default function HouseDetailsView() {
 	const { house } = useLoaderData() as { house: HouseClass }
 	const revalidator = useRevalidator()
@@ -22,8 +43,6 @@ export default function HouseDetailsView() {
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 	const isWritable = useAppSelector(state => canWrite('house', 'houseHouse')(state))
-
-	const handleChange = (_: React.SyntheticEvent, newValue: number) => setValue(newValue)
 
 	useEffect(() => {
 		function onAddHouseEvent() {
@@ -52,7 +71,10 @@ export default function HouseDetailsView() {
 							{houseData && houseData.floors.length > 0 && (
 								<>
 									<Box component='div' sx={{ borderBottom: 1, borderColor: 'divider' }}>
-										<Tabs value={value} onChange={handleChange} aria-label='Horizontal tab House Details'>
+										<Tabs
+											value={value}
+											onChange={(_: React.SyntheticEvent, newValue: number) => setValue(newValue)}
+											aria-label='Horizontal tab House Details'>
 											{houseData.floors &&
 												houseData.floors.map((e, index) =>
 													e.id ? <Tab key={e.id} label={e.name} {...tabProps(index)} /> : null
@@ -96,18 +118,30 @@ export default function HouseDetailsView() {
 	)
 }
 
-export async function loader({ params }: LoaderFunctionArgs) {
-	const houseId = params.houseId
-	if (!houseId) {
+/**
+ * Loader function for fetching house details based on the provided route parameters.
+ *
+ * @param params - The route parameters containing the `houseId`.
+ * @returns A promise that resolves to an object containing the house data, or a Response for redirects or errors.
+ *
+ * @throws Throws a response with status 400 if `houseId` is missing.
+ * @throws Throws a response with status 404 if the house data is not found.
+ * @throws Rethrows any other errors encountered during the fetch operation.
+ *
+ * @remarks
+ * - If the authentication token is missing, the user is redirected to the login page.
+ * - Alerts are dispatched to the store for error notifications.
+ */
+export async function loader({ params }: LoaderFunctionArgs): Promise<Response | { house: HouseClass }> {
+	if (!params.houseId) {
 		throw data('No house Id', { status: 400 })
 	}
-	const token = localStorage.getItem('token')
-	if (!token) {
+	if (!localStorage.getItem('token')) {
 		store.dispatch(showAlert({ message: 'Unknown user - token not found', severity: 'error' }))
 		return redirect('/login')
 	}
 	try {
-		const promise = await store.dispatch(houseApi.endpoints.getHouse.initiate(parseInt(houseId))).unwrap()
+		const promise = await store.dispatch(houseApi.endpoints.getHouse.initiate(parseInt(params.houseId))).unwrap()
 		if (!promise) {
 			throw data('Data not Found', { status: 404 })
 		}

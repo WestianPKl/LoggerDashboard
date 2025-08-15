@@ -3,6 +3,20 @@ import sequelize from '../../../util/database.js'
 import User from '../users/user.model.js'
 import AdmRolesUser from './admRolesUser.model.js'
 
+/**
+ * Sequelize model definition for the 'adm_roles' table.
+ *
+ * Represents administrative roles within the system.
+ *
+ * @typedef {Object} AdmRoles
+ * @property {number} id - Primary key, auto-incremented.
+ * @property {string} name - Name of the role.
+ * @property {string} description - Description of the role.
+ * @property {number} createdById - ID of the user who created the role.
+ * @property {number} updatedById - ID of the user who last updated the role.
+ * @property {Date} [createdAt] - Timestamp when the role was created.
+ * @property {Date} [updatedAt] - Timestamp when the role was last updated.
+ */
 const AdmRoles = sequelize.define(
     'adm_roles',
     {

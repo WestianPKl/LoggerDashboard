@@ -14,6 +14,15 @@ import ErrorLog from '../model/errorLog.model.js'
 
 const Op = Sequelize.Op
 
+/**
+ * Retrieves error logs based on the provided query object in the request body.
+ *
+ * @async
+ * @function getErrorLogs
+ * @param {import('express').Request} req - Express request object containing the query in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a JSON response with the retrieved error logs or an error message.
+ */
 export async function getErrorLogs(req, res) {
     try {
         const queryObject = decodeSequelizeQuery(req.body)
@@ -26,6 +35,15 @@ export async function getErrorLogs(req, res) {
     }
 }
 
+/**
+ * Retrieves an error log entry by its ID.
+ *
+ * @async
+ * @function getErrorLog
+ * @param {import('express').Request} req - Express request object, expects `errorLogId` param.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with the error log data or an error message.
+ */
 export async function getErrorLog(req, res) {
     try {
         const errorLogId = req.params.errorLogId
@@ -38,6 +56,18 @@ export async function getErrorLog(req, res) {
     }
 }
 
+/**
+ * Handles the addition of a new error log entry.
+ *
+ * Validates the incoming request, creates a new error log entry in the database within a transaction,
+ * and returns the appropriate response based on the operation's outcome.
+ *
+ * @async
+ * @function
+ * @param {import('express').Request} req - Express request object containing the error log data in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a JSON response indicating success or failure.
+ */
 export async function addErrorLog(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -58,6 +88,17 @@ export async function addErrorLog(req, res) {
     }
 }
 
+/**
+ * Updates an existing error log entry in the database.
+ *
+ * @async
+ * @function updateErrorLog
+ * @param {import('express').Request} req - Express request object containing parameters and body data.
+ * @param {import('express').Response} res - Express response object used to send responses.
+ * @returns {Promise<void>} Sends a JSON response indicating the result of the update operation.
+ *
+ * @throws Will handle and respond to validation errors, missing error log, or database errors.
+ */
 export async function updateErrorLog(req, res) {
     const t = await sequelize.transaction()
     try {
@@ -94,6 +135,15 @@ export async function updateErrorLog(req, res) {
     }
 }
 
+/**
+ * Deletes an error log entry by its ID.
+ *
+ * @async
+ * @function deleteErrorLog
+ * @param {import('express').Request} req - Express request object, expects `id` in the request body.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response indicating success or failure.
+ */
 export async function deleteErrorLog(req, res) {
     const t = await sequelize.transaction()
     try {

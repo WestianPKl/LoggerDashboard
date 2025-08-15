@@ -37,6 +37,10 @@ import {
 } from '../../middleware/body-validation.js'
 import validateToken from '../../middleware/jwtValidation.js'
 
+/**
+ * Express router for handling equipment-related API routes.
+ * @type {import('express').Router}
+ */
 const router = express.Router()
 
 router.post('/equ-types', validateToken, getEquTypes)

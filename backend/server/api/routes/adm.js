@@ -39,6 +39,10 @@ import {
 } from '../../middleware/body-validation.js'
 import validateToken from '../../middleware/jwtValidation.js'
 
+/**
+ * Express router instance for handling admin-related routes.
+ * @type {import('express').Router}
+ */
 const router = express.Router()
 
 router.post('/adm-permissions', validateToken, getPermissions)

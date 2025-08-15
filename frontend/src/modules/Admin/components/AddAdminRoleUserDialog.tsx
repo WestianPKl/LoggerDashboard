@@ -4,6 +4,23 @@ import type { IAddAdminRoleUserDialogProps } from '../scripts/IAdmin'
 import AdminUserSelect from '../../../components/AdminUserSelect'
 import type { UserClass } from '../../User/scripts/UserClass'
 
+/**
+ * A dialog component for adding one or more users to a specific admin role.
+ *
+ * @component
+ * @param {Object} props - Component props.
+ * @param {string | number} props.roleId - The ID of the role to which users will be added.
+ * @param {boolean} props.openAddDialog - Controls whether the dialog is open.
+ * @param {() => void} props.handleCloseAdd - Callback to close the dialog.
+ * @param {(data: { user: UserClass[]; roleId: string | number }) => void} props.addItemHandler - Handler called when users are added to the role.
+ *
+ * @returns {JSX.Element} The rendered dialog component for adding users to a role.
+ *
+ * @remarks
+ * - Uses Material-UI components for layout and styling.
+ * - Integrates with a user selection component (`AdminUserSelect`).
+ * - Disables the "Add" button if no users are selected.
+ */
 export default function AddUserRoleDialog({
 	roleId,
 	openAddDialog,
@@ -15,7 +32,16 @@ export default function AddUserRoleDialog({
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	function onSubmitHandler(e: React.FormEvent) {
+	/**
+	 * Handles the form submission event for adding an admin role to users.
+	 *
+	 * Prevents the default form submission behavior, validates the presence of users,
+	 * constructs the data object with selected users and role ID, closes the dialog,
+	 * and invokes the handler to add the item.
+	 *
+	 * @param e - The form submission event.
+	 */
+	function onSubmitHandler(e: React.FormEvent): void {
 		e.preventDefault()
 		if (!users || users.length === 0) return
 		const data = {
@@ -26,16 +52,26 @@ export default function AddUserRoleDialog({
 		addItemHandler(data)
 	}
 
-	function onUserChangeHandler(item: UserClass[]) {
+	/**
+	 * Handles changes to the selected users.
+	 *
+	 * @param item - An array of `UserClass` objects representing the selected users.
+	 */
+	function onUserChangeHandler(item: UserClass[]): void {
 		setUsers(item)
 	}
 
-	function closeDialog() {
+	/**
+	 * Closes the Add Admin Role User dialog.
+	 *
+	 * This function resets the selected users state to `undefined` and triggers the dialog close handler.
+	 *
+	 * @returns {void}
+	 */
+	function closeDialog(): void {
 		setUsers(undefined)
 		handleCloseAdd()
 	}
-
-	const isSubmitDisabled = !users || users.length === 0
 
 	return (
 		<Dialog sx={{ width: '100%' }} open={openAddDialog} onClose={closeDialog} closeAfterTransition={false}>
@@ -50,7 +86,11 @@ export default function AddUserRoleDialog({
 					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={closeDialog}>
 						Cancel
 					</Button>
-					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} type='submit' disabled={isSubmitDisabled}>
+					<Button
+						variant='outlined'
+						size={isMobile ? 'small' : 'medium'}
+						type='submit'
+						disabled={!users || users.length === 0}>
 						Add
 					</Button>
 				</DialogActions>

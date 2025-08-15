@@ -9,6 +9,23 @@ import { useGetDataLogsViewQuery } from '../../../store/api/dataApi'
 const DataChartRangeButtons = lazy(() => import('./DataChartRangeButtons'))
 const DataChartExportButtons = lazy(() => import('./DataChartExportButtons'))
 
+/**
+ * Displays a chart visualizing sensor data (temperature, humidity, pressure) for a given logger and sensor.
+ *
+ * Features:
+ * - Fetches and displays time-series sensor data for the selected logger and sensor.
+ * - Allows users to select a time range (last hour, day, week, month, or all data).
+ * - Supports auto-refresh with a configurable interval and countdown display.
+ * - Provides export functionality for chart images and data.
+ * - Shows average and threshold lines for temperature, humidity, and pressure.
+ * - Displays event markers on the chart if present in the data.
+ * - Responsive design for mobile and desktop.
+ * - Handles loading and error states, displaying appropriate messages.
+ *
+ * @param equLoggerId - The ID of the equipment logger to display data for.
+ * @param equSensorId - The ID of the equipment sensor to display data for.
+ * @returns A React component rendering the sensor data chart and related controls.
+ */
 export default function DataChart({ equLoggerId, equSensorId }: { equLoggerId: number; equSensorId: number }) {
 	const [range, setRange] = useState<string>(() => localStorage.getItem('sensor_range') || '1h')
 	const [autoRefreshEnabled, setAutoRefreshEnabled] = useState<boolean>(() => {
@@ -96,15 +113,36 @@ export default function DataChart({ equLoggerId, equSensorId }: { equLoggerId: n
 		all: 'All data',
 	}
 
-	function handleRangeChange(newRange: string) {
+	/**
+	 * Handles changes to the selected range.
+	 *
+	 * Updates the component state with the new range and persists the selection
+	 * in localStorage under the key 'sensor_range'.
+	 *
+	 * @param newRange - The newly selected range value.
+	 */
+	function handleRangeChange(newRange: string): void {
 		setRange(newRange)
 		localStorage.setItem('sensor_range', newRange)
 	}
-	function handleReset() {
+	/**
+	 * Resets the data range to the default value ('1h') and removes the
+	 * 'sensor_range' entry from localStorage.
+	 *
+	 * This function is typically used to revert any user-selected range
+	 * back to its initial state and clear the persisted range setting.
+	 */
+	function handleReset(): void {
 		setRange('1h')
 		localStorage.removeItem('sensor_range')
 	}
-	function refreshData() {
+	/**
+	 * Refreshes the data by triggering a refetch and resets the refresh timer.
+	 *
+	 * Calls the `refetch` function to retrieve the latest data and sets the
+	 * countdown timer back to the initial `refreshInterval` value.
+	 */
+	function refreshData(): void {
 		refetch()
 		setTimeLeft(refreshInterval)
 	}

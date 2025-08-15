@@ -8,6 +8,14 @@ import LoadingCircle from '../../components/UI/LoadingCircle'
 import { store } from '../../store/store'
 import { Await, useLoaderData, data } from 'react-router'
 
+/**
+ * EquipmentMainView is the main component for displaying equipment data.
+ * It loads equipment asynchronously using React Router's `useLoaderData` and `Await` components,
+ * and renders the data in an `EquipmentTable` once loaded.
+ * The layout adapts responsively based on the current theme's breakpoint, using Material-UI's `useMediaQuery`.
+ *
+ * @returns {JSX.Element} The rendered equipment main view, including a loading indicator while data is being fetched.
+ */
 export default function EquipmentMainView() {
 	const { equipments } = useLoaderData() as { equipments: Promise<EquipmentClass[]> }
 
@@ -23,7 +31,17 @@ export default function EquipmentMainView() {
 	)
 }
 
-export async function loader() {
+/**
+ * Asynchronously loads the list of equipment from the API and returns it.
+ *
+ * Dispatches a Redux action to fetch equipment data using the `equipmentApi` endpoint.
+ * If the data is not found, throws a 404 error.
+ * In case of an error during the fetch, dispatches an alert with the error message and rethrows the error.
+ *
+ * @returns {Promise<{ equipments: EquipmentClass[] }>} A promise that resolves to an object containing the list of equipment.
+ * @throws Will throw an error if the equipment data cannot be fetched or is not found.
+ */
+export async function loader(): Promise<{ equipments: EquipmentClass[] }> {
 	try {
 		const promise = await store.dispatch(equipmentApi.endpoints.getEquipments.initiate({})).unwrap()
 		if (!promise) {

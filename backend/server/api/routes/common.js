@@ -13,6 +13,10 @@ import {
     errorSeverity,
 } from '../../middleware/body-validation.js'
 
+/**
+ * Express router instance for defining API routes.
+ * @type {import('express').Router}
+ */
 const router = express.Router()
 
 router.post('/error-logs', getErrorLogs)

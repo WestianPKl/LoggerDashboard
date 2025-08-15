@@ -13,6 +13,32 @@ const initialState: IAccountState = {
 	avatar: undefined,
 }
 
+/**
+ * Redux slice for managing account authentication state.
+ *
+ * @remarks
+ * This slice handles user authentication, including login, logout, token management,
+ * user information, and avatar retrieval. It provides reducers for logging in and out,
+ * updating authentication duration, and setting the user's avatar. Selectors are included
+ * for accessing authentication-related state properties.
+ *
+ * @example
+ * // Dispatch login action
+ * dispatch(accountSlice.actions.logIn({ expiration, user, token }));
+ *
+ * // Access selectors
+ * const isLogged = useSelector(accountSlice.selectors.selectIsLogged);
+ *
+ * @property {Reducer} logIn - Logs in the user and sets authentication details.
+ * @property {Reducer} logOff - Logs out the user and clears authentication details.
+ * @property {Reducer} getAuthDuration - Updates the authentication duration.
+ * @property {Reducer} getUserAvatar - Sets the user's avatar.
+ * @property {Function} selectIsLogged - Selector for authentication status.
+ * @property {Function} selectUser - Selector for user information.
+ * @property {Function} selectDuration - Selector for authentication duration.
+ * @property {Function} selectToken - Selector for authentication token.
+ * @property {Function} selectAvatar - Selector for user avatar.
+ */
 export const accountSlice = createAppSlice({
 	name: 'account',
 	initialState,

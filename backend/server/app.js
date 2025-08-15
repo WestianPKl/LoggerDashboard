@@ -18,6 +18,10 @@ import commonRouter from './api/routes/common.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+/**
+ * The Express application instance used to define middleware, routes, and server configuration.
+ * @type {import('express').Express}
+ */
 const app = express()
 
 app.use(

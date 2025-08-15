@@ -1,3 +1,26 @@
+/**
+ * @file dataApi.ts
+ *
+ * This file defines API endpoints for managing data definitions, data logs, last values, and related views using Redux Toolkit Query.
+ * It provides endpoints for CRUD operations and for retrieving various data views, with error handling and cache management.
+ *
+ * @param {DataDefinitionClass} DataDefinitionClass - The class representing a data definition entity.
+ * @param {DataLogClass} DataLogClass - The class representing a data log entity.
+ * @param {DataLastValueClass} DataLastValueClass - The class representing a last value entity.
+ * @param {DataLastValueViewClass} DataLastValueViewClass - The class representing a last value view entity.
+ * @param {DataConnectedSensorViewClass} DataConnectedSensorViewClass - The class representing a connected sensor view entity.
+ * @param {DataLogsViewClass} DataLogsViewClass - The class representing a logs view entity.
+ *
+ * Endpoints:
+ * - getDataDefinitions, getDataDefinition, addDataDefinition, updateDataDefinition, deleteDataDefinition
+ * - getDataLogs, getDataLog, addDataLog, updateDataLog, deleteDataLog
+ * - getDataLastValues, getDataLastValue, addDataLastValue, updateDataLastValue, deleteDataLastValue
+ * - getDataLastValuesView, getDataLastValuesMulti, getDataConnectedSensorView, getDataLogsView
+ * - getErrorProne: Example endpoint for error handling demonstration.
+ *
+ * Exports:
+ * - React hooks for each endpoint for use in components.
+ */
 import { api } from './api'
 import type { DataDefinitionClass } from '../../modules/Data/scripts/DataDefinitionClass'
 import type { DataLogClass } from '../../modules/Data/scripts/DataLogClass'

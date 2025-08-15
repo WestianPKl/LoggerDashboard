@@ -1,6 +1,17 @@
 import { Sequelize } from 'sequelize'
 import sequelize from '../../../util/database.js'
 
+/**
+ * Sequelize model for the 'data_definitions' table.
+ *
+ * @typedef {Object} DataDefinitions
+ * @property {number} id - Primary key, auto-incremented integer.
+ * @property {string} name - Name of the data definition.
+ * @property {string} unit - Unit associated with the data definition.
+ * @property {string} description - Description of the data definition.
+ * @property {Date} [createdAt] - Timestamp when the record was created.
+ * @property {Date} [updatedAt] - Timestamp when the record was last updated.
+ */
 const DataDefinitions = sequelize.define(
     'data_definitions',
     {

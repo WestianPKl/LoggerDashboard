@@ -1,3 +1,29 @@
+/**
+ * Integration tests for the User API.
+ *
+ * This file covers the following scenarios:
+ * - User registration (including duplicate username/email and password mismatch cases)
+ * - User login (success, missing fields, wrong password)
+ * - Password reset request and password reset
+ * - Fetching user data by ID and listing all users
+ * - Editing and deleting user accounts
+ * - Input validation for all endpoints
+ *
+ * @param {string} tokenFullAccess JWT token for a user with full permissions (used for most authorized requests)
+ * @param {string} tokenNoPermissions JWT token for a user with no permissions (used to test authorization failures)
+ * @param {string} newUserToken JWT token for a newly registered user
+ * @param {number} userId Stores the ID of the user created during tests
+ * @param {string} username Used to verify user data after registration and login
+ * @param {string} email Used to verify user data after registration and login
+ * @param {string} passwordResetToken Token generated for password reset flow
+ *
+ * Structure:
+ * - beforeAll: Logs in two users and stores their tokens for use in tests
+ * - Each 'it' block tests a specific API endpoint or scenario, including both positive and negative cases
+ * - Uses supertest for HTTP requests and JWT for token decoding
+ *
+ * The tests ensure that the User API endpoints behave correctly, handle errors, and enforce validation and authorization rules.
+ */
 import request from 'supertest'
 import app from '../app.js'
 import jwt from 'jsonwebtoken'

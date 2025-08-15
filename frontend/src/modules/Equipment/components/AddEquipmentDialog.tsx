@@ -10,7 +10,7 @@ import {
 	useMediaQuery,
 	useTheme,
 } from '@mui/material'
-import type { IAddEquipment, IAddEquipmentProps } from '../scripts/IEquipment'
+import type { IAddEquipmentProps } from '../scripts/IEquipment'
 import EquipmentVendorSelect from '../../../components/EquipmentVendorSelect'
 import EquipmentModelSelect from '../../../components/EquipmentModelSelect'
 import EquipmentTypeSelect from '../../../components/EquipmentTypeSelect'
@@ -20,6 +20,22 @@ import type { EquipmentTypeClass } from '../scripts/EquipmentTypeClass'
 import DataDefinitionSelect from '../../../components/DataDefinitionSelect'
 import type { DataDefinitionClass } from '../../Data/scripts/DataDefinitionClass'
 
+/**
+ * Displays a dialog for adding or editing equipment items.
+ *
+ * This component renders a form inside a Material-UI Dialog, allowing users to input or modify equipment details
+ * such as serial number, vendor, model, type, and data definitions. It supports both single and multiple edit modes.
+ *
+ * @component
+ * @param {Object} props - The component props.
+ * @param {boolean} props.edit - Indicates if the dialog is in edit mode.
+ * @param {IEquipmentItem[] | undefined} props.selectedItems - The currently selected equipment items for editing.
+ * @param {boolean} props.openAddDialog - Controls whether the dialog is open.
+ * @param {() => void} props.handleCloseAdd - Callback to close the dialog.
+ * @param {(data: IAddEquipment | IAddEquipment[]) => void} props.addItemHandler - Handler to add or update equipment items.
+ *
+ * @returns {JSX.Element} The rendered AddEquipmentDialog component.
+ */
 export default function AddEquipmentDialog({
 	edit,
 	selectedItems,
@@ -69,40 +85,86 @@ export default function AddEquipmentDialog({
 		}
 	}, [openAddDialog, edit, selectedItems])
 
-	function onSerialNumberChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
+	/**
+	 * Handles changes to the serial number input field.
+	 *
+	 * Updates the serial number state with the current value from the input element.
+	 *
+	 * @param e - The change event triggered by the serial number input field.
+	 */
+	function onSerialNumberChangeHandler(e: React.ChangeEvent<HTMLInputElement>): void {
 		setSerialNumber(e.target.value)
 	}
 
-	function onVendorChangeHandler(item: EquipmentVendorClass | null) {
+	/**
+	 * Handles the change event for the equipment vendor selection.
+	 *
+	 * Updates the current vendor state with the selected vendor item.
+	 *
+	 * @param item - The selected equipment vendor, or `null` if no vendor is selected.
+	 */
+	function onVendorChangeHandler(item: EquipmentVendorClass | null): void {
 		setVendor(item)
 	}
-	function onModelChangeHandler(item: EquipmentModelClass | null) {
+	/**
+	 * Handles changes to the selected equipment model.
+	 *
+	 * @param item - The newly selected `EquipmentModelClass` instance or `null` if no model is selected.
+	 * Updates the component state with the selected model.
+	 */
+	function onModelChangeHandler(item: EquipmentModelClass | null): void {
 		setModel(item)
 	}
-	function onTypeChangeHandler(item: EquipmentTypeClass | null) {
+	/**
+	 * Handles the change event for the equipment type selection.
+	 *
+	 * Updates the selected equipment type state when the user selects a new type.
+	 *
+	 * @param item - The newly selected equipment type, or `null` if no type is selected.
+	 */
+	function onTypeChangeHandler(item: EquipmentTypeClass | null): void {
 		setType(item)
 	}
-	function onDataDefinitionHandler(item: DataDefinitionClass[]) {
+	/**
+	 * Handles updates to the data definition state.
+	 *
+	 * @param item - An array of `DataDefinitionClass` objects representing the new data definitions to be set.
+	 */
+	function onDataDefinitionHandler(item: DataDefinitionClass[]): void {
 		setDataDefinition(item)
 	}
 
-	function closeDialog() {
+	/**
+	 * Closes the Add Equipment dialog by invoking the provided close handler.
+	 *
+	 * Calls the `handleCloseAdd` function to perform any necessary cleanup and close the dialog UI.
+	 */
+	function closeDialog(): void {
 		handleCloseAdd()
 	}
 
-	function onSubmitHandler(e: React.FormEvent) {
+	/**
+	 * Handles the form submission for adding or editing equipment.
+	 *
+	 * - If not in edit mode, creates a new equipment item and passes it to `addItemHandler`.
+	 * - If in edit mode with multiple selection, maps selected items to the expected format and passes them to `addItemHandler`.
+	 * - If in edit mode with a single item, updates the item and passes it as an array to `addItemHandler`.
+	 * - Always closes the dialog after handling the submission.
+	 *
+	 * @param e - The form event triggered by submitting the form.
+	 */
+	function onSubmitHandler(e: React.FormEvent): void {
 		e.preventDefault()
 		if (!edit) {
-			const data: IAddEquipment = {
+			addItemHandler({
 				serialNumber,
 				equVendorId: vendor?.id,
 				equModelId: model?.id,
 				equTypeId: type?.id,
 				dataDefinitions: dataDefinition,
-			}
-			addItemHandler(data)
+			})
 		} else if (edit && multiple) {
-			const items: IAddEquipment[] =
+			addItemHandler(
 				selectedItems?.map(e => ({
 					id: e.id,
 					serialNumber: e.serialNumber,
@@ -111,17 +173,18 @@ export default function AddEquipmentDialog({
 					equTypeId: e.type?.id,
 					dataDefinitions: e.dataDefinitions ?? [],
 				})) || []
-			addItemHandler(items)
+			)
 		} else if (edit && !multiple) {
-			const data: IAddEquipment = {
-				id: itemId,
-				serialNumber,
-				equVendorId: vendor?.id,
-				equModelId: model?.id,
-				equTypeId: type?.id,
-				dataDefinitions: dataDefinition,
-			}
-			addItemHandler([data])
+			addItemHandler([
+				{
+					id: itemId,
+					serialNumber,
+					equVendorId: vendor?.id,
+					equModelId: model?.id,
+					equTypeId: type?.id,
+					dataDefinitions: dataDefinition,
+				},
+			])
 		}
 		closeDialog()
 	}

@@ -2,6 +2,23 @@ import { Sequelize } from 'sequelize'
 import sequelize from '../../../util/database.js'
 import User from '../users/user.model.js'
 
+/**
+ * Sequelize model definition for the "house_house" table.
+ *
+ * @typedef {Object} House
+ * @property {number} id - Primary key, auto-incremented.
+ * @property {string} name - Name of the house. (required)
+ * @property {string} [postalCode] - Postal code of the house.
+ * @property {string} [city] - City where the house is located.
+ * @property {string} [street] - Street address of the house.
+ * @property {string} [houseNumber] - House number.
+ * @property {string} [pictureLink] - URL to the house's picture.
+ * @property {string} [pictureLinkBig] - URL to a larger version of the house's picture.
+ * @property {number} createdById - ID of the user who created the record. (required)
+ * @property {number} updatedById - ID of the user who last updated the record. (required)
+ * @property {Date} [createdAt] - Timestamp when the record was created.
+ * @property {Date} [updatedAt] - Timestamp when the record was last updated.
+ */
 const House = sequelize.define(
     'house_house',
     {

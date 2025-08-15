@@ -7,6 +7,19 @@ import { useAppDispatch } from '../../../store/hooks'
 import { showAlert } from '../../../store/application-store'
 import LoadingCircle from '../../../components/UI/LoadingCircle'
 
+/**
+ * Renders a table displaying user or role permissions in the admin panel.
+ *
+ * Fetches permission data based on either a `userId` or `roleId` and displays it
+ * using the `UserPermissionTable` component. Handles loading and error states,
+ * and adapts layout for mobile devices.
+ *
+ * @param userId - Optional ID of the user whose permissions are to be displayed.
+ * @param isAdmin - Optional flag indicating if the current user is an admin.
+ * @param roleId - Optional ID of the role whose permissions are to be displayed.
+ *
+ * @returns A React component that displays the permissions table within a responsive container.
+ */
 export default function AdminUserPermissionTable({
 	userId,
 	isAdmin,

@@ -5,11 +5,31 @@ import { useGetDataDefinitionsQuery } from '../store/api/dataApi'
 import { useAppDispatch } from '../store/hooks'
 import { showAlert } from '../store/application-store'
 
+/**
+ * Props for a select component that handles DataDefinitionClass items.
+ *
+ * @property getItem - Callback function invoked with the selected DataDefinitionClass array.
+ * @property item - The currently selected DataDefinitionClass array, or undefined if none is selected.
+ */
 interface ISelectProps {
 	getItem: (item: DataDefinitionClass[]) => void
 	item: DataDefinitionClass[] | undefined
 }
 
+/**
+ * DataDefinitionSelect is a React component that renders a multi-select Autocomplete input
+ * for selecting data definitions. It fetches available data definitions using a query hook,
+ * displays them as selectable options, and handles error reporting via a Redux alert.
+ *
+ * @param getItem - Callback function invoked when the selected items change, receiving the new selection.
+ * @param item - The currently selected data definitions.
+ *
+ * @remarks
+ * - Uses Material-UI's Autocomplete and TextField components.
+ * - Adapts its width based on the screen size (responsive for mobile).
+ * - Displays up to two selected tags in the input field.
+ * - Shows an error alert if fetching data definitions fails.
+ */
 export default function DataDefinitionSelect({ getItem, item }: ISelectProps) {
 	const dispatch = useAppDispatch()
 
@@ -26,7 +46,13 @@ export default function DataDefinitionSelect({ getItem, item }: ISelectProps) {
 		}
 	}, [dispatch, dataDefinitionsError])
 
-	function getOptionLabel(dataDefinition: DataDefinitionClass) {
+	/**
+	 * Returns the display label for a given DataDefinitionClass option.
+	 *
+	 * @param dataDefinition - The data definition object to extract the label from.
+	 * @returns The name of the data definition if available, otherwise an empty string.
+	 */
+	function getOptionLabel(dataDefinition: DataDefinitionClass): string {
 		let value: string = ''
 		if (dataDefinition.name) {
 			value = dataDefinition.name

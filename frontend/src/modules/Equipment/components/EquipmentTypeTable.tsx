@@ -29,6 +29,26 @@ import { useUpdateEquipmentTypeMutation } from '../../../store/api/equipmentApi'
 import { useDeleteEquipmentTypeMutation } from '../../../store/api/equipmentApi'
 import { useRevalidator } from 'react-router'
 
+/**
+ * EquipmentTypeTable component displays a table of equipment types with CRUD (Create, Read, Update, Delete) operations.
+ *
+ * @param equipmentType - An array of equipment type objects to display in the table.
+ *
+ * Features:
+ * - Displays equipment types in a paginated, selectable table.
+ * - Allows adding, editing, and deleting equipment types based on user permissions.
+ * - Supports responsive UI for mobile and desktop.
+ * - Integrates with Redux for state management and permission checks.
+ * - Uses dialogs for add, edit, and delete operations.
+ * - Shows success and error alerts for user actions.
+ *
+ * @remarks
+ * - Requires permission checks for write and delete actions.
+ * - Uses MUI DataGrid for table rendering.
+ * - Expects mutation hooks and alert actions to be available in the context.
+ *
+ * @component
+ */
 export default function EquipmentTypeTable({ equipmentType }: IEquipmentTypeTableProps) {
 	const dispatch = useAppDispatch()
 	const revalidator = useRevalidator()
@@ -52,14 +72,6 @@ export default function EquipmentTypeTable({ equipmentType }: IEquipmentTypeTabl
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	const columns = useMemo<GridColDef[]>(
-		() => [
-			{ field: 'id', headerName: 'ID', width: 100 },
-			{ field: 'name', headerName: 'Name', width: 360 },
-		],
-		[]
-	)
-
 	const equipmentTypeMap = useMemo(() => {
 		const map = new Map()
 		equipmentType.forEach(item => {
@@ -73,7 +85,13 @@ export default function EquipmentTypeTable({ equipmentType }: IEquipmentTypeTabl
 		setSelectedItems(selectedIds.map(id => equipmentTypeMap.get(Number(id))).filter(Boolean))
 	}, [rowSelectionModel, equipmentTypeMap])
 
-	function clearObject() {
+	/**
+	 * Clears the current selection by resetting the selected items array
+	 * and updating the row selection model to an empty state.
+	 *
+	 * This function is typically used to deselect all items in the equipment type table.
+	 */
+	function clearObject(): void {
 		setSelectedItems([])
 		setRowSelectionModel({
 			type: 'include',
@@ -81,7 +99,17 @@ export default function EquipmentTypeTable({ equipmentType }: IEquipmentTypeTabl
 		})
 	}
 
-	async function addItemHandler(item: IAddEquipmentData | IAddEquipmentData[]) {
+	/**
+	 * Handles adding a new equipment type or multiple equipment types.
+	 *
+	 * Closes the add dialog, attempts to add the equipment type(s) via an API call,
+	 * shows a success alert on success, and triggers a data revalidation.
+	 * If an error occurs, displays an error alert with the appropriate message.
+	 *
+	 * @param item - The equipment data to add, either a single item or an array of items.
+	 * @returns A promise that resolves when the operation is complete.
+	 */
+	async function addItemHandler(item: IAddEquipmentData | IAddEquipmentData[]): Promise<void> {
 		try {
 			setOpenAddDialog(false)
 			if (!Array.isArray(item)) {
@@ -95,7 +123,17 @@ export default function EquipmentTypeTable({ equipmentType }: IEquipmentTypeTabl
 		}
 	}
 
-	async function editItemHandler(items: IAddEquipmentData | IAddEquipmentData[]) {
+	/**
+	 * Handles editing of one or multiple equipment type items.
+	 *
+	 * Closes the edit dialog, updates the equipment type(s) via API,
+	 * shows a success alert on completion, clears the form object,
+	 * and triggers a revalidation. If an error occurs, displays an error alert.
+	 *
+	 * @param items - A single equipment data object or an array of equipment data objects to be edited.
+	 * @returns A promise that resolves when the edit operation(s) are complete.
+	 */
+	async function editItemHandler(items: IAddEquipmentData | IAddEquipmentData[]): Promise<void> {
 		try {
 			setOpenEditDialog(false)
 			if (Array.isArray(items) && items.length >= 1) {
@@ -114,7 +152,19 @@ export default function EquipmentTypeTable({ equipmentType }: IEquipmentTypeTabl
 		}
 	}
 
-	async function deleteItemHandler() {
+	/**
+	 * Handles the deletion of selected equipment types.
+	 *
+	 * Closes the delete confirmation dialog, then attempts to delete all selected equipment types
+	 * by calling the `deleteEquipmentType` API for each selected item. If the deletion is successful,
+	 * displays a success alert and triggers a data revalidation. If an error occurs during deletion,
+	 * displays an error alert with the appropriate message.
+	 *
+	 * @async
+	 * @function
+	 * @returns {Promise<void>} A promise that resolves when the deletion process is complete.
+	 */
+	async function deleteItemHandler(): Promise<void> {
 		try {
 			setOpenDeleteDialog(false)
 			if (selectedItems.length >= 1) {
@@ -132,31 +182,65 @@ export default function EquipmentTypeTable({ equipmentType }: IEquipmentTypeTabl
 		}
 	}
 
-	function handleClickAddOpen() {
+	/**
+	 * Opens the dialog for adding a new equipment type by setting the `openAddDialog` state to true.
+	 *
+	 * @remarks
+	 * This function is typically used as an event handler for UI elements (e.g., a button)
+	 * that trigger the display of the add equipment type dialog.
+	 */
+	function handleClickAddOpen(): void {
 		setOpenAddDialog(true)
 	}
 
-	function handleClickEditOpen() {
+	/**
+	 * Opens the edit dialog by setting the `openEditDialog` state to `true`.
+	 * Typically used as an event handler for edit actions in the equipment type table.
+	 */
+	function handleClickEditOpen(): void {
 		setOpenEditDialog(true)
 	}
 
-	function handleClickDeleteOpen() {
+	/**
+	 * Opens the delete confirmation dialog by setting the `openDeleteDialog` state to `true`.
+	 *
+	 * This function is typically called when the user initiates a delete action,
+	 * such as clicking a "Delete" button in the UI.
+	 */
+	function handleClickDeleteOpen(): void {
 		setOpenDeleteDialog(true)
 	}
 
-	function handleCloseDelete() {
+	/**
+	 * Closes the delete confirmation dialog by setting its open state to false.
+	 *
+	 * This function is typically called when the user cancels or completes a delete action,
+	 * ensuring the delete dialog is no longer visible.
+	 */
+	function handleCloseDelete(): void {
 		setOpenDeleteDialog(false)
 	}
 
-	function handleCloseAdd() {
+	/**
+	 * Closes the "Add Equipment Type" dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler for closing the add dialog,
+	 * such as when the user cancels or completes the add operation.
+	 */
+	function handleCloseAdd(): void {
 		setOpenAddDialog(false)
 	}
 
-	function handleCloseEdit() {
+	/**
+	 * Closes the edit dialog by setting the `openEditDialog` state to false.
+	 *
+	 * This function is typically used as an event handler to close the edit dialog
+	 * when the user cancels or completes an edit operation.
+	 */
+	function handleCloseEdit(): void {
 		setOpenEditDialog(false)
 	}
 
-	const paginationModel = { page: 0, pageSize: 15 }
 	return (
 		<Box sx={{ textAlign: 'center' }}>
 			<Box sx={{ textAlign: 'left' }}>
@@ -272,8 +356,14 @@ export default function EquipmentTypeTable({ equipmentType }: IEquipmentTypeTabl
 				</Box>
 				<DataGrid
 					rows={equipmentType}
-					columns={columns}
-					initialState={{ pagination: { paginationModel } }}
+					columns={useMemo<GridColDef[]>(
+						() => [
+							{ field: 'id', headerName: 'ID', width: 100 },
+							{ field: 'name', headerName: 'Name', width: 360 },
+						],
+						[]
+					)}
+					initialState={{ pagination: { paginationModel: { page: 0, pageSize: 15 } } }}
 					pageSizeOptions={[15, 30, 45]}
 					checkboxSelection={isWritable ? true : false}
 					disableRowSelectionOnClick={true}

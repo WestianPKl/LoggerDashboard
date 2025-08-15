@@ -7,6 +7,18 @@ import { useAppDispatch } from '../../../store/hooks'
 import { showAlert } from '../../../store/application-store'
 import LoadingCircle from '../../../components/UI/LoadingCircle'
 
+/**
+ * Main component for displaying and managing users associated with a specific admin role.
+ *
+ * Fetches role data based on the provided `roleId` and displays a table of users for that role.
+ * Handles error reporting and adapts layout for mobile devices.
+ *
+ * @param props - Component props.
+ * @param props.isAdmin - Optional flag indicating if the current user has admin privileges.
+ * @param props.roleId - Optional ID of the admin role to display users for.
+ *
+ * @returns The rendered component displaying the users table for the selected admin role.
+ */
 export default function AdminUserRoleMain({ isAdmin, roleId }: { isAdmin?: boolean; roleId?: number }) {
 	const [rolesData, setRolesData] = useState<AdminRoleClass>(new AdminRoleClass())
 

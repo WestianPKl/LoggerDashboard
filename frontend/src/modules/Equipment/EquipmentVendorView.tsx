@@ -8,6 +8,14 @@ import LoadingCircle from '../../components/UI/LoadingCircle'
 import { redirect, Await, useLoaderData, data } from 'react-router'
 import { store } from '../../store/store'
 
+/**
+ * EquipmentVendorView is a React component that displays a table of equipment vendors.
+ * It utilizes data loaded via `useLoaderData`, which is expected to provide an array of `EquipmentVendorClass` objects.
+ * The component adapts its layout based on the current screen size, using Material-UI's theming and media query hooks.
+ * Data loading is handled asynchronously with React's `Suspense` and `Await` components, showing a loading indicator while data is being fetched.
+ *
+ * @returns {JSX.Element} The rendered equipment vendor view.
+ */
 export default function EquipmentVendorView() {
 	const { equipmentVendors } = useLoaderData() as { equipmentVendors: EquipmentVendorClass[] }
 
@@ -25,9 +33,22 @@ export default function EquipmentVendorView() {
 	)
 }
 
-export async function loader() {
-	const token = localStorage.getItem('token')
-	if (!token) {
+/**
+ * Asynchronously loads equipment vendor data for the EquipmentVendorView module.
+ *
+ * This loader function checks for a valid authentication token in localStorage.
+ * If the token is missing, it redirects the user to the login page.
+ * Otherwise, it dispatches an API call to fetch equipment vendors.
+ * If the data is not found, it throws a 404 error.
+ * On success, it returns an object containing the list of equipment vendors.
+ * If an error occurs during the API call, it dispatches an alert with the error message and rethrows the error.
+ *
+ * @returns {Promise<Response | { equipmentVendors: EquipmentVendorClass[] }>}
+ *   A promise that resolves to either a redirect response or an object with the equipment vendors.
+ * @throws Will throw an error if the API call fails or if the data is not found.
+ */
+export async function loader(): Promise<Response | { equipmentVendors: EquipmentVendorClass[] }> {
+	if (!localStorage.getItem('token')) {
 		return redirect('/login')
 	}
 	try {

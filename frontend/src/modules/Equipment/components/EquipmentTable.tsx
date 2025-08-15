@@ -55,56 +55,6 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	const columns = useMemo<GridColDef[]>(
-		() => [
-			{ field: 'id', headerName: 'ID', width: 50 },
-			{ field: 'serialNumber', headerName: 'Serial number', width: 200 },
-			{
-				field: 'vendor.name',
-				headerName: 'Vendor name',
-				width: 200,
-				valueGetter: (_, row) => `${row.vendor.name}`,
-			},
-			{
-				field: 'model.name',
-				headerName: 'Model name',
-				width: 200,
-				valueGetter: (_, row) => `${row.model.name}`,
-			},
-			{
-				field: 'type.name',
-				headerName: 'Type name',
-				width: 155,
-				valueGetter: (_, row) => `${row.type.name}`,
-			},
-			{
-				field: 'createdBy.username',
-				headerName: 'Created by',
-				width: 155,
-				valueGetter: (_, row) => `${row.createdBy.username}`,
-			},
-			{
-				field: 'updatedBy.username',
-				headerName: 'Updated by',
-				width: 155,
-				valueGetter: (_, row) => `${row.updatedBy.username}`,
-			},
-			{
-				field: 'createdAt',
-				headerName: 'Creation date',
-				width: 160,
-				valueGetter: (_, row) => `${row.createdAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
-			},
-			{
-				field: 'updatedAt',
-				headerName: 'Update date',
-				width: 160,
-				valueGetter: (_, row) => `${row.updatedAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
-			},
-		],
-		[]
-	)
-
 	const equipmentMap = useMemo(() => {
 		const map = new Map()
 		equipment.forEach(item => {
@@ -118,7 +68,15 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 		setSelectedItems(selectedIds.map(id => equipmentMap.get(Number(id))).filter(Boolean))
 	}, [rowSelectionModel, equipmentMap])
 
-	function clearObject() {
+	/**
+	 * Clears the current selection by resetting the selected items array
+	 * and initializing the row selection model to an empty state.
+	 *
+	 * This function sets the selected items to an empty array and updates
+	 * the row selection model with an 'include' type and an empty set of IDs.
+	 * Typically used to deselect all items in the equipment table.
+	 */
+	function clearObject(): void {
 		setSelectedItems([])
 		setRowSelectionModel({
 			type: 'include',
@@ -126,7 +84,17 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 		})
 	}
 
-	async function addItemHandler(item: IAddEquipment | IAddEquipment[]) {
+	/**
+	 * Handles adding a new equipment item or multiple items.
+	 *
+	 * Closes the add dialog, attempts to add the equipment via the API,
+	 * shows a success alert on success, and triggers a revalidation.
+	 * If an error occurs, displays an error alert with the relevant message.
+	 *
+	 * @param item - The equipment item or array of items to add.
+	 * @returns A promise that resolves when the operation is complete.
+	 */
+	async function addItemHandler(item: IAddEquipment | IAddEquipment[]): Promise<void> {
 		try {
 			setOpenAddDialog(false)
 			if (!Array.isArray(item)) {
@@ -140,7 +108,17 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 		}
 	}
 
-	async function editItemHandler(items: IAddEquipment | IAddEquipment[]) {
+	/**
+	 * Handles editing of one or multiple equipment items.
+	 *
+	 * Closes the edit dialog, updates the provided equipment item(s) via the `updateEquipment` API,
+	 * and shows a success alert upon completion. If an error occurs during the update process,
+	 * displays an error alert with the relevant message.
+	 *
+	 * @param items - A single equipment item or an array of equipment items to be edited.
+	 * @returns A Promise that resolves when all updates are complete.
+	 */
+	async function editItemHandler(items: IAddEquipment | IAddEquipment[]): Promise<void> {
 		try {
 			setOpenEditDialog(false)
 			if (Array.isArray(items) && items.length >= 1) {
@@ -159,7 +137,16 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 		}
 	}
 
-	async function restoreItemHandler() {
+	/**
+	 * Handles the restoration of selected equipment items.
+	 *
+	 * Closes the restore dialog, then attempts to restore all selected equipment items in parallel.
+	 * On successful restoration, displays a success alert and triggers a data revalidation.
+	 * If an error occurs during the restoration process, displays an error alert with the relevant message.
+	 *
+	 * @returns {Promise<void>} A promise that resolves when the restoration process is complete.
+	 */
+	async function restoreItemHandler(): Promise<void> {
 		try {
 			setOpenRestoreDialog(false)
 			if (selectedItems.length >= 1) {
@@ -177,7 +164,18 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 		}
 	}
 
-	async function deleteItemHandler() {
+	/**
+	 * Handles the deletion of selected equipment items.
+	 *
+	 * Closes the delete confirmation dialog, then attempts to delete all selected equipment items
+	 * concurrently. If deletion is successful, displays a success alert and triggers a data revalidation.
+	 * If an error occurs during deletion, displays an error alert with the appropriate message.
+	 *
+	 * @async
+	 * @function
+	 * @returns {Promise<void>} A promise that resolves when the deletion process is complete.
+	 */
+	async function deleteItemHandler(): Promise<void> {
 		try {
 			setOpenDeleteDialog(false)
 			if (selectedItems.length >= 1) {
@@ -195,39 +193,83 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 		}
 	}
 
-	function handleClickAddOpen() {
+	/**
+	 * Opens the dialog for adding new equipment by setting the `openAddDialog` state to `true`.
+	 *
+	 * @remarks
+	 * This function is typically used as an event handler for UI elements (e.g., a button)
+	 * that trigger the display of the add equipment dialog.
+	 */
+	function handleClickAddOpen(): void {
 		setOpenAddDialog(true)
 	}
 
-	function handleClickEditOpen() {
+	/**
+	 * Opens the edit dialog by setting the `openEditDialog` state to `true`.
+	 * Typically used as an event handler for edit actions in the equipment table.
+	 */
+	function handleClickEditOpen(): void {
 		setOpenEditDialog(true)
 	}
 
-	function handleClickRestoreOpen() {
+	/**
+	 * Opens the restore dialog by setting the `openRestoreDialog` state to `true`.
+	 * Typically used as an event handler for restore actions in the equipment table.
+	 */
+	function handleClickRestoreOpen(): void {
 		setOpenRestoreDialog(true)
 	}
 
-	function handleClickDeleteOpen() {
+	/**
+	 * Opens the delete confirmation dialog by setting the `openDeleteDialog` state to `true`.
+	 *
+	 * This function is typically called when the user initiates a delete action,
+	 * such as clicking a delete button in the equipment table.
+	 */
+	function handleClickDeleteOpen(): void {
 		setOpenDeleteDialog(true)
 	}
 
-	function handleCloseDelete() {
+	/**
+	 * Closes the delete confirmation dialog by setting its open state to false.
+	 *
+	 * This function is typically called when the user cancels or completes a delete action,
+	 * ensuring the dialog is no longer visible.
+	 */
+	function handleCloseDelete(): void {
 		setOpenDeleteDialog(false)
 	}
 
-	function handleCloseAdd() {
+	/**
+	 * Closes the "Add Equipment" dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler for closing the add dialog,
+	 * such as when the user cancels or completes the add operation.
+	 */
+	function handleCloseAdd(): void {
 		setOpenAddDialog(false)
 	}
 
-	function handleCloseEdit() {
+	/**
+	 * Closes the edit dialog by setting the open state to false.
+	 *
+	 * This function is typically used as an event handler to close
+	 * the edit dialog in the equipment table component.
+	 */
+	function handleCloseEdit(): void {
 		setOpenEditDialog(false)
 	}
 
-	function handleCloseRestore() {
+	/**
+	 * Closes the restore dialog by setting its open state to false.
+	 *
+	 * This function is typically used as an event handler to close
+	 * the restore confirmation dialog in the equipment table component.
+	 */
+	function handleCloseRestore(): void {
 		setOpenRestoreDialog(false)
 	}
 
-	const paginationModel = { page: 0, pageSize: 15 }
 	return (
 		<Box sx={{ textAlign: 'center' }}>
 			<Box sx={{ textAlign: 'left' }}>
@@ -387,8 +429,56 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 				</Box>
 				<DataGrid
 					rows={equipment}
-					columns={columns}
-					initialState={{ pagination: { paginationModel } }}
+					columns={useMemo<GridColDef[]>(
+						() => [
+							{ field: 'id', headerName: 'ID', width: 50 },
+							{ field: 'serialNumber', headerName: 'Serial number', width: 200 },
+							{
+								field: 'vendor.name',
+								headerName: 'Vendor name',
+								width: 200,
+								valueGetter: (_, row) => `${row.vendor.name}`,
+							},
+							{
+								field: 'model.name',
+								headerName: 'Model name',
+								width: 200,
+								valueGetter: (_, row) => `${row.model.name}`,
+							},
+							{
+								field: 'type.name',
+								headerName: 'Type name',
+								width: 155,
+								valueGetter: (_, row) => `${row.type.name}`,
+							},
+							{
+								field: 'createdBy.username',
+								headerName: 'Created by',
+								width: 155,
+								valueGetter: (_, row) => `${row.createdBy.username}`,
+							},
+							{
+								field: 'updatedBy.username',
+								headerName: 'Updated by',
+								width: 155,
+								valueGetter: (_, row) => `${row.updatedBy.username}`,
+							},
+							{
+								field: 'createdAt',
+								headerName: 'Creation date',
+								width: 160,
+								valueGetter: (_, row) => `${row.createdAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
+							},
+							{
+								field: 'updatedAt',
+								headerName: 'Update date',
+								width: 160,
+								valueGetter: (_, row) => `${row.updatedAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
+							},
+						],
+						[]
+					)}
+					initialState={{ pagination: { paginationModel: { page: 0, pageSize: 15 } } }}
 					pageSizeOptions={[15, 30, 45]}
 					checkboxSelection={isWritable ? true : false}
 					disableRowSelectionOnClick={true}

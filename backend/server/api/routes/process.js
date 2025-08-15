@@ -18,6 +18,10 @@ import {
 } from '../../middleware/body-validation.js'
 import validateToken from '../../middleware/jwtValidation.js'
 
+/**
+ * Express router instance for handling process-related API routes.
+ * @type {import('express').Router}
+ */
 const router = express.Router()
 
 router.post('/process-types', validateToken, getProcessTypes)

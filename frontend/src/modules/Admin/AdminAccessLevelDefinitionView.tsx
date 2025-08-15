@@ -8,6 +8,15 @@ import LoadingCircle from '../../components/UI/LoadingCircle'
 import { store } from '../../store/store'
 import { data, useLoaderData, Await } from 'react-router'
 
+/**
+ * Renders the admin view for displaying access level definitions.
+ *
+ * This component fetches access level data using `useLoaderData`, determines the current screen size,
+ * and displays the `AdminAccessLevelDefinitionTable` within a responsive container.
+ * While the access levels are loading, a loading spinner (`LoadingCircle`) is shown.
+ *
+ * @returns {JSX.Element} The rendered admin access level definition view.
+ */
 export default function AdminAccessLevelDefinitionView() {
 	const { accessLevels } = useLoaderData() as { accessLevels: AccessLevelDefinitionClass[] }
 
@@ -25,7 +34,18 @@ export default function AdminAccessLevelDefinitionView() {
 	)
 }
 
-export async function loader() {
+/**
+ * Asynchronously loads access level definitions from the API and returns them.
+ *
+ * Dispatches an API call to fetch access level definitions and unwraps the result.
+ * If no data is found, throws a 404 error. In case of any error, dispatches an alert
+ * with the error message and rethrows the error.
+ *
+ * @returns {Promise<{ accessLevels: AccessLevelDefinitionClass[] }>}
+ *   A promise that resolves to an object containing an array of access level definitions.
+ * @throws Will throw an error if the data is not found or if the API call fails.
+ */
+export async function loader(): Promise<{ accessLevels: AccessLevelDefinitionClass[] }> {
 	try {
 		const promise = await store.dispatch(adminApi.endpoints.getAccessLevelDefinitions.initiate({})).unwrap()
 		if (!promise) {

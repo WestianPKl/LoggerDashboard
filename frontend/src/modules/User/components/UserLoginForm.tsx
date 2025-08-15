@@ -3,6 +3,20 @@ import { useNavigate } from 'react-router'
 import { Button, Box, TextField, useMediaQuery, useTheme } from '@mui/material'
 import type { ILoginFormProps } from '../scripts/UserInterface'
 
+/**
+ * Renders a user login form with username and password fields.
+ *
+ * @component
+ * @param {ILoginFormProps} props - The props for the UserLoginForm component.
+ * @param {(credentials: { username: string; password: string }) => void} props.logIn - Callback function to handle login with the provided credentials.
+ *
+ * @returns {JSX.Element} The rendered login form component.
+ *
+ * @remarks
+ * - Displays validation errors if username or password fields are empty.
+ * - Navigates to the password reset page when the "Reset password" button is clicked.
+ * - Responsive button sizing based on screen size.
+ */
 export default function UserLoginForm({ logIn }: ILoginFormProps) {
 	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
@@ -12,7 +26,16 @@ export default function UserLoginForm({ logIn }: ILoginFormProps) {
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	const onSubmitHandler = (e: React.FormEvent) => {
+	/**
+	 * Handles the form submission event for the user login form.
+	 *
+	 * Prevents the default form submission behavior, validates the username and password fields,
+	 * sets error messages if validation fails, and calls the `logIn` function with the provided
+	 * credentials if validation passes.
+	 *
+	 * @param e - The form submission event.
+	 */
+	function onSubmitHandler(e: React.FormEvent): void {
 		e.preventDefault()
 		const newErrors: { username?: string; password?: string } = {}
 		if (!username) newErrors.username = 'Username is required'
@@ -23,7 +46,13 @@ export default function UserLoginForm({ logIn }: ILoginFormProps) {
 		}
 	}
 
-	const passwordReset = () => {
+	/**
+	 * Navigates the user to the password reset page.
+	 *
+	 * This function redirects the user to the '/password-reset' route,
+	 * typically used when the user requests to reset their password.
+	 */
+	function passwordReset(): void {
 		navigate('/password-reset')
 	}
 

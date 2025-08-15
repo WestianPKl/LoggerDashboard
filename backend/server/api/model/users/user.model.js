@@ -1,6 +1,22 @@
 import { Sequelize } from 'sequelize'
 import sequelize from '../../../util/database.js'
 
+/**
+ * Sequelize model definition for the 'users' table.
+ *
+ * @typedef {Object} User
+ * @property {number} id - Primary key, auto-incremented user ID.
+ * @property {string} username - Unique username of the user.
+ * @property {string} email - Unique email address of the user.
+ * @property {string} password - Hashed password of the user.
+ * @property {Date} [createdAt] - Timestamp when the user was created.
+ * @property {Date} [updatedAt] - Timestamp when the user was last updated.
+ * @property {boolean} [confirmed=false] - Whether the user's email is confirmed.
+ * @property {string} [avatar] - URL or path to the user's avatar image.
+ * @property {string} [avatarBig] - URL or path to the user's large avatar image.
+ * @property {string} [resetPasswordToken] - Token for password reset functionality.
+ * @property {Date} [resetPasswordExpires] - Expiry date for the reset password token.
+ */
 const User = sequelize.define(
     'users',
     {

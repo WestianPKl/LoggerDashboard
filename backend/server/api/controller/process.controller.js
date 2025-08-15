@@ -19,6 +19,20 @@ import ProcessDefinition from '../model/process/processDefinition.model.js'
 
 const Op = Sequelize.Op
 
+/**
+ * Handles the retrieval of process types.
+ *
+ * @async
+ * @function getProcessTypes
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @returns {Promise<void>} Sends a JSON response with the retrieved process types or an error message.
+ *
+ * @description
+ * Checks if the user has permission to read process types. If permission is granted,
+ * decodes the query from the request body and retrieves matching process types from the database.
+ * Responds with the data if successful, or with an appropriate error message otherwise.
+ */
 export async function getProcessTypes(req, res) {
     try {
         const permissionGranded = await checkPermission(

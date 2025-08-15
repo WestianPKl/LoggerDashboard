@@ -1,3 +1,25 @@
+/**
+ * @file lcd_1602_i2c.hpp
+ * @brief Constants and function declarations for controlling a 1602 LCD display via I2C.
+ *
+ * This header defines command constants and function prototypes for interfacing with
+ * a 16x2 character LCD using the I2C protocol, typically with a PCF8574 I/O expander.
+ *
+ * Constants:
+ * - LCD command codes (e.g., LCD_CLEARDISPLAY, LCD_RETURNHOME)
+ * - LCD display control flags (e.g., LCD_DISPLAYON, LCD_CURSORON, LCD_BLINKON)
+ * - LCD function set flags (e.g., LCD_2LINE, LCD_8BITMODE, LCD_5x10DOTS)
+ * - LCD backlight and enable bit definitions
+ * - Default I2C address (addr)
+ * - LCD_CHARACTER and LCD_COMMAND for data/command mode
+ * - MAX_LINES and MAX_CHARS for display dimensions
+ *
+ * Functions:
+ * - lcd_clear(): Clear the LCD display and return cursor to home position.
+ * - lcd_set_cursor(int col, int row): Set the cursor to the specified column and row.
+ * - lcd_string(const char *str): Display a string on the LCD at the current cursor position.
+ * - lcd_init(): Initialize the LCD display and I2C interface.
+ */
 #ifndef __LCD_1602_I2C_HPP__
 #define __LCD_1602_I2C_HPP__
 

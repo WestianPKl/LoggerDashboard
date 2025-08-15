@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `adm_access_level_definition` (
   `name` varchar(45) NOT NULL COMMENT 'Access level definition name.',
   `access_level` int NOT NULL COMMENT 'Definition access level.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Access levels definition table.';
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Access levels definition table.';
 
 -- Data exporting was unselected.
 
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `adm_functionality_definition` (
   `name` varchar(45) NOT NULL COMMENT 'Functionality definition name.',
   `description` varchar(255) NOT NULL COMMENT 'Functionality definition description.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Functionality definition table.';
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Functionality definition table.';
 
 -- Data exporting was unselected.
 
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `adm_object_definition` (
   `name` varchar(45) NOT NULL COMMENT 'Object definition name.',
   `description` varchar(255) NOT NULL COMMENT 'Object definition description.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Object definition table.';
+) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Object definition table.';
 
 -- Data exporting was unselected.
 
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS `adm_permissions` (
   CONSTRAINT `fk_adm_permission_object_definition` FOREIGN KEY (`adm_object_definition_id`) REFERENCES `adm_object_definition` (`id`),
   CONSTRAINT `fk_adm_permission_role` FOREIGN KEY (`role_id`) REFERENCES `adm_roles` (`id`),
   CONSTRAINT `fk_adm_permisssion_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Permissions table.';
+) ENGINE=InnoDB AUTO_INCREMENT=126 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Permissions table.';
 
 -- Data exporting was unselected.
 
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `adm_roles` (
   KEY `fk_adm_role_editor_users_idx` (`updated_by_id`),
   CONSTRAINT `fk_adm_roles_creator_users` FOREIGN KEY (`created_by_id`) REFERENCES `users` (`id`),
   CONSTRAINT `fk_adm_roles_editor_users` FOREIGN KEY (`updated_by_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Role templates table.';
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Role templates table.';
 
 -- Data exporting was unselected.
 
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS `data_definitions` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data definitions table.';
+) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data definitions table.';
 
 -- Data exporting was unselected.
 
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS `data_last_value` (
   CONSTRAINT `fk_data_last_value_data_logs` FOREIGN KEY (`data_log_id`) REFERENCES `data_logs` (`id`),
   CONSTRAINT `fk_data_last_value_equ_logger` FOREIGN KEY (`equ_logger_id`) REFERENCES `equ_equipment` (`id`),
   CONSTRAINT `fk_data_last_value_equ_sensor` FOREIGN KEY (`equ_sensor_id`) REFERENCES `equ_equipment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=86018 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data last value table.';
+) ENGINE=InnoDB AUTO_INCREMENT=86111 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data last value table.';
 
 -- Data exporting was unselected.
 
@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS `data_logs` (
   CONSTRAINT `fk_data_logs_data_type` FOREIGN KEY (`data_definition_id`) REFERENCES `data_definitions` (`id`),
   CONSTRAINT `fk_data_logs_equ_equipment` FOREIGN KEY (`equ_logger_id`) REFERENCES `equ_equipment` (`id`),
   CONSTRAINT `fk_data_logs_equ_equipment_sensor` FOREIGN KEY (`equ_sensor_id`) REFERENCES `equ_equipment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=86133 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data logs table.';
+) ENGINE=InnoDB AUTO_INCREMENT=86222 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data logs table.';
 
 -- Data exporting was unselected.
 
@@ -222,7 +222,7 @@ CREATE TABLE IF NOT EXISTS `equ_equipment` (
   CONSTRAINT `fk_equ_equipment_equ_type` FOREIGN KEY (`equ_type_id`) REFERENCES `equ_type` (`id`),
   CONSTRAINT `fk_equ_equipment_equ_vendor` FOREIGN KEY (`equ_vendor_id`) REFERENCES `equ_vendor` (`id`),
   CONSTRAINT `fk_equ_equipment_updated_by` FOREIGN KEY (`updated_by_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=834 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment list table.';
+) ENGINE=InnoDB AUTO_INCREMENT=845 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment list table.';
 
 -- Data exporting was unselected.
 
@@ -231,7 +231,7 @@ CREATE TABLE IF NOT EXISTS `equ_model` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT 'Equipment model name.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=192 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment model table.';
+) ENGINE=InnoDB AUTO_INCREMENT=196 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment model table.';
 
 -- Data exporting was unselected.
 
@@ -252,7 +252,7 @@ CREATE TABLE IF NOT EXISTS `equ_type` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT 'Equipment type name.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=193 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment type table.';
+) ENGINE=InnoDB AUTO_INCREMENT=197 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment type table.';
 
 -- Data exporting was unselected.
 
@@ -261,7 +261,7 @@ CREATE TABLE IF NOT EXISTS `equ_vendor` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT 'Equipment vendor name.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=195 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment vendor table.';
+) ENGINE=InnoDB AUTO_INCREMENT=199 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment vendor table.';
 
 -- Data exporting was unselected.
 
@@ -284,7 +284,7 @@ CREATE TABLE IF NOT EXISTS `error_log` (
   PRIMARY KEY (`id`),
   KEY `fk_error_log_equ_equipment_idx` (`equipment_id`),
   CONSTRAINT `fk_error_log_equ_equipment` FOREIGN KEY (`equipment_id`) REFERENCES `equ_equipment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=280 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=331 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Data exporting was unselected.
 
@@ -303,7 +303,7 @@ CREATE TABLE IF NOT EXISTS `house_floors` (
   PRIMARY KEY (`id`),
   KEY `fk_house_floors_house_house_idx` (`house_id`),
   CONSTRAINT `fk_house_floors_house_house` FOREIGN KEY (`house_id`) REFERENCES `house_house` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=145 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House floors table.';
+) ENGINE=InnoDB AUTO_INCREMENT=150 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House floors table.';
 
 -- Data exporting was unselected.
 
@@ -326,7 +326,7 @@ CREATE TABLE IF NOT EXISTS `house_house` (
   KEY `fk_house_house_editor_users_idx` (`updated_by_id`),
   CONSTRAINT `fk_house_house_creator_users` FOREIGN KEY (`created_by_id`) REFERENCES `users` (`id`),
   CONSTRAINT `fk_house_house_editor_users` FOREIGN KEY (`updated_by_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=165 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House table';
+) ENGINE=InnoDB AUTO_INCREMENT=170 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House table';
 
 -- Data exporting was unselected.
 
@@ -343,7 +343,7 @@ CREATE TABLE IF NOT EXISTS `house_logger` (
   KEY `fk_house_logger_house_floors_idx` (`house_floor_id`),
   CONSTRAINT `fk_house_logger_equ_equipment` FOREIGN KEY (`equ_logger_id`) REFERENCES `equ_equipment` (`id`),
   CONSTRAINT `fk_house_logger_house_floors` FOREIGN KEY (`house_floor_id`) REFERENCES `house_floors` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=156 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House loggers table.';
+) ENGINE=InnoDB AUTO_INCREMENT=160 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House loggers table.';
 
 -- Data exporting was unselected.
 
@@ -361,7 +361,7 @@ CREATE TABLE IF NOT EXISTS `process_definition` (
   KEY `fk_process_definition_editor_users_idx` (`updated_by_id`),
   CONSTRAINT `fk_process_definition_creator_users` FOREIGN KEY (`created_by_id`) REFERENCES `users` (`id`),
   CONSTRAINT `fk_process_definition_editor_users` FOREIGN KEY (`updated_by_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Process definition table.';
+) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Process definition table.';
 
 -- Data exporting was unselected.
 
@@ -370,7 +370,7 @@ CREATE TABLE IF NOT EXISTS `process_type` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT 'Process type name.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=111 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Process type table.';
+) ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Process type table.';
 
 -- Data exporting was unselected.
 
@@ -401,7 +401,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `username_UNIQUE` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=153 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Users list table.';
+) ENGINE=InnoDB AUTO_INCREMENT=157 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Users list table.';
 
 -- Data exporting was unselected.
 
