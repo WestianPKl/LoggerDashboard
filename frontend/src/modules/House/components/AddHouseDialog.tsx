@@ -37,11 +37,11 @@ export default function AddHouseDialog({
 	handleCloseAdd,
 	addItemHandler,
 }: IAddHouseProps) {
-	const [name, setName] = useState('')
-	const [postalCode, setPostalCode] = useState('')
-	const [city, setCity] = useState('')
-	const [street, setStreet] = useState('')
-	const [houseNumber, setHouseNumber] = useState('')
+	const [name, setName] = useState<string>('')
+	const [postalCode, setPostalCode] = useState<string | undefined>(undefined)
+	const [city, setCity] = useState<string | undefined>(undefined)
+	const [street, setStreet] = useState<string | undefined>(undefined)
+	const [houseNumber, setHouseNumber] = useState<string | undefined>(undefined)
 	const [enteredImg, setEnteredImg] = useState<File | string | undefined>(undefined)
 	const [previewImg, setPreviewImg] = useState<string | undefined>(undefined)
 	const [multiple, setMultiple] = useState(false)
@@ -56,29 +56,29 @@ export default function AddHouseDialog({
 			if (selectedItems?.length === 1) {
 				const item = selectedItems[0]
 				setName(item.name || '')
-				setPostalCode(item.postalCode || '')
-				setCity(item.city || '')
-				setStreet(item.street || '')
-				setHouseNumber(item.houseNumber || '')
+				setPostalCode(item.postalCode)
+				setCity(item.city)
+				setStreet(item.street)
+				setHouseNumber(item.houseNumber)
 				setItemId(item.id)
 				setEnteredImg(item.pictureLink)
 				setMultiple(false)
 			} else {
 				setName('')
-				setPostalCode('')
-				setCity('')
-				setStreet('')
-				setHouseNumber('')
+				setPostalCode(undefined)
+				setCity(undefined)
+				setStreet(undefined)
+				setHouseNumber(undefined)
 				setItemId(undefined)
 				setEnteredImg(undefined)
 				setMultiple(true)
 			}
 		} else {
 			setName('')
-			setPostalCode('')
-			setCity('')
-			setStreet('')
-			setHouseNumber('')
+			setPostalCode(undefined)
+			setCity(undefined)
+			setStreet(undefined)
+			setHouseNumber(undefined)
 			setItemId(undefined)
 			setEnteredImg(undefined)
 			setMultiple(false)
@@ -195,6 +195,7 @@ export default function AddHouseDialog({
 							onChange={e => setName(e.target.value)}
 							disabled={multiple}
 							value={name}
+							required
 						/>
 						<TextField
 							sx={{ mt: 1, width: isMobile ? 200 : 400 }}
@@ -255,7 +256,11 @@ export default function AddHouseDialog({
 					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={closeDialog}>
 						Cancel
 					</Button>
-					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} type='submit'>
+					<Button
+						variant='outlined'
+						size={isMobile ? 'small' : 'medium'}
+						type='submit'
+						disabled={!name.trim() || (edit && multiple)}>
 						{edit ? 'Save' : 'Add'}
 					</Button>
 				</DialogActions>

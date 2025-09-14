@@ -49,8 +49,12 @@ Configure other settings in main.py file (Logger/Sensor ID, select which paramet
 
 ## 6. C/C++ logger configuration (logger and sensor must be added to database -> ID required)
 
-Configure settings in main.hpp file (Logger/Sensor ID, select which parameter will be measured , set URL for TOKEN, DATA and ERROR, set server IP and port. Set flags for sensors - SHT or BME, RTC clocks - internal or external PCF8563T and if synchronization with NTP server is needed).
-Configure WiFi settings in program_main.cpp (SSID/PASSWORD)
+If device is not flashed:
+Configure settings in main.hpp file (Logger/Sensor ID, select which parameter will be measured , set URL for TOKEN, DATA and ERROR, set server IP and port. Set flags for sensors - SHT or BME, RTC clocks - internal or external PCF8563T and if synchronization with NTP server is needed). Set WIFI credentials (SSID/PASSWORD).
+
+if device is flashed:
+Connect to PC via USB and configure device with use of python software.
+Python software is located in logger/Tools folder - prepare python venv, activate it and install pyserial module.
 
 ## 7. API documentation
 

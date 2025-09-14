@@ -1,73 +1,137 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/timer.h"
+#include "hardware/watchdog.h"
 #include "program_main.hpp"
 #include "pico/cyw43_arch.h"
+#include "tusb.h"
+#include <cstring>
+#include <cctype>
 extern "C" {
     #include "lwip/timeouts.h"
 }
-
-#define RELAY_1   12
-#define RELAY_2   13
-#define RELAY_3   14
-#define RELAY_4   15
+#include "config.hpp"
+#include "com.hpp"
 
 volatile bool update_screen_flag = false;
 volatile bool post_flag = false;
+volatile bool wifi_reconnect_flag = false;
+volatile bool wifi_apply_flag = false;
+volatile bool device_reset_flag = false;
 
 bool screen_update_callback(repeating_timer_t *);
 bool post_request_callback(repeating_timer_t *);
+static void rearm_post_timer();
+
+static repeating_timer_t screen_timer;
+static repeating_timer_t post_timer;
+
 
 /**
- * @brief Entry point of the Pico_TH_Logger_Relay_SMD_PCF8563T application.
+ * @brief Application entry point for the Pico TH Logger (Relay SMD, PCF8563T variant).
  *
- * This function initializes the standard IO, equipment, and WiFi connection.
- * If WiFi initialization fails, it enters an error state indicated by a blinking red RGB LED.
- * Upon successful initialization, it sets up two repeating timers:
- *   - One for updating the screen every second.
- *   - One for sending POST requests every 10 minutes.
+ * Initializes standard I/O, configuration, hardware, and Wi‑Fi, then enters a
+ * cooperative, single-threaded event loop that services communications, timers,
+ * Wi‑Fi polling, UI updates, and data posting.
  *
- * The function then initializes four relay GPIOs and enters the main loop, which:
- *   - Handles system timeouts and WiFi polling.
- *   - Updates the display and sends data when corresponding flags are set.
- *   - Cycles through activating each relay in sequence, with a 300 ms delay between each.
+ * Startup sequence:
+ * - Initializes stdio and waits briefly to allow USB CDC to enumerate.
+ * - Loads configuration.
+ * - Initializes measurement/control equipment.
+ * - Initializes Wi‑Fi stack and connection (according to configuration).
+ * - Arms a 1 Hz repeating timer to trigger screen updates.
+ * - Arms/refreshes the data posting timer according to the current configuration.
  *
- * The main loop runs indefinitely.
+ * Main loop responsibilities:
+ * - com_poll(): Services the command/communications interface (e.g., USB CDC).
+ * - Handles device_reset_flag:
+ *   - Clears the flag, flushes CDC, and reboots cleanly via the watchdog.
+ *   - Provides a busy-wait fallback if reboot does not occur immediately.
+ * - Handles wifi_apply_flag:
+ *   - Re-initializes Wi‑Fi with current configuration.
+ * - Wi‑Fi service:
+ *   - If Wi‑Fi is enabled, calls cyw43_arch_poll() to maintain the driver stack.
+ * - Handles wifi_reconnect_flag:
+ *   - If Wi‑Fi is enabled in config, re-enables and attempts reconnection.
+ *   - If disabled in config, turns Wi‑Fi off and emits "WIFI_DISABLED" over CDC.
+ * - Periodic configuration check (every 1000 ms):
+ *   - Detects changes to post_time_ms and re-arms the posting timer when needed.
+ * - Handles update_screen_flag:
+ *   - Refreshes the display with the latest measurements.
+ * - Handles post_flag:
+ *   - Sends collected data to the configured endpoint.
  *
- * @return int Exit status (never returns under normal operation).
+ * Timers and flags:
+ * - screen_timer: 1-second repeating timer that schedules UI updates
+ *   (sets update_screen_flag via screen_update_callback).
+ * - post timer: Armed via rearm_post_timer() based on config.post_time_ms
+ *   (sets post_flag to trigger data posting).
+ * - Flags (set by ISRs, callbacks, or command handlers) drive all actions to
+ *   keep the loop non-blocking and responsive.
+ *
+ * Notes:
+ * - Designed for cooperative multitasking on RP2040; no RTOS is required.
+ * - Avoids blocking operations in the main loop; long operations are gated by flags.
+ * - Uses watchdog_reboot() for clean resets; CDC is given a brief flush window.
+ * - cyw43_arch_poll() is only invoked when Wi‑Fi is enabled to minimize overhead.
+ *
+ * @return int Never returns; the function runs indefinitely. Return value is nominally 0.
  */
 int main() {
-    repeating_timer_t screen_timer;
-    repeating_timer_t post_timer;
     stdio_init_all();
     sleep_ms(2000);
+
+    config_init();
+
     ProgramMain program_main;
     program_main.init_equipment();
-    if (program_main.init_wifi() != WIFI_OK) {
-        while (true) {
-            program_main.set_rgb_color(255, 0, 0);
-            sleep_ms(500);
-            program_main.set_rgb_color(0, 0, 0);
-            sleep_ms(500);
-        }
-    }
+    program_main.init_wifi();
     add_repeating_timer_ms(1000, screen_update_callback, NULL, &screen_timer);
-    add_repeating_timer_ms(600000, post_request_callback, NULL, &post_timer);
-
-    gpio_init(RELAY_1);
-    gpio_init(RELAY_2);
-    gpio_init(RELAY_3);
-    gpio_init(RELAY_4);
-
-    gpio_set_dir(RELAY_1, GPIO_OUT);
-    gpio_set_dir(RELAY_2, GPIO_OUT);
-    gpio_set_dir(RELAY_3, GPIO_OUT);
-    gpio_set_dir(RELAY_4, GPIO_OUT);
-
+    rearm_post_timer();
 
     while (true) {
-        sys_check_timeouts();
-        cyw43_arch_poll();
+        com_poll();
+        if (device_reset_flag) {
+            device_reset_flag = false;
+            // Give CDC a brief moment to flush before reboot
+            sleep_ms(50);
+            // Reboot via watchdog (keeps core clean)
+            watchdog_reboot(0, 0, 0);
+            // Fallback: busy-wait
+            while (1) { tight_loop_contents(); }
+        }
+
+        if (wifi_apply_flag) {
+            wifi_apply_flag = false;
+            program_main.init_wifi();
+        }
+        if (program_main.is_wifi_enabled()) {
+            cyw43_arch_poll();
+        }
+
+        if (wifi_reconnect_flag) {
+            wifi_reconnect_flag = false;
+            const auto &cfg_now = config_get();
+            if (cfg_now.wifi_enabled) {
+                program_main.set_wifi_enabled(true);
+                (void)program_main.reconnect_wifi();
+            } else {
+                program_main.set_wifi_enabled(false);
+                tud_cdc_write_str("WIFI_DISABLED\n");
+                tud_cdc_write_flush();
+            }
+        }
+
+    static absolute_time_t next_check = {0};
+    if (absolute_time_diff_us(get_absolute_time(), next_check) >= 0) {
+            static uint32_t last_post_time = 0;
+            auto &cfgc = config_get();
+            if (cfgc.post_time_ms != last_post_time) {
+                last_post_time = cfgc.post_time_ms;
+                rearm_post_timer();
+            }
+            next_check = make_timeout_time_ms(1000);
+        }
         if (update_screen_flag) {
             update_screen_flag = false;
             program_main.display_measurement();
@@ -76,28 +140,39 @@ int main() {
             post_flag = false;
             program_main.send_data();
         }
-        sleep_ms(10);
-        sleep_ms(300);
-        gpio_put(RELAY_1, 1);
-        gpio_put(RELAY_2, 0);
-        gpio_put(RELAY_3, 0);
-        gpio_put(RELAY_4, 0);
-        sleep_ms(300);
-        gpio_put(RELAY_1, 0);
-        gpio_put(RELAY_2, 1);
-        gpio_put(RELAY_3, 0);
-        gpio_put(RELAY_4, 0);
-        sleep_ms(300);
-        gpio_put(RELAY_1, 0);
-        gpio_put(RELAY_2, 0);
-        gpio_put(RELAY_3, 1);
-        gpio_put(RELAY_4, 0);
-        sleep_ms(300);
-        gpio_put(RELAY_1, 0);
-        gpio_put(RELAY_2, 0);
-        gpio_put(RELAY_3, 0);
-        gpio_put(RELAY_4, 1);
     }
+}
+
+
+/**
+ * @brief Cancels and re-arms the repeating POST timer based on the current configuration.
+ *
+ * This function:
+ * - Cancels any existing repeating timer stored in post_timer.
+ * - Reads the desired interval from config_get()->post_time_ms.
+ * - Enforces a minimum interval of 1000 ms to prevent excessively frequent callbacks.
+ * - Schedules a new repeating timer that invokes post_request_callback at the configured interval.
+ *
+ * Use this after startup or whenever the posting interval in the configuration changes.
+ *
+ * Side effects:
+ * - Updates the global post_timer handle.
+ *
+ * Notes:
+ * - If the configured period is below 1000 ms, 1000 ms is used instead.
+ * - The result of add_repeating_timer_ms is not checked; scheduling failures will be silent.
+ *
+ * @see config_get
+ * @see cancel_repeating_timer
+ * @see add_repeating_timer_ms
+ * @see post_request_callback
+ */
+static void rearm_post_timer() {
+    cancel_repeating_timer(&post_timer);
+    const auto &cfg = config_get();
+    int64_t period = (int64_t)cfg.post_time_ms;
+    if (period < 1000) period = 1000;
+    add_repeating_timer_ms(period, post_request_callback, NULL, &post_timer);
 }
 
 

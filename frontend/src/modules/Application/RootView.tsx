@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Outlet, redirect, useLoaderData, useSubmit } from 'react-router'
 import AppBarView from './AppBarView'
 import Wrapper from '../../components/UI/Wrapper'
@@ -21,35 +21,33 @@ import { fetchAccessLevels, fetchPermission } from '../../store/auth-actions'
  * @returns {JSX.Element} The root section of the application, including the app bar and nested routes.
  */
 export default function RootView() {
-	const { userId, token, permissionToken } = useLoaderData()
+	const { token } = useLoaderData()
 	const submit = useSubmit()
 	const dispatch = useAppDispatch()
-	const logoffTimeout = useRef<number | null>(null)
 
 	useEffect(() => {
-		let mounted = true
-		if (token && permissionToken) {
+		if (!token) {
+			return
+		}
+		let timeoutId: number | undefined
+		if (token) {
 			const duration = dispatch(getAuthTokenDuration())
-			if (userId && token && permissionToken && typeof duration === 'number' && duration > 0 && mounted) {
-				logoffTimeout.current = setTimeout(() => {
-					return submit(null, { action: '/login', method: 'POST' })
+			if (typeof duration === 'number' && duration < 0) {
+				submit(null, { action: '/logout', method: 'POST' })
+			} else if (typeof duration === 'number' && duration > 0) {
+				timeoutId = window.setTimeout(() => {
+					submit(null, { action: '/logout', method: 'POST' })
+					window.location.reload()
 				}, duration)
 			}
-			return () => {
-				mounted = false
-				if (logoffTimeout.current) {
-					clearTimeout(logoffTimeout.current)
-				}
-			}
-		} else {
-			return () => {
-				mounted = false
-				if (logoffTimeout.current) {
-					clearTimeout(logoffTimeout.current)
-				}
+		}
+		return () => {
+			if (timeoutId !== undefined) {
+				clearTimeout(timeoutId)
 			}
 		}
-	}, [dispatch])
+	}, [token, dispatch, submit])
+
 	return (
 		<Box component={'section'}>
 			<AppBarView />
@@ -71,9 +69,7 @@ export default function RootView() {
  *   - `permissionToken`: The permission token (string or null).
  */
 export async function loader(): Promise<{
-	userId: number | undefined
 	token: string | null
-	permissionToken: string | null
 }> {
 	const userId = store.dispatch(initStore())
 	if (typeof userId === 'number' && localStorage.getItem('token') && localStorage.getItem('permissionToken')) {
@@ -84,9 +80,7 @@ export async function loader(): Promise<{
 		])
 	}
 	return {
-		userId,
 		token: localStorage.getItem('token'),
-		permissionToken: localStorage.getItem('permissionToken'),
 	}
 }
 

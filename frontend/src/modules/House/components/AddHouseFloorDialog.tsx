@@ -179,6 +179,7 @@ export default function AddHouseFloorDialog({
 							onChange={e => setName(e.target.value)}
 							disabled={multiple}
 							value={name}
+							required
 						/>
 						<HouseSelect getItem={setHouse} item={house} disabled={isDashboard || multiple} />
 						<input
@@ -207,7 +208,11 @@ export default function AddHouseFloorDialog({
 					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={closeDialog}>
 						Cancel
 					</Button>
-					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} type='submit'>
+					<Button
+						variant='outlined'
+						size={isMobile ? 'small' : 'medium'}
+						type='submit'
+						disabled={!name.trim() || !house || (edit && multiple)}>
 						{edit ? 'Save' : 'Add'}
 					</Button>
 				</DialogActions>

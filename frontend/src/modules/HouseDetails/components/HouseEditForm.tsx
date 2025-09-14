@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button, Box, TextField, useMediaQuery, useTheme } from '@mui/material'
-import type { IHouseEditFormProps } from './../scripts/IHouseDetails'
+import type { IHouseEditFormProps } from '../scripts/IHouseDetails'
 import type { IAddHouseFloorData } from '../../House/scripts/IHouse'
 import classes from '../../House/components/AddHouseDialog.module.css'
 import AddHouseFloorDialog from '../../House/components/AddHouseFloorDialog'
@@ -24,7 +24,7 @@ import AddHouseFloorDialog from '../../House/components/AddHouseFloorDialog'
  * />
  */
 export default function HouseEditForm({ house, addHouseFloorHandler, editHouseHandler }: IHouseEditFormProps) {
-	const [name, setName] = useState<string | undefined>('')
+	const [name, setName] = useState<string>('')
 	const [postalCode, setPostalCode] = useState<string | undefined>('')
 	const [city, setCity] = useState<string | undefined>('')
 	const [street, setStreet] = useState<string | undefined>('')
@@ -58,7 +58,7 @@ export default function HouseEditForm({ house, addHouseFloorHandler, editHouseHa
 	}
 
 	useEffect(() => {
-		setName(house.name)
+		setName(house.name || '')
 		setPostalCode(house.postalCode)
 		setCity(house.city)
 		setStreet(house.street)
@@ -206,6 +206,7 @@ export default function HouseEditForm({ house, addHouseFloorHandler, editHouseHa
 						label='Name'
 						onChange={onNameChangeHandler}
 						value={name}
+						required
 					/>
 					<TextField
 						sx={{ mt: '1rem', width: isMobile ? 200 : 400 }}
@@ -271,7 +272,13 @@ export default function HouseEditForm({ house, addHouseFloorHandler, editHouseHa
 					/>
 				</Box>
 				<Box>
-					<Button sx={{ m: 2 }} variant='contained' color='primary' size={isMobile ? 'small' : 'medium'} type='submit'>
+					<Button
+						sx={{ m: 2 }}
+						variant='contained'
+						color='primary'
+						size={isMobile ? 'small' : 'medium'}
+						type='submit'
+						disabled={!name.trim()}>
 						Save Changes
 					</Button>
 					<Button

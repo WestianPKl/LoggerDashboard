@@ -46,9 +46,9 @@ export interface EquipmentInput {
 
 /**
  * Represents an equipment entity with its associated properties and relationships.
- * 
+ *
  * @implements {EquipmentInput}
- * 
+ *
  * @property {number | undefined} id - Unique identifier for the equipment.
  * @property {string | undefined} serialNumber - Serial number of the equipment.
  * @property {number | undefined} equVendorId - Identifier for the equipment vendor.
@@ -65,7 +65,7 @@ export interface EquipmentInput {
  * @property {DataLastValueClass | undefined} lastValue - Last recorded value for the equipment.
  * @property {UserClass | undefined} createdBy - User who created the equipment record.
  * @property {UserClass | undefined} updatedBy - User who last updated the equipment record.
- * 
+ *
  * @constructor
  * @param {EquipmentInput} [model={}] - Optional initial values to populate the equipment instance.
  */

@@ -202,6 +202,7 @@ export default function AddEquipmentDialog({
 							onChange={onSerialNumberChangeHandler}
 							disabled={multiple}
 							value={serialNumber}
+							required
 						/>
 						<EquipmentVendorSelect getItem={onVendorChangeHandler} item={vendor} />
 						<EquipmentModelSelect getItem={onModelChangeHandler} item={model} />
@@ -215,7 +216,11 @@ export default function AddEquipmentDialog({
 					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={closeDialog}>
 						Cancel
 					</Button>
-					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} type='submit'>
+					<Button
+						variant='outlined'
+						size={isMobile ? 'small' : 'medium'}
+						type='submit'
+						disabled={!serialNumber.trim() || !vendor || !model || !type || (edit && multiple)}>
 						{edit ? 'Save' : 'Add'}
 					</Button>
 				</DialogActions>

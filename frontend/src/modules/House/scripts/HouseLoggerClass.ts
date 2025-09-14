@@ -24,9 +24,9 @@ export interface HouseLoggerInput {
 
 /**
  * Represents a logger device associated with a house floor.
- * 
+ *
  * @implements {HouseLoggerInput}
- * 
+ *
  * @property {number | undefined} id - Unique identifier for the house logger.
  * @property {number | undefined} equLoggerId - Identifier for the associated equipment logger.
  * @property {number | undefined} houseFloorId - Identifier for the house floor where the logger is located.
@@ -34,7 +34,7 @@ export interface HouseLoggerInput {
  * @property {number | undefined} posY - Y coordinate position of the logger on the floor.
  * @property {EquipmentClass | undefined} logger - The equipment logger instance.
  * @property {HouseFloorClass | undefined} floor - The house floor instance.
- * 
+ *
  * @constructor
  * Creates a new instance of HouseLoggerClass.
  * @param {HouseLoggerInput} [model={}] - Optional initial values to populate the logger instance.

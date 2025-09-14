@@ -11,13 +11,13 @@ export interface EquipmentVendorInput {
 
 /**
  * Represents a vendor of equipment, implementing the {@link EquipmentVendorInput} interface.
- * 
+ *
  * @remarks
  * This class is used to encapsulate the properties and initialization logic for an equipment vendor.
- * 
+ *
  * @property id - The unique identifier of the equipment vendor.
  * @property name - The name of the equipment vendor.
- * 
+ *
  * @constructor
  * Creates a new instance of `EquipmentVendorClass`.
  * @param model - An optional object conforming to `EquipmentVendorInput` to initialize the instance properties.

@@ -35,8 +35,8 @@ export default function AdminAddFunctionalityDefinitionDialog({
 	handleCloseAdd,
 	addItemHandler,
 }: IAddFunctionalityDefinitionProps) {
-	const [name, setName] = useState<string | undefined>('')
-	const [description, setDescription] = useState<string | undefined>('')
+	const [name, setName] = useState<string>('')
+	const [description, setDescription] = useState<string | undefined>(undefined)
 	const [multiple, setMultiple] = useState<boolean>(false)
 	const [itemId, setItemId] = useState<number | undefined>(undefined)
 
@@ -46,17 +46,22 @@ export default function AdminAddFunctionalityDefinitionDialog({
 	useEffect(() => {
 		if (edit) {
 			if (selectedItems?.length == 1) {
-				setName(selectedItems[0].name)
+				setName(selectedItems[0].name || '')
 				setDescription(selectedItems[0].description)
 				setItemId(selectedItems[0].id)
 				setMultiple(false)
 				return
 			} else {
 				setName('')
-				setDescription('')
+				setDescription(undefined)
 				setMultiple(true)
 				return
 			}
+		} else {
+			setName('')
+			setDescription(undefined)
+			setMultiple(true)
+			return
 		}
 	}, [setMultiple, setName, setDescription, openAddDialog, selectedItems, edit])
 
@@ -100,7 +105,7 @@ export default function AdminAddFunctionalityDefinitionDialog({
 				description: description,
 			})
 		} else if (edit && multiple) {
-			let items: IAddFunctionalityDefinitionData[] = []
+			const items: IAddFunctionalityDefinitionData[] = []
 			selectedItems?.forEach(e => {
 				if (e) {
 					items.push({
@@ -150,6 +155,7 @@ export default function AdminAddFunctionalityDefinitionDialog({
 							onChange={onNameChangeHandler}
 							disabled={multiple}
 							value={name}
+							required
 						/>
 						<TextField
 							sx={{ mt: '1rem', width: isMobile ? 200 : 400 }}
@@ -165,7 +171,11 @@ export default function AdminAddFunctionalityDefinitionDialog({
 					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={closeDialog}>
 						Cancel
 					</Button>
-					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} type='submit'>
+					<Button
+						variant='outlined'
+						size={isMobile ? 'small' : 'medium'}
+						type='submit'
+						disabled={!name.trim() || (edit && multiple)}>
 						{edit ? 'Save' : 'Add'}
 					</Button>
 				</DialogActions>

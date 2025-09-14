@@ -47,7 +47,7 @@ export interface DataLogInput {
  * @constructor
  * Creates a new instance of DataLogClass.
  * Initializes properties from the provided model and instantiates related classes if present.
- * 
+ *
  * @param {DataLogInput} [model={}] - The input model to initialize the data log entry.
  */
 export class DataLogClass implements DataLogInput {

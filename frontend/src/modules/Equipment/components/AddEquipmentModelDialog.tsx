@@ -117,6 +117,7 @@ export default function AddEquipmentModelDialog({
 							onChange={onNameChangeHandler}
 							disabled={multiple}
 							value={name}
+							required
 						/>
 					</Box>
 				</DialogContent>
@@ -124,7 +125,11 @@ export default function AddEquipmentModelDialog({
 					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={closeDialog}>
 						Cancel
 					</Button>
-					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} type='submit'>
+					<Button
+						variant='outlined'
+						size={isMobile ? 'small' : 'medium'}
+						type='submit'
+						disabled={!name.trim() || (edit && multiple)}>
 						{edit ? 'Save' : 'Add'}
 					</Button>
 				</DialogActions>

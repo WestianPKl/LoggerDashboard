@@ -29,9 +29,9 @@ export interface PermissionInput {
 
 /**
  * Represents a permission entity with related definitions for functionality, object, and access level.
- * 
+ *
  * @implements {PermissionInput}
- * 
+ *
  * @property {number | undefined} id - The unique identifier of the permission.
  * @property {number | undefined} userId - The identifier of the user associated with the permission.
  * @property {number | undefined} roleId - The identifier of the role associated with the permission.
@@ -41,10 +41,10 @@ export interface PermissionInput {
  * @property {FunctionalityDefinitionClass | undefined} functionalityDefinition - The functionality definition object.
  * @property {ObjectDefinitionClass | undefined} objectDefinition - The object definition object.
  * @property {AccessLevelDefinitionClass | undefined} accessLevelDefinition - The access level definition object.
- * 
+ *
  * @constructor
  * @param {PermissionInput} [model={}] - Optional initial values to populate the permission instance.
- * 
+ *
  * @remarks
  * If the provided model contains nested definition objects, they will be instantiated as their respective classes.
  */

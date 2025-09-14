@@ -12,10 +12,11 @@ extern "C" {
 #include "lcd_1602_i2c.hpp"
 #include "rtc_clock.hpp"
 #include "main.hpp"
+#include "config.hpp"
 
-#define LED_BLUE    6
-#define LED_GREEN   8
-#define LED_RED     7
+#define LED_BLUE    18
+#define LED_GREEN   20
+#define LED_RED     19
 #define BUZZER      11
 
 using namespace std;
@@ -108,16 +109,12 @@ bool ProgramMain::synchronize_time() {
             sleep_ms(100);
         }
     } else {
-        printf("❌ DNS error: %d\n", err);
         return false;
     }
 
     if (!dns_resolved) {
-        printf("❌ DNS timeout\n");
         return false;
     }
-
-    printf("🌐 NTP resolved to: %s\n", ipaddr_ntoa(&resolved_ip));
 
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
     sntp_setserver(0, &resolved_ip);
@@ -126,14 +123,11 @@ bool ProgramMain::synchronize_time() {
     for (int i = 0; i < 30; ++i) {
         cyw43_arch_poll();
         if (time_synced) {
-            printf("✅ SNTP time confirmed via callback\n");
             sntp_stop();
             return true;
         }
         sleep_ms(300);
     }
-
-    printf("❌ SNTP timeout\n");
     return false;
 }
 
@@ -185,12 +179,11 @@ void ProgramMain::init_equipment() {
     myBME280 = new BME280(BME280::MODE::MODE_FORCED);
     myTCP = new TCP();
 
-    if (CLOCK == 1){
+    if (config_get().clock_enabled == 1){
         pcf8563t_init(I2C_PORT);
     }
 
     set_rgb_color(0, 255, 0);
-    printf("✅ Equipment initialized correctly\n");
 }
 
 /**
@@ -207,28 +200,59 @@ void ProgramMain::init_equipment() {
  *         - WIFI_CONN_FAIL if Wi-Fi connection fails
  */
 uint8_t ProgramMain::init_wifi() {
-    const char *SSID = "TP-Link_0A7B";
-    const char *PASSWORD = "12345678";
+    set_wifi_enabled(config_get().wifi_enabled);
+    if (!is_wifi_enabled()) {
+        return WIFI_OK;
+    }
+    const auto &cfg = config_get();
+    const char *SSID = cfg.wifi_ssid[0] ? cfg.wifi_ssid : "";
+    const char *PASSWORD = cfg.wifi_password[0] ? cfg.wifi_password : "";
 
     set_rgb_color(255, 255, 255);
     if (cyw43_arch_init()) {
-        printf("❌ Wi-Fi init failed\n");
         lcd_set_cursor(0, 0);
-        lcd_string("❌ WiFi init error\n");
+        lcd_string("WiFi init error \n");
         set_rgb_color(255, 0, 0);
+        set_wifi_enabled(false);
         return WIFI_INIT_FAIL;
     }
 
     cyw43_arch_enable_sta_mode();
     if (cyw43_arch_wifi_connect_timeout_ms(SSID, PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) {
         lcd_set_cursor(0, 0);
-        lcd_string("❌ WiFi conn error\n");
+        lcd_string("WiFi conn error \n");
         set_rgb_color(255, 0, 0);
+        set_wifi_enabled(false);
         return WIFI_CONN_FAIL;
     }
 
     set_rgb_color(0, 255, 0);
-    printf("✅ WiFi conn OK\n");
+    synchronize_time();
+    return WIFI_OK;
+}
+
+uint8_t ProgramMain::reconnect_wifi() {
+    set_wifi_enabled(config_get().wifi_enabled);
+    if (!is_wifi_enabled()) {
+        return WIFI_OK;
+    }
+    const auto &cfg = config_get();
+    const char *SSID = cfg.wifi_ssid[0] ? cfg.wifi_ssid : "";
+    const char *PASSWORD = cfg.wifi_password[0] ? cfg.wifi_password : "";
+
+    set_rgb_color(255, 255, 255);
+    cyw43_arch_deinit();
+    sleep_ms(100);
+    if (cyw43_arch_init()) {
+        set_rgb_color(255, 0, 0);
+        return WIFI_INIT_FAIL;
+    }
+    cyw43_arch_enable_sta_mode();
+    if (cyw43_arch_wifi_connect_timeout_ms(SSID, PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) {
+        set_rgb_color(255, 0, 0);
+        return WIFI_CONN_FAIL;
+    }
+    set_rgb_color(0, 255, 0);
     synchronize_time();
     return WIFI_OK;
 }
@@ -277,13 +301,14 @@ void ProgramMain::display_measurement() {
     static uint8_t option = 0;
     bool time_ok = false;
     uint16_t time[7];
-    if (CLOCK == 1) {
+    if (config_get().clock_enabled == 1) {
         time_ok = pcf8563t_read_time(I2C_PORT, time);
     }
 
     if (!time_ok) {
-        printf("❌ Time could not be readed.\n");
-        TCP().send_error_log("Time could not be readed.", CLOCK ? "PCF8563" : "RTC");
+        if (is_wifi_enabled()) {
+            TCP().send_error_log("Time could not be readed.", config_get().clock_enabled ? "PCF8563" : "RTC");
+        }
         return;
     }
 
@@ -291,8 +316,9 @@ void ProgramMain::display_measurement() {
 
     if (values.temperature < -100 || values.temperature > 100 ||
         values.humidity < 0 || values.humidity > 100) {
-        printf("❌ Measurement out of range\n");
-        myTCP->send_error_log("Sensor error", "Values out of range");
+        if (is_wifi_enabled()) {
+            myTCP->send_error_log("Sensor error", "Values out of range");
+        }
         return;
     }
 
@@ -323,7 +349,7 @@ void ProgramMain::display_measurement() {
 	if(option > 6){
 		option = 0;
 	}
-    printf("✅ Data OK\n");
+
 }
 
 /**
@@ -343,14 +369,16 @@ void ProgramMain::display_measurement() {
  * Error conditions at each step are logged using the TCP error logging mechanism.
  */
 void ProgramMain::send_data() {
+    if (!is_wifi_enabled()) {
+        return;
+    }
     bool time_ok = false;
     uint16_t time[7];
-    if (CLOCK == 1) {
+    if (config_get().clock_enabled == 1) {
         time_ok = pcf8563t_read_time(I2C_PORT, time);
     }
     if (!time_ok) {
-        printf("❌ Time could not be readed.\n");
-        TCP().send_error_log("Time could not be readed.", CLOCK ? "PCF8563" : "RTC");
+        TCP().send_error_log("Time could not be readed.", config_get().clock_enabled ? "PCF8563" : "RTC");
         return;
     }
     char time_send[32];
@@ -359,22 +387,18 @@ void ProgramMain::send_data() {
     BME280::Measurement_t values = myBME280->measure();
     if (values.temperature < -100 || values.temperature > 100 ||
         values.humidity < 0 || values.humidity > 100) {
-        printf("❌ Invalid sensor values\n");
         myTCP->send_error_log("Invalid sensor data");
         return;
     }
     if (!myTCP->send_token_get_request()) {
-        printf("❌ API communication error\n");
         myTCP->send_error_log("Token fetch failed");
         return;
     }
     if (strlen(myTCP->get_token()) == 0) {
-        printf("❌ Token is incorrect\n");
         myTCP->send_error_log("Token is incorrect");
         return;
     }
     if (!myTCP->send_data_post_request(time_send, values.temperature, values.humidity, values.pressure)) {
-        printf("❌ Data sending error\n");
         myTCP->send_error_log("Data sending error", time_send);
     }
 }
@@ -402,9 +426,7 @@ extern "C" void sntp_set_system_time(uint32_t secs) {
         .min   = (int8_t)(lt->tm_min),
         .sec   = (int8_t)(lt->tm_sec),
     };
-    printf("🕒 [SNTP] System time set: %04d-%02d-%02d %02d:%02d:%02d\n",
-           dt.year, dt.month, dt.day, dt.hour, dt.min, dt.sec);
-    if (CLOCK == 1 && SET == 1) {
+        if (config_get().clock_enabled == 1 && config_get().set_time_enabled == 1) {
         pcf8563t_set_time(I2C_PORT, dt.sec, dt.min, dt.hour, dt.dotw, dt.day, dt.month, dt.year);
     }
 }

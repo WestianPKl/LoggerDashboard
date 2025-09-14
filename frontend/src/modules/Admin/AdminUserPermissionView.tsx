@@ -48,13 +48,17 @@ export default function AdminUserPermissionView() {
  * Loader function for fetching permission data based on either a role ID or a user ID from route parameters.
  *
  * @param {LoaderFunctionArgs} args - The arguments object containing route parameters.
- * @returns {Promise<{ permissionData: PermissionClass[]; roleId: number | undefined; userId: number | undefined }>} 
+ * @returns {Promise<{ permissionData: PermissionClass[]; roleId: number | undefined; userId: number | undefined }>}
  * An object containing the fetched permission data and the corresponding roleId or userId.
  *
  * @throws Will throw an error if neither roleId nor userId is provided in the parameters.
  * @throws Will throw an error if the data is not found or if an error occurs during the fetch operation.
  */
-export async function loader({ params }: LoaderFunctionArgs): Promise<{ permissionData: PermissionClass[]; roleId: number | undefined; userId: number | undefined }> {
+export async function loader({ params }: LoaderFunctionArgs): Promise<{
+	permissionData: PermissionClass[]
+	roleId: number | undefined
+	userId: number | undefined
+}> {
 	let roleId = undefined
 	let userId = undefined
 	if (params.roleId) {

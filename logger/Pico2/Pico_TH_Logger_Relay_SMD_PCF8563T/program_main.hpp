@@ -34,6 +34,7 @@
 class ProgramMain{
     BME280* myBME280 = nullptr;
     TCP* myTCP = nullptr;
+    bool wifi_active = true;
 
     private:
         void setup_pwm(uint);
@@ -43,6 +44,9 @@ class ProgramMain{
     public:
         void init_equipment();
         uint8_t init_wifi();
+        uint8_t reconnect_wifi();
+        void set_wifi_enabled(bool enabled) { wifi_active = enabled; }
+        bool is_wifi_enabled() const { return wifi_active; }
         void set_rgb_color(uint8_t, uint8_t, uint8_t);
         void display_measurement();
         void send_data();

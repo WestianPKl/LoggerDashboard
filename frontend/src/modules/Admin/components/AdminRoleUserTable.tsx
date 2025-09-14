@@ -20,10 +20,10 @@ import { useAppDispatch } from '../../../store/hooks'
 import { DataGrid, type GridColDef, type GridRowSelectionModel } from '@mui/x-data-grid'
 import type { UserClass } from '../../User/scripts/UserClass'
 import { useAddAdminRoleUserMutation, useDeleteAdminRoleUserMutation } from '../../../store/api/adminApi'
-import type { IAddAdminRoleUserDataDialog } from '../../Admin/scripts/IAdmin'
+import type { IAddAdminRoleUserDataDialog } from '../scripts/IAdmin'
 import GroupIcon from '@mui/icons-material/Group'
-import type { IRoleUserPermissionProps } from '../../Admin/scripts/IAdmin'
-import AddUserRoleDialog from '../../Admin/components/AddAdminRoleUserDialog'
+import type { IRoleUserPermissionProps } from '../scripts/IAdmin'
+import AddUserRoleDialog from './AddAdminRoleUserDialog'
 import { useRevalidator } from 'react-router'
 
 /**

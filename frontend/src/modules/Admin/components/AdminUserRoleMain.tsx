@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react'
 const AdminRoleUserTable = lazy(() => import('./AdminRoleUserTable'))
 import { Container, useMediaQuery, useTheme } from '@mui/material'
 import { useGetAdminRolesQuery } from '../../../store/api/adminApi'
-import { AdminRoleClass } from '../../Admin/scripts/AdminRoleClass'
+import { AdminRoleClass } from '../scripts/AdminRoleClass'
 import { useAppDispatch } from '../../../store/hooks'
 import { showAlert } from '../../../store/application-store'
 import LoadingCircle from '../../../components/UI/LoadingCircle'

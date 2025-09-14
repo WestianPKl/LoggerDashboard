@@ -35,7 +35,7 @@ export default function AdminAddAdminRoleDialog({
 	addItemHandler,
 }: IAddAdminRoleProps) {
 	const [name, setName] = useState<string>('')
-	const [description, setDescription] = useState<string>('')
+	const [description, setDescription] = useState<string | undefined>(undefined)
 	const [multiple, setMultiple] = useState<boolean>(false)
 	const [itemId, setItemId] = useState<number | undefined>(undefined)
 
@@ -46,18 +46,18 @@ export default function AdminAddAdminRoleDialog({
 		if (edit) {
 			if (selectedItems?.length === 1) {
 				setName(selectedItems[0].name || '')
-				setDescription(selectedItems[0].description || '')
+				setDescription(selectedItems[0].description)
 				setItemId(selectedItems[0].id)
 				setMultiple(false)
 			} else {
 				setName('')
-				setDescription('')
+				setDescription(undefined)
 				setItemId(undefined)
 				setMultiple(true)
 			}
 		} else {
 			setName('')
-			setDescription('')
+			setDescription(undefined)
 			setItemId(undefined)
 			setMultiple(false)
 		}

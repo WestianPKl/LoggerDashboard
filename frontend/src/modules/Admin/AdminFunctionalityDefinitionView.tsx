@@ -44,7 +44,7 @@ export default function AdminFunctionalityDefinitionView() {
  * If no data is found, throws a 404 error.
  * In case of an error, dispatches an alert with the error message and rethrows the error.
  *
- * @returns {Promise<{ functionalityDefinitions: FunctionalityDefinitionClass[] }>} 
+ * @returns {Promise<{ functionalityDefinitions: FunctionalityDefinitionClass[] }>}
  *   A promise that resolves to an object containing the functionality definitions.
  * @throws Will throw an error if the data is not found or if the API request fails.
  */
