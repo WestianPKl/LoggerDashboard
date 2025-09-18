@@ -23,7 +23,7 @@
         "transpile_dev": "babel ./server --copy-files --out-dir dist-server --source-maps",
         "clean": "rimraf dist-server",
         "dev": "NODE_ENV=development nodemon server/bin/www.js",
-        "prod": "NODE_ENV=production nodemon server/bin/www.js"
+        "prod": "NODE_ENV=production node server/bin/www.js"
     },
     "dependencies": {
         "@babel/polyfill": "^7.12.1",

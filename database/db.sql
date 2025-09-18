@@ -1,7 +1,7 @@
 -- --------------------------------------------------------
--- Host:                         127.0.0.1
--- Server version:               9.1.0 - MySQL Community Server - GPL
--- Server OS:                    Win64
+-- Host:                         192.168.18.75
+-- Server version:               8.4.6-0ubuntu0.25.04.1 - (Ubuntu)
+-- Server OS:                    Linux
 -- HeidiSQL Version:             12.10.0.7000
 -- --------------------------------------------------------
 
@@ -14,37 +14,37 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- Dumping structure for table logger_wsb_dev.adm_access_level_definition
+-- Dumping structure for table logger_prod.adm_access_level_definition
 CREATE TABLE IF NOT EXISTS `adm_access_level_definition` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL COMMENT 'Access level definition name.',
   `access_level` int NOT NULL COMMENT 'Definition access level.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Access levels definition table.';
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Access levels definition table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.adm_functionality_definition
+-- Dumping structure for table logger_prod.adm_functionality_definition
 CREATE TABLE IF NOT EXISTS `adm_functionality_definition` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL COMMENT 'Functionality definition name.',
   `description` varchar(255) NOT NULL COMMENT 'Functionality definition description.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Functionality definition table.';
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Functionality definition table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.adm_object_definition
+-- Dumping structure for table logger_prod.adm_object_definition
 CREATE TABLE IF NOT EXISTS `adm_object_definition` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL COMMENT 'Object definition name.',
   `description` varchar(255) NOT NULL COMMENT 'Object definition description.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Object definition table.';
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Object definition table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.adm_permissions
+-- Dumping structure for table logger_prod.adm_permissions
 CREATE TABLE IF NOT EXISTS `adm_permissions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL COMMENT 'User ID.',
@@ -63,11 +63,11 @@ CREATE TABLE IF NOT EXISTS `adm_permissions` (
   CONSTRAINT `fk_adm_permission_object_definition` FOREIGN KEY (`adm_object_definition_id`) REFERENCES `adm_object_definition` (`id`),
   CONSTRAINT `fk_adm_permission_role` FOREIGN KEY (`role_id`) REFERENCES `adm_roles` (`id`),
   CONSTRAINT `fk_adm_permisssion_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=126 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Permissions table.';
+) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Permissions table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.adm_roles
+-- Dumping structure for table logger_prod.adm_roles
 CREATE TABLE IF NOT EXISTS `adm_roles` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL COMMENT 'Role template name.',
@@ -81,11 +81,11 @@ CREATE TABLE IF NOT EXISTS `adm_roles` (
   KEY `fk_adm_role_editor_users_idx` (`updated_by_id`),
   CONSTRAINT `fk_adm_roles_creator_users` FOREIGN KEY (`created_by_id`) REFERENCES `users` (`id`),
   CONSTRAINT `fk_adm_roles_editor_users` FOREIGN KEY (`updated_by_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Role templates table.';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Role templates table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.adm_roles_user
+-- Dumping structure for table logger_prod.adm_roles_user
 CREATE TABLE IF NOT EXISTS `adm_roles_user` (
   `role_id` int NOT NULL COMMENT 'Adm Role ID.',
   `user_id` int NOT NULL COMMENT 'User ID.',
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS `adm_roles_user` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for view logger_wsb_dev.adm_view_permission
+-- Dumping structure for view logger_prod.adm_view_permission
 -- Creating temporary table to overcome VIEW dependency errors
 CREATE TABLE `adm_view_permission` (
 	`id` INT NOT NULL,
@@ -106,7 +106,7 @@ CREATE TABLE `adm_view_permission` (
 	`adm_access_level_definition_id` INT NOT NULL COMMENT 'Access level definition ID.'
 ) ENGINE=MyISAM;
 
--- Dumping structure for table logger_wsb_dev.data_definitions
+-- Dumping structure for table logger_prod.data_definitions
 CREATE TABLE IF NOT EXISTS `data_definitions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL COMMENT 'Data definition name.',
@@ -115,11 +115,11 @@ CREATE TABLE IF NOT EXISTS `data_definitions` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data definitions table.';
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data definitions table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.data_last_value
+-- Dumping structure for table logger_prod.data_last_value
 CREATE TABLE IF NOT EXISTS `data_last_value` (
   `id` int NOT NULL AUTO_INCREMENT,
   `data_log_id` int NOT NULL COMMENT 'Data Log ID.',
@@ -137,11 +137,11 @@ CREATE TABLE IF NOT EXISTS `data_last_value` (
   CONSTRAINT `fk_data_last_value_data_logs` FOREIGN KEY (`data_log_id`) REFERENCES `data_logs` (`id`),
   CONSTRAINT `fk_data_last_value_equ_logger` FOREIGN KEY (`equ_logger_id`) REFERENCES `equ_equipment` (`id`),
   CONSTRAINT `fk_data_last_value_equ_sensor` FOREIGN KEY (`equ_sensor_id`) REFERENCES `equ_equipment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=86111 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data last value table.';
+) ENGINE=InnoDB AUTO_INCREMENT=109445 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data last value table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.data_logs
+-- Dumping structure for table logger_prod.data_logs
 CREATE TABLE IF NOT EXISTS `data_logs` (
   `id` int NOT NULL AUTO_INCREMENT,
   `value` varchar(45) NOT NULL COMMENT 'Data value.',
@@ -156,11 +156,11 @@ CREATE TABLE IF NOT EXISTS `data_logs` (
   CONSTRAINT `fk_data_logs_data_type` FOREIGN KEY (`data_definition_id`) REFERENCES `data_definitions` (`id`),
   CONSTRAINT `fk_data_logs_equ_equipment` FOREIGN KEY (`equ_logger_id`) REFERENCES `equ_equipment` (`id`),
   CONSTRAINT `fk_data_logs_equ_equipment_sensor` FOREIGN KEY (`equ_sensor_id`) REFERENCES `equ_equipment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=86222 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data logs table.';
+) ENGINE=InnoDB AUTO_INCREMENT=109449 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Data logs table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for view logger_wsb_dev.data_view_connected_sensor
+-- Dumping structure for view logger_prod.data_view_connected_sensor
 -- Creating temporary table to overcome VIEW dependency errors
 CREATE TABLE `data_view_connected_sensor` (
 	`equ_logger_id` INT NULL COMMENT 'Equipment logger ID.',
@@ -172,7 +172,7 @@ CREATE TABLE `data_view_connected_sensor` (
 	`sensor_serial_number` VARCHAR(1) NULL COMMENT 'Equipment serial number.' COLLATE 'utf8mb4_0900_ai_ci'
 ) ENGINE=MyISAM;
 
--- Dumping structure for view logger_wsb_dev.data_view_last_value
+-- Dumping structure for view logger_prod.data_view_last_value
 -- Creating temporary table to overcome VIEW dependency errors
 CREATE TABLE `data_view_last_value` (
 	`id` INT NOT NULL,
@@ -186,7 +186,7 @@ CREATE TABLE `data_view_last_value` (
 	`unit` VARCHAR(1) NULL COMMENT 'Data definition unit.' COLLATE 'utf8mb4_0900_ai_ci'
 ) ENGINE=MyISAM;
 
--- Dumping structure for view logger_wsb_dev.data_view_logs
+-- Dumping structure for view logger_prod.data_view_logs
 -- Creating temporary table to overcome VIEW dependency errors
 CREATE TABLE `data_view_logs` (
 	`time` VARCHAR(1) NOT NULL COLLATE 'utf8mb4_0900_ai_ci',
@@ -198,7 +198,7 @@ CREATE TABLE `data_view_logs` (
 	`altitude` VARCHAR(1) NULL COLLATE 'utf8mb4_0900_ai_ci'
 ) ENGINE=MyISAM;
 
--- Dumping structure for table logger_wsb_dev.equ_equipment
+-- Dumping structure for table logger_prod.equ_equipment
 CREATE TABLE IF NOT EXISTS `equ_equipment` (
   `id` int NOT NULL AUTO_INCREMENT,
   `serial_number` varchar(255) NOT NULL COMMENT 'Equipment serial number.',
@@ -222,20 +222,20 @@ CREATE TABLE IF NOT EXISTS `equ_equipment` (
   CONSTRAINT `fk_equ_equipment_equ_type` FOREIGN KEY (`equ_type_id`) REFERENCES `equ_type` (`id`),
   CONSTRAINT `fk_equ_equipment_equ_vendor` FOREIGN KEY (`equ_vendor_id`) REFERENCES `equ_vendor` (`id`),
   CONSTRAINT `fk_equ_equipment_updated_by` FOREIGN KEY (`updated_by_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=845 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment list table.';
+) ENGINE=InnoDB AUTO_INCREMENT=367 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment list table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.equ_model
+-- Dumping structure for table logger_prod.equ_model
 CREATE TABLE IF NOT EXISTS `equ_model` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT 'Equipment model name.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=196 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment model table.';
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment model table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.equ_sensor_functions
+-- Dumping structure for table logger_prod.equ_sensor_functions
 CREATE TABLE IF NOT EXISTS `equ_sensor_functions` (
   `equ_sensor_id` int NOT NULL,
   `data_definition_id` int NOT NULL,
@@ -247,31 +247,31 @@ CREATE TABLE IF NOT EXISTS `equ_sensor_functions` (
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.equ_type
+-- Dumping structure for table logger_prod.equ_type
 CREATE TABLE IF NOT EXISTS `equ_type` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT 'Equipment type name.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=197 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment type table.';
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment type table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.equ_vendor
+-- Dumping structure for table logger_prod.equ_vendor
 CREATE TABLE IF NOT EXISTS `equ_vendor` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT 'Equipment vendor name.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=199 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment vendor table.';
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Equipment vendor table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for view logger_wsb_dev.equ_view_unused_logger
+-- Dumping structure for view logger_prod.equ_view_unused_logger
 -- Creating temporary table to overcome VIEW dependency errors
 CREATE TABLE `equ_view_unused_logger` (
 	`equ_logger_id` INT NOT NULL
 ) ENGINE=MyISAM;
 
--- Dumping structure for table logger_wsb_dev.error_log
+-- Dumping structure for table logger_prod.error_log
 CREATE TABLE IF NOT EXISTS `error_log` (
   `id` int NOT NULL AUTO_INCREMENT,
   `message` varchar(255) NOT NULL,
@@ -284,11 +284,11 @@ CREATE TABLE IF NOT EXISTS `error_log` (
   PRIMARY KEY (`id`),
   KEY `fk_error_log_equ_equipment_idx` (`equipment_id`),
   CONSTRAINT `fk_error_log_equ_equipment` FOREIGN KEY (`equipment_id`) REFERENCES `equ_equipment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=331 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.house_floors
+-- Dumping structure for table logger_prod.house_floors
 CREATE TABLE IF NOT EXISTS `house_floors` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL COMMENT 'House floor name.',
@@ -303,11 +303,11 @@ CREATE TABLE IF NOT EXISTS `house_floors` (
   PRIMARY KEY (`id`),
   KEY `fk_house_floors_house_house_idx` (`house_id`),
   CONSTRAINT `fk_house_floors_house_house` FOREIGN KEY (`house_id`) REFERENCES `house_house` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=150 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House floors table.';
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House floors table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.house_house
+-- Dumping structure for table logger_prod.house_house
 CREATE TABLE IF NOT EXISTS `house_house` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT 'House name.',
@@ -326,11 +326,11 @@ CREATE TABLE IF NOT EXISTS `house_house` (
   KEY `fk_house_house_editor_users_idx` (`updated_by_id`),
   CONSTRAINT `fk_house_house_creator_users` FOREIGN KEY (`created_by_id`) REFERENCES `users` (`id`),
   CONSTRAINT `fk_house_house_editor_users` FOREIGN KEY (`updated_by_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=170 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House table';
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House table';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.house_logger
+-- Dumping structure for table logger_prod.house_logger
 CREATE TABLE IF NOT EXISTS `house_logger` (
   `id` int NOT NULL AUTO_INCREMENT,
   `equ_logger_id` int NOT NULL COMMENT 'Equipment logger ID.',
@@ -343,11 +343,11 @@ CREATE TABLE IF NOT EXISTS `house_logger` (
   KEY `fk_house_logger_house_floors_idx` (`house_floor_id`),
   CONSTRAINT `fk_house_logger_equ_equipment` FOREIGN KEY (`equ_logger_id`) REFERENCES `equ_equipment` (`id`),
   CONSTRAINT `fk_house_logger_house_floors` FOREIGN KEY (`house_floor_id`) REFERENCES `house_floors` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=160 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House loggers table.';
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='House loggers table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.process_definition
+-- Dumping structure for table logger_prod.process_definition
 CREATE TABLE IF NOT EXISTS `process_definition` (
   `id` int NOT NULL AUTO_INCREMENT,
   `process_type_id` int NOT NULL,
@@ -361,31 +361,31 @@ CREATE TABLE IF NOT EXISTS `process_definition` (
   KEY `fk_process_definition_editor_users_idx` (`updated_by_id`),
   CONSTRAINT `fk_process_definition_creator_users` FOREIGN KEY (`created_by_id`) REFERENCES `users` (`id`),
   CONSTRAINT `fk_process_definition_editor_users` FOREIGN KEY (`updated_by_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Process definition table.';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Process definition table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.process_type
+-- Dumping structure for table logger_prod.process_type
 CREATE TABLE IF NOT EXISTS `process_type` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT 'Process type name.',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Process type table.';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Process type table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.superusers
+-- Dumping structure for table logger_prod.superusers
 CREATE TABLE IF NOT EXISTS `superusers` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL COMMENT 'User ID.',
   PRIMARY KEY (`id`),
   KEY `fk_superusers_users_idx` (`user_id`),
   CONSTRAINT `fk_superusers_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Superusers table.';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Superusers table.';
 
 -- Data exporting was unselected.
 
--- Dumping structure for table logger_wsb_dev.users
+-- Dumping structure for table logger_prod.users
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(45) NOT NULL,
@@ -393,15 +393,15 @@ CREATE TABLE IF NOT EXISTS `users` (
   `password` varchar(255) NOT NULL,
   `confirmed` tinyint DEFAULT '0',
   `avatar` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `avatar_big` varchar(255) DEFAULT NULL,
   `reset_password_token` varchar(255) DEFAULT NULL,
   `reset_password_expires` datetime DEFAULT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`),
   UNIQUE KEY `username_UNIQUE` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=157 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Users list table.';
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Users list table.';
 
 -- Data exporting was unselected.
 
