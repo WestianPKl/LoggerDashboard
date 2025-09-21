@@ -22,9 +22,8 @@ static volatile bool s_pending_show = false;
 static volatile bool s_pending_help = false;
 static char s_pending_help_args[64] = {0};
 
-// Help content
-static size_t s_help_index = 0;       // current index for paged help
-static int s_help_page = 10;          // default page size
+static size_t s_help_index = 0;
+static int s_help_page = 10;
 static const char* s_help_lines[] = {
     "Commands:",
     "  show                               - print current config",
@@ -83,7 +82,7 @@ static const size_t s_help_count = sizeof(s_help_lines)/sizeof(s_help_lines[0]);
 static void cdc_write_all(const char* data, int len) {
     if (len <= 0) return;
     int written = 0;
-    absolute_time_t deadline = make_timeout_time_ms(1000); // up to ~1s per chunk
+    absolute_time_t deadline = make_timeout_time_ms(1000);
     while (written < len) {
         if (!tud_cdc_connected()) break;
         int n = tud_cdc_write(data + written, (uint32_t)(len - written));
@@ -91,11 +90,9 @@ static void cdc_write_all(const char* data, int len) {
             written += n;
             tud_cdc_write_flush();
         } else {
-            // Give USB stack time to progress
             tud_task();
             tight_loop_contents();
             if (absolute_time_diff_us(get_absolute_time(), deadline) < 0) {
-                // timeout: don't block forever
                 break;
             }
         }
@@ -195,7 +192,6 @@ static void process_show_output() {
     cdc_write_linef("wifi_ssid=%s\n", cfg.wifi_ssid);
     cdc_write_linef("wifi_password=%s\n", cfg.wifi_password);
     cdc_write_linef("post_time_ms=%u\n", (unsigned)cfg.post_time_ms);
-    // Diagnostic: where config came from at boot
     auto src = config_last_source();
     const char *src_s = (src == ConfigSource::Loaded) ? "loaded" : (src == ConfigSource::DefaultsSaved) ? "defaults" : "unknown";
     cdc_write_linef("config_source=%s\n", src_s);
@@ -465,7 +461,7 @@ extern "C" void tud_cdc_rx_cb(uint8_t itf) {
             while (*rest && isspace((unsigned char)*rest)) ++rest;
 
             if (strcmp(cmd_kw, "show") == 0 && (*rest == '\0')) {
-                s_pending_show = true; // defer printing to com_poll
+                s_pending_show = true;
             } else if (strcmp(cmd_kw, "set") == 0) {
                 char key_raw[48];
                 char val_raw[64];
@@ -498,7 +494,6 @@ extern "C" void tud_cdc_rx_cb(uint8_t itf) {
                 char key_lc[48];
                 size_t i = 0; for (; key_raw[i] && i + 1 < sizeof(key_lc); ++i) key_lc[i] = (char)tolower((unsigned char)key_raw[i]);
                 key_lc[i] = '\0';
-                // Provide backward-compatible aliases
                 if (strcmp(key_lc, "wifi") == 0) {
                     strcpy(key_lc, "wifi_enabled");
                 } else if (strcmp(key_lc, "set") == 0) {

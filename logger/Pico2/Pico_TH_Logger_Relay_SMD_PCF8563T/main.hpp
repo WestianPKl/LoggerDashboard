@@ -45,7 +45,7 @@
 #define TOKEN_PATH      "/api/data/data-token"
 #define DATA_PATH        "/api/data/data-log"
 #define ERROR_PATH      "/api/common/error-log"
-#define SERVER_IP       "192.168.18.124"
+#define SERVER_IP       "192.168.18.127"
 #define SERVER_PORT     3000
 
 // Equipment settings:

@@ -6,163 +6,187 @@
 #include "main.hpp"
 #include "config.hpp"
 
-/**
- * @brief Retrieves the received token.
- *
- * This function returns a pointer to the received token string.
- *
- * @return const char* Pointer to the received token.
- */
+extern "C" {
+    #include "lwip/timeouts.h"
+    #include "lwip/tcp.h"
+}
+
+
 const char* TCP::get_token() {
     return received_token;
 }
 
-/**
- * @brief Sends an HTTP GET request to retrieve a token from a remote server over TCP.
- *
- * This method establishes a TCP connection to the server specified by SERVER_IP and SERVER_PORT,
- * sends a GET request to the path defined by TOKEN_PATH, and waits for the response.
- * It parses the HTTP response to extract a JSON token from the body, storing it in `received_token`.
- *
- * The function uses lwIP's raw TCP API for asynchronous communication and handles
- * connection, data reception, and parsing internally.
- *
- * @return true if a valid token was received and parsed successfully, false otherwise.
- *
- * @note The function blocks for a short period (about 3 seconds) to allow for response processing.
- * @note The received token is stored in the `received_token` member variable.
- * @note Prints debug information to the console regarding connection status, received data, and parsing results.
- */
+
+struct tcp_context_base_t {
+    volatile bool done = false;
+    volatile bool failed = false;
+};
+
+struct token_ctx_t : public tcp_context_base_t {
+    TCP* self = nullptr;
+};
+
+struct post_ctx_t : public tcp_context_base_t {
+    char request[768];
+    char response[1024];
+    size_t response_len = 0;
+};
+
+
 bool TCP::send_token_get_request() {
     ip_addr_t server_ip;
     const auto &cfg = config_get();
     if (!ipaddr_aton(cfg.server_ip, &server_ip)) {
         return false;
     }
-    struct tcp_pcb* pcb = tcp_new();
-    if (!pcb) return false;
 
     recv_len = 0;
     memset(recv_buffer, 0, sizeof(recv_buffer));
+    memset(received_token, 0, sizeof(received_token));
 
-    tcp_arg(pcb, this);
+    token_ctx_t *ctx = (token_ctx_t*)calloc(1, sizeof(token_ctx_t));
+    if (!ctx) return false;
+    ctx->self = this;
+
+    struct tcp_pcb* pcb = tcp_new();
+    if (!pcb) {
+        free(ctx);
+        return false;
+    }
+
+    tcp_arg(pcb, ctx);
+
+    tcp_err(pcb, [](void *arg, err_t) {
+        auto *c = static_cast<token_ctx_t*>(arg);
+        if (c) { c->failed = true; c->done = true; }
+    });
 
     tcp_recv(pcb, [](void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) -> err_t {
-        TCP* self = static_cast<TCP*>(arg);
+        auto *c = static_cast<token_ctx_t*>(arg);
+        if (!c || !c->self) {
+            if (p) pbuf_free(p);
+            tcp_abort(pcb);
+            return ERR_ABRT;
+        }
+
+        if (err != ERR_OK) {
+            if (p) pbuf_free(p);
+            c->failed = true; c->done = true;
+            tcp_abort(pcb);
+            return ERR_ABRT;
+        }
+
         if (!p) {
-            self->recv_buffer[self->recv_len] = '\0';
-            char *json_start = strstr(self->recv_buffer, "\r\n\r\n");
+            c->self->recv_buffer[c->self->recv_len] = '\0';
+            char *json_start = strstr(c->self->recv_buffer, "\r\n\r\n");
             if (json_start) {
                 json_start += 4;
                 char token[512];
                 if (sscanf(json_start, "{\"token\":\"%[^\"]\"}", token) == 1) {
-                    strncpy(self->received_token, token, sizeof(self->received_token));
-                    self->received_token[sizeof(self->received_token)-1] = '\0';
+                    strncpy(c->self->received_token, token, sizeof(c->self->received_token));
+                    c->self->received_token[sizeof(c->self->received_token)-1] = '\0';
                 }
             }
-            tcp_close(pcb);
+            c->done = true;
             return ERR_OK;
         }
 
-        while (p && self->recv_len + p->len < sizeof(self->recv_buffer) - 1) {
-            memcpy(self->recv_buffer + self->recv_len, p->payload, p->len);
-            self->recv_len += p->len;
-            struct pbuf *next = p->next;
-            pbuf_free(p);
-            p = next;
+        u16_t ack = 0;
+        for (struct pbuf *q = p; q; q = q->next) {
+            size_t copy = q->len;
+            if (c->self->recv_len + copy >= sizeof(c->self->recv_buffer) - 1) {
+                copy = (sizeof(c->self->recv_buffer) - 1) - c->self->recv_len;
+            }
+            if (copy > 0) {
+                memcpy(c->self->recv_buffer + c->self->recv_len, q->payload, copy);
+                c->self->recv_len += copy;
+            }
+            ack += q->len;
         }
+        if (ack) tcp_recved(pcb, ack);
+        pbuf_free(p);
 
         return ERR_OK;
     });
 
-    err_t result = tcp_connect(pcb, &server_ip, cfg.server_port, [](void *arg, struct tcp_pcb *pcb, err_t err) -> err_t {
-        if (err != ERR_OK) {
-            return err;
+    tcp_poll(pcb, [](void *arg, struct tcp_pcb *pcb) -> err_t {
+        static uint8_t ticks = 0;
+        auto *c = static_cast<token_ctx_t*>(arg);
+        if (++ticks > 20) {
+            if (c) { c->failed = true; c->done = true; }
+            tcp_abort(pcb);
+            return ERR_ABRT;
         }
-        const auto &cfg2 = config_get();
-        char host_line[64];
-        snprintf(host_line, sizeof(host_line), "%s", cfg2.server_ip);
-        const char* http_request =
-            "GET " TOKEN_PATH " HTTP/1.1\r\n"
-            "Host: ";
-        std::string req = std::string(http_request) + host_line + "\r\nConnection: close\r\n\r\n";
-        return tcp_write(pcb, req.c_str(), req.size(), TCP_WRITE_FLAG_COPY);
-    });
+        return ERR_OK;
+    }, 2);
+
+    err_t result = tcp_connect(pcb, &server_ip, cfg.server_port,
+        [](void *arg, struct tcp_pcb *pcb, err_t err) -> err_t {
+            if (err != ERR_OK) return err;
+
+            const auto &cfg2 = config_get();
+            char host_line[64];
+            snprintf(host_line, sizeof(host_line), "%s", cfg2.server_ip);
+
+            std::string req = std::string("GET " TOKEN_PATH " HTTP/1.1\r\n")
+                            + "Host: " + host_line + "\r\n"
+                            + "Connection: close\r\n\r\n";
+
+            err_t w = tcp_write(pcb, req.c_str(), req.size(), TCP_WRITE_FLAG_COPY);
+            if (w != ERR_OK) return w;
+            return tcp_output(pcb); 
+        });
 
     if (result != ERR_OK) {
-        tcp_close(pcb);
+        tcp_abort(pcb);
+        free(ctx);
         return false;
     }
 
-    for (int i = 0; i < 300; ++i) {
+    absolute_time_t deadline = make_timeout_time_ms(8000);
+    while (!time_reached(deadline) && !ctx->done) {
         cyw43_arch_poll();
-        sleep_ms(10);
+        sys_check_timeouts();
+        sleep_ms(5);
     }
 
-    return strlen(received_token) > 0;
+    if (!ctx->failed) {
+        if (tcp_close(pcb) != ERR_OK) tcp_abort(pcb);
+    } else {
+        tcp_abort(pcb);
+    }
+
+    bool ok = strlen(received_token) > 0;
+    free(ctx);
+    return ok;
 }
 
-
-struct tcp_context_t {
-    char request[768];
-};
-
-/**
- * @brief Callback function invoked when a TCP connection is established.
- *
- * This function is called by the lwIP stack when a TCP connection attempt completes.
- * If the connection is successful, it sends a POST request stored in the context.
- * Logs the result of the connection and write operations.
- *
- * @param arg Pointer to a user-defined context (expected to be of type tcp_context_t*).
- * @param pcb Pointer to the TCP protocol control block for the connection.
- * @param err Error code indicating the result of the connection attempt.
- *            - ERR_OK: Connection was successful.
- *            - Other values: Connection failed.
- * @return err_t
- *         - ERR_OK if the POST request was sent successfully.
- *         - Error code if the connection or write operation failed.
- */
 err_t TCP::tcp_connected_callback(void *arg, struct tcp_pcb *pcb, err_t err) {
-    tcp_context_t *ctx = static_cast<tcp_context_t*>(arg);
-    if (err != ERR_OK) {
-        return err;
-    }
+    post_ctx_t *ctx = static_cast<post_ctx_t*>(arg);
+    if (err != ERR_OK) return err;
 
-    err_t write_err = tcp_write(pcb, ctx->request, strlen(ctx->request), TCP_WRITE_FLAG_COPY);
-    return write_err;
+    err_t w = tcp_write(pcb, ctx->request, strlen(ctx->request), TCP_WRITE_FLAG_COPY);
+    if (w != ERR_OK) return w;
+    return tcp_output(pcb);
 }
 
-/**
- * @brief Sends temperature, humidity, and pressure data as a JSON array via an HTTP POST request over TCP.
- *
- * This function constructs a JSON array containing three objects (temperature, humidity, and atmospheric pressure),
- * each with a timestamp, value, definition, logger ID, and sensor ID. It then sends this data to a remote server
- * using an HTTP POST request over a TCP connection. The function handles TCP connection setup, request formatting,
- * sending, and response handling.
- *
- * @param timestamp   The timestamp string to associate with the sensor readings.
- * @param temp        The temperature value to send.
- * @param hum         The humidity value to send.
- * @param pressure    The atmospheric pressure value to send.
- * @return true if the POST request was sent and a response was received successfully, false otherwise.
- */
+
 bool TCP::send_data_post_request(const char* timestamp, float temp, float hum, float pressure) {
     const auto &cfg = config_get();
-    char json_body[512];
 
+    char json_body[512];
     snprintf(json_body, sizeof(json_body),
-        "[" 
+        "["
         "{\"time\":\"%s\",\"value\":%.2f,\"definition\":\"temperature\",\"equLoggerId\":%u,\"equSensorId\":%u},"
         "{\"time\":\"%s\",\"value\":%.2f,\"definition\":\"humidity\",\"equLoggerId\":%u,\"equSensorId\":%u},"
         "{\"time\":\"%s\",\"value\":%.2f,\"definition\":\"atmPressure\",\"equLoggerId\":%u,\"equSensorId\":%u}"
         "]",
-        timestamp, temp, cfg.logger_id, cfg.sensor_id,
-        timestamp, hum, cfg.logger_id, cfg.sensor_id,
-        timestamp, pressure, cfg.logger_id, cfg.sensor_id
+        timestamp ? timestamp : "", temp, cfg.logger_id, cfg.sensor_id,
+        timestamp ? timestamp : "", hum, cfg.logger_id, cfg.sensor_id,
+        timestamp ? timestamp : "", pressure, cfg.logger_id, cfg.sensor_id
     );
 
-    tcp_context_t* ctx = (tcp_context_t*)calloc(1, sizeof(tcp_context_t));
+    post_ctx_t* ctx = (post_ctx_t*)calloc(1, sizeof(post_ctx_t));
     if (!ctx) return false;
 
     snprintf(ctx->request, sizeof(ctx->request),
@@ -189,62 +213,92 @@ bool TCP::send_data_post_request(const char* timestamp, float temp, float hum, f
         return false;
     }
 
-    static char response_buffer[1024] = {0};
-    static size_t response_len = 0;
-
     tcp_arg(pcb, ctx);
 
+    tcp_err(pcb, [](void *arg, err_t) {
+        auto *c = static_cast<post_ctx_t*>(arg);
+        if (c) { c->failed = true; c->done = true; }
+    });
+
     tcp_recv(pcb, [](void *arg, struct tcp_pcb *pcb, struct pbuf *p, err_t err) -> err_t {
+        auto *c = static_cast<post_ctx_t*>(arg);
+        if (!c) {
+            if (p) pbuf_free(p);
+            tcp_abort(pcb);
+            return ERR_ABRT;
+        }
+
+        if (err != ERR_OK) {
+            if (p) pbuf_free(p);
+            c->failed = true; c->done = true;
+            tcp_abort(pcb);
+            return ERR_ABRT;
+        }
+
         if (!p) {
-            response_buffer[response_len] = '\0';
-            tcp_close(pcb);
+            c->response[c->response_len] = '\0';
+            c->done = true;
             return ERR_OK;
         }
 
-        while (p && response_len + p->len < sizeof(response_buffer) - 1) {
-            memcpy(response_buffer + response_len, p->payload, p->len);
-            response_len += p->len;
-            struct pbuf *next = p->next;
-            pbuf_free(p);
-            p = next;
+        u16_t ack = 0;
+        for (struct pbuf* q = p; q; q = q->next) {
+            size_t copy = q->len;
+            if (c->response_len + copy >= sizeof(c->response) - 1) {
+                copy = (sizeof(c->response) - 1) - c->response_len;
+            }
+            if (copy > 0) {
+                memcpy(c->response + c->response_len, q->payload, copy);
+                c->response_len += copy;
+            }
+            ack += q->len;
         }
+        if (ack) tcp_recved(pcb, ack);
+        pbuf_free(p);
 
         return ERR_OK;
     });
 
+    tcp_poll(pcb, [](void *arg, struct tcp_pcb *pcb) -> err_t {
+        static uint8_t ticks = 0;
+        auto *c = static_cast<post_ctx_t*>(arg);
+        if (++ticks > 20) {
+            if (c) { c->failed = true; c->done = true; }
+            tcp_abort(pcb);
+            return ERR_ABRT;
+        }
+        return ERR_OK;
+    }, 2);
+
     err_t result = tcp_connect(pcb, &server_ip, cfg.server_port, tcp_connected_callback);
     if (result != ERR_OK) {
-        tcp_close(pcb);
+        tcp_abort(pcb);
         free(ctx);
         return false;
     }
 
-    for (int i = 0; i < 200; ++i) {
+    absolute_time_t deadline = make_timeout_time_ms(8000);
+    while (!time_reached(deadline) && !ctx->done) {
         cyw43_arch_poll();
-        sleep_ms(10);
+        sys_check_timeouts();
+        sleep_ms(5);
     }
 
-    tcp_close(pcb);
+    if (!ctx->failed) {
+        if (tcp_close(pcb) != ERR_OK) tcp_abort(pcb);
+    } else {
+        tcp_abort(pcb);
+    }
+
+    bool ok = !ctx->failed;
     free(ctx);
-    return true;
+    return ok;
 }
 
-/**
- * @brief Sends an error log message to a remote server via TCP in JSON format.
- *
- * This function constructs a JSON payload containing the error message, details,
- * and equipment ID, then sends it as an HTTP POST request to a predefined server.
- * It handles TCP connection setup, sending the request, and receiving the response.
- *
- * @param message   The main error message to be logged.
- * @param details   Additional details about the error (can be nullptr).
- * @return true     If the error log was sent successfully.
- * @return false    If there was a failure in memory allocation, TCP setup, or connection.
- */
 bool TCP::send_error_log(const char* message, const char* details) {
     const auto &cfg = config_get();
-    char json_body[512];
 
+    char json_body[512];
     snprintf(json_body, sizeof(json_body),
         "{"
         "\"equipmentId\":%u,"
@@ -254,11 +308,11 @@ bool TCP::send_error_log(const char* message, const char* details) {
         "\"type\":\"Equipment\""
         "}",
         cfg.logger_id,
-        message,
+        message ? message : "",
         details ? details : ""
     );
 
-    tcp_context_t* ctx = (tcp_context_t*)calloc(1, sizeof(tcp_context_t));
+    post_ctx_t* ctx = (post_ctx_t*)calloc(1, sizeof(post_ctx_t));
     if (!ctx) return false;
 
     snprintf(ctx->request, sizeof(ctx->request),
@@ -284,42 +338,92 @@ bool TCP::send_error_log(const char* message, const char* details) {
         return false;
     }
 
-    static char response_buffer[512] = {0};
-    static size_t response_len = 0;
-
     tcp_arg(pcb, ctx);
 
+    tcp_err(pcb, [](void *arg, err_t) {
+        auto *c = static_cast<post_ctx_t*>(arg);
+        if (c) { c->failed = true; c->done = true; }
+    });
+
     tcp_recv(pcb, [](void* arg, struct tcp_pcb* pcb, struct pbuf* p, err_t err) -> err_t {
+        auto *c = static_cast<post_ctx_t*>(arg);
+        if (!c) {
+            if (p) pbuf_free(p);
+            tcp_abort(pcb);
+            return ERR_ABRT;
+        }
+
+        if (err != ERR_OK) {
+            if (p) pbuf_free(p);
+            c->failed = true; c->done = true;
+            tcp_abort(pcb);
+            return ERR_ABRT;
+        }
+
         if (!p) {
-            response_buffer[response_len] = '\0';
-            tcp_close(pcb);
+            c->response[c->response_len] = '\0';
+            c->done = true;
             return ERR_OK;
         }
 
-        while (p && response_len + p->len < sizeof(response_buffer) - 1) {
-            memcpy(response_buffer + response_len, p->payload, p->len);
-            response_len += p->len;
-            struct pbuf* next = p->next;
-            pbuf_free(p);
-            p = next;
+        u16_t ack = 0;
+        for (struct pbuf* q = p; q; q = q->next) {
+            size_t copy = q->len;
+            if (c->response_len + copy >= sizeof(c->response) - 1) {
+                copy = (sizeof(c->response) - 1) - c->response_len;
+            }
+            if (copy > 0) {
+                memcpy(c->response + c->response_len, q->payload, copy);
+                c->response_len += copy;
+            }
+            ack += q->len;
         }
+        if (ack) tcp_recved(pcb, ack);
+        pbuf_free(p);
 
         return ERR_OK;
     });
 
-    err_t result = tcp_connect(pcb, &server_ip, cfg.server_port, tcp_connected_callback);
+    tcp_poll(pcb, [](void *arg, struct tcp_pcb *pcb) -> err_t {
+        static uint8_t ticks = 0;
+        auto *c = static_cast<post_ctx_t*>(arg);
+        if (++ticks > 20) {
+            if (c) { c->failed = true; c->done = true; }
+            tcp_abort(pcb);
+            return ERR_ABRT;
+        }
+        return ERR_OK;
+    }, 2);
+
+    err_t result = tcp_connect(pcb, &server_ip, cfg.server_port,
+        [](void *arg, struct tcp_pcb *pcb, err_t err) -> err_t {
+            auto *ctx = static_cast<post_ctx_t*>(arg);
+            if (err != ERR_OK) return err;
+            err_t w = tcp_write(pcb, ctx->request, strlen(ctx->request), TCP_WRITE_FLAG_COPY);
+            if (w != ERR_OK) return w;
+            return tcp_output(pcb);
+        });
+
     if (result != ERR_OK) {
-        tcp_close(pcb);
+        tcp_abort(pcb);
         free(ctx);
         return false;
     }
 
-    for (int i = 0; i < 200; ++i) {
+    absolute_time_t deadline = make_timeout_time_ms(8000);
+    while (!time_reached(deadline) && !ctx->done) {
         cyw43_arch_poll();
-        sleep_ms(10);
+        sys_check_timeouts();
+        sleep_ms(5);
     }
 
-    tcp_close(pcb);
+    if (!ctx->failed) {
+        if (tcp_close(pcb) != ERR_OK) tcp_abort(pcb);
+    } else {
+        tcp_abort(pcb);
+    }
+
+    bool ok = !ctx->failed;
     free(ctx);
-    return true;
+    return ok;
 }

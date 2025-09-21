@@ -176,10 +176,22 @@ void ProgramMain::init_equipment() {
     lcd_clear();
     lcd_string("Starting...");
 
-    myBME280 = new BME280(BME280::MODE::MODE_FORCED);
-    myTCP = new TCP();
+    if  (config_get().sht == 30){
+        myBME280 = new BME280(BME280::MODE::MODE_FORCED);
+    }
+    else if (config_get().sht == 40){
+        myBME280 = new BME280(BME280::MODE::MODE_FORCED);
+    }
+    else {
+        myBME280 = new BME280(BME280::MODE::MODE_FORCED);
+    }
 
-    if (config_get().clock_enabled == 1){
+    if(config_get().wifi_enabled == 1){
+        myTCP = new TCP();
+    }
+        
+
+    if (config_get().clock_enabled == 1) {
         pcf8563t_init(I2C_PORT);
     }
 
@@ -307,17 +319,21 @@ void ProgramMain::display_measurement() {
 
     if (!time_ok) {
         if (is_wifi_enabled()) {
-            TCP().send_error_log("Time could not be readed.", config_get().clock_enabled ? "PCF8563" : "RTC");
+            if(myTCP->send_error_log("Time could not be readed.", config_get().clock_enabled ? "PCF8563" : "RTC")){
+                printf("Time error");
+            }
         }
         return;
     }
 
     BME280::Measurement_t values = myBME280->measure();
-
+        
     if (values.temperature < -100 || values.temperature > 100 ||
         values.humidity < 0 || values.humidity > 100) {
         if (is_wifi_enabled()) {
-            myTCP->send_error_log("Sensor error", "Values out of range");
+            if(myTCP->send_error_log("Sensor error", "Values out of range")){
+                printf("Sensor error");
+            }    
         }
         return;
     }
@@ -330,12 +346,19 @@ void ProgramMain::display_measurement() {
 
     if (option == 0) {
         set_rgb_color(0, 255, 0);
-        snprintf(line2, sizeof(line2), "T:%.1fC H:%.1f%%", values.temperature, values.humidity);
+        if(config_get().temperature == 1 && config_get().humidity == 1)
+            snprintf(line2, sizeof(line2), "T:%.1fC H:%.1f%%", values.temperature, values.humidity);
+        else if(config_get().temperature == 1)
+            snprintf(line2, sizeof(line2), "T:%.1fC", values.temperature);
+        else if(config_get().humidity == 1)
+            snprintf(line2, sizeof(line2), "H:%.1f%%", values.humidity);
+        else
+            snprintf(line2, sizeof(line2), "No data");
         lcd_set_cursor(1, 0);
         lcd_string("                ");
         lcd_set_cursor(1, 0);
         lcd_string(line2);
-    } else if (option == 3) {
+    } else if (option == 3 && config_get().pressure == 1) {
         set_rgb_color(0, 0, 0);
         snprintf(line2, sizeof(line2), "P:%4.0fhPa", values.pressure);
         lcd_set_cursor(1, 0);
@@ -349,7 +372,6 @@ void ProgramMain::display_measurement() {
 	if(option > 6){
 		option = 0;
 	}
-
 }
 
 /**
@@ -378,28 +400,43 @@ void ProgramMain::send_data() {
         time_ok = pcf8563t_read_time(I2C_PORT, time);
     }
     if (!time_ok) {
-        TCP().send_error_log("Time could not be readed.", config_get().clock_enabled ? "PCF8563" : "RTC");
+        if(!myTCP->send_error_log("Time could not be readed.", config_get().clock_enabled ? "PCF8563" : "RTC")){
+            printf("Time error - data send");
+        }
         return;
     }
     char time_send[32];
     snprintf(time_send, sizeof(time_send), "%04d-%02d-%02d %02d:%02d:%02d",
              time[6], time[5], time[3], time[2], time[1], time[0]);
+
+
     BME280::Measurement_t values = myBME280->measure();
+
+
     if (values.temperature < -100 || values.temperature > 100 ||
         values.humidity < 0 || values.humidity > 100) {
-        myTCP->send_error_log("Invalid sensor data");
+        if(!myTCP->send_error_log("Invalid sensor data")){
+            printf("Invalid sensor data");
+        }
         return;
     }
     if (!myTCP->send_token_get_request()) {
-        myTCP->send_error_log("Token fetch failed");
+        if(!myTCP->send_error_log("Token fetch failed")){
+            printf("Token fetch failed");
+        }
         return;
     }
     if (strlen(myTCP->get_token()) == 0) {
-        myTCP->send_error_log("Token is incorrect");
+        if(!myTCP->send_error_log("Token is incorrect")){
+            printf("Token is incorrect");
+        }
         return;
     }
     if (!myTCP->send_data_post_request(time_send, values.temperature, values.humidity, values.pressure)) {
-        myTCP->send_error_log("Data sending error", time_send);
+        if(myTCP->send_error_log("Data sending error", time_send)){
+            printf("Data sending error");
+        }
+        return;
     }
 }
 
@@ -426,7 +463,7 @@ extern "C" void sntp_set_system_time(uint32_t secs) {
         .min   = (int8_t)(lt->tm_min),
         .sec   = (int8_t)(lt->tm_sec),
     };
-        if (config_get().clock_enabled == 1 && config_get().set_time_enabled == 1) {
+    if (config_get().clock_enabled == 1 && config_get().set_time_enabled == 1) {
         pcf8563t_set_time(I2C_PORT, dt.sec, dt.min, dt.hour, dt.dotw, dt.day, dt.month, dt.year);
     }
 }

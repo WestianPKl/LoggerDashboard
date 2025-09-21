@@ -148,7 +148,6 @@ void config_set_defaults() {
 	std::strncpy(g_config.wifi_ssid, WIFI_SSID, sizeof(g_config.wifi_ssid) - 1);
 	std::strncpy(g_config.wifi_password, WIFI_PASSWORD, sizeof(g_config.wifi_password) - 1);
 
-	// POST interval default
 	g_config.post_time_ms = POST_TIME;
 
 	g_config.crc32 = calc_crc32(g_config);

@@ -8,7 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 build
 !.vscode/*
-
+__pycache__
+/__pycache__/
+.venv
 
 .DS_Store
 /node_modules/

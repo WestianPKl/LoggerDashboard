@@ -115,6 +115,7 @@ public:
     enum MODE { MODE_SLEEP = 0b00,
                 MODE_FORCED = 0b01,
                 MODE_NORMAL = 0b11};
+   static constexpr float SEA_LEVEL_HPA = 1013.0f;
 private:
     const uint READ_BIT = 0x80;
     uint8_t     addr = 0x76;

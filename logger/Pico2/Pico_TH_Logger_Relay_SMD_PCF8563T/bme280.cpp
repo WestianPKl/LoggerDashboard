@@ -21,6 +21,7 @@ BME280::BME280(MODE mode = MODE::MODE_NORMAL) {
     write_register(0xF4, measurement_reg.get());
 };
 
+
 /**
  * @brief Performs a measurement using the BME280 sensor and returns the results.
  *
@@ -36,9 +37,11 @@ BME280::Measurement_t BME280::measure() {
     if (measurement_reg.mode == MODE::MODE_FORCED) {
         write_register(0xf4, measurement_reg.get());
         uint8_t buffer;
+        absolute_time_t deadline = make_timeout_time_ms(200);
         do {
             read_registers(0xf3, &buffer, 1);
             sleep_ms(1);
+            if (time_reached(deadline)) break;
         } while (buffer & 0x08);
     }
     bme280_read_raw(&humidity,
@@ -105,25 +108,26 @@ int32_t BME280::compensate_temp(int32_t adc_T) {
  *       properly initialized before calling this function.
  */
 uint32_t BME280::compensate_pressure(int32_t adc_P) {
-    int32_t var1, var2;
-    uint32_t p;
-    var1 = (((int32_t) t_fine) >> 1) - (int32_t) 64000;
-    var2 = (((var1 >> 2) * (var1 >> 2)) >> 11) * ((int32_t) dig_P6);
-    var2 = var2 + ((var1 * ((int32_t) dig_P5)) << 1);
-    var2 = (var2 >> 2) + (((int32_t) dig_P4) << 16);
-    var1 = (((dig_P3 * (((var1 >> 2) * (var1 >> 2)) >> 13)) >> 3) + ((((int32_t) dig_P2) * var1) >> 1)) >> 18;
-    var1 = ((((32768 + var1)) * ((int32_t) dig_P1)) >> 15);
-    if (var1 == 0)
+    int64_t var1, var2, p;
+
+    var1 = ((int64_t)t_fine) - 128000;
+    var2 = var1 * var1 * (int64_t)dig_P6;
+    var2 = var2 + ((var1 * (int64_t)dig_P5) << 17);
+    var2 = var2 + (((int64_t)dig_P4) << 35);
+    var1 = ((var1 * var1 * (int64_t)dig_P3) >> 8) + ((var1 * (int64_t)dig_P2) << 12);
+    var1 = (((((int64_t)1) << 47) + var1) * (int64_t)dig_P1) >> 33;
+
+    if (var1 == 0) {
         return 0;
-    p = (((uint32_t) (((int32_t) 1048576) - adc_P) - (var2 >> 12))) * 3125;
-    if (p < 0x80000000)
-        p = (p << 1) / ((uint32_t) var1);
-    else
-        p = (p / (uint32_t) var1) * 2;
-    var1 = (((int32_t) dig_P9) * ((int32_t) (((p >> 3) * (p >> 3)) >> 13))) >> 12;
-    var2 = (((int32_t) (p >> 2)) * ((int32_t) dig_P8)) >> 13;
-    p = (uint32_t) ((int32_t) p + ((var1 + var2 + dig_P7) >> 4));
-    return p;
+    }
+    p = 1048576 - adc_P;
+    p = (((((int64_t)p << 31) - var2) * 3125) / var1);
+
+    var1 = (((int64_t)dig_P9) * (p >> 13) * (p >> 13)) >> 25;
+    var2 = (((int64_t)dig_P8) * p) >> 19;
+
+    p = (((p + var1 + var2) >> 8) + (((int64_t)dig_P7) << 4));
+    return (uint32_t)(p >> 8);
 }
 
 /**
@@ -206,25 +210,25 @@ void BME280::read_registers(uint8_t reg, uint8_t *buf, uint16_t len) {
  */
 void BME280::read_compensation_parameters() {
     read_registers(0x88, buffer, 26);
-    dig_T1 = buffer[0] | (buffer[1] << 8);
-    dig_T2 = buffer[2] | (buffer[3] << 8);
-    dig_T3 = buffer[4] | (buffer[5] << 8);
-    dig_P1 = buffer[6] | (buffer[7] << 8);
-    dig_P2 = buffer[8] | (buffer[9] << 8);
-    dig_P3 = buffer[10] | (buffer[11] << 8);
-    dig_P4 = buffer[12] | (buffer[13] << 8);
-    dig_P5 = buffer[14] | (buffer[15] << 8);
-    dig_P6 = buffer[16] | (buffer[17] << 8);
-    dig_P7 = buffer[18] | (buffer[19] << 8);
-    dig_P8 = buffer[20] | (buffer[21] << 8);
-    dig_P9 = buffer[22] | (buffer[23] << 8);
-    dig_H1 = buffer[25];
-    read_registers(0xE1, buffer, 8);
-    dig_H2 = buffer[0] | (buffer[1] << 8);
-    dig_H3 = (int8_t) buffer[2];
-    dig_H4 = buffer[3] << 4 | (buffer[4] & 0xf);
-    dig_H5 = (buffer[5] >> 4) | (buffer[6] << 4);
-    dig_H6 = (int8_t) buffer[7];
+    dig_T1 = (uint16_t)(buffer[0] | (buffer[1] << 8));
+    dig_T2 = (int16_t)(buffer[2] | (buffer[3] << 8));
+    dig_T3 = (int16_t)(buffer[4] | (buffer[5] << 8));
+    dig_P1 = (uint16_t)(buffer[6] | (buffer[7] << 8));
+    dig_P2 = (int16_t)(buffer[8] | (buffer[9] << 8));
+    dig_P3 = (int16_t)(buffer[10] | (buffer[11] << 8));
+    dig_P4 = (int16_t)(buffer[12] | (buffer[13] << 8));
+    dig_P5 = (int16_t)(buffer[14] | (buffer[15] << 8));
+    dig_P6 = (int16_t)(buffer[16] | (buffer[17] << 8));
+    dig_P7 = (int16_t)(buffer[18] | (buffer[19] << 8));
+    dig_P8 = (int16_t)(buffer[20] | (buffer[21] << 8));
+    dig_P9 = (int16_t)(buffer[22] | (buffer[23] << 8));
+    dig_H1 = (uint8_t)buffer[25];
+    read_registers(0xE1, buffer, 7);
+    dig_H2 = (int16_t)(buffer[0] | (buffer[1] << 8));
+    dig_H3 = (uint8_t)buffer[2];
+    dig_H4 = (int16_t)((buffer[3] << 4) | (buffer[4] & 0x0F));
+    dig_H5 = (int16_t)((buffer[5] << 4) | (buffer[4] >> 4));
+    dig_H6 = (int8_t)buffer[6];
 }
 
 /**

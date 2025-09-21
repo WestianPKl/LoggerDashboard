@@ -90,21 +90,21 @@ int main() {
     rearm_post_timer();
 
     while (true) {
+        tud_task();
+        sys_check_timeouts();
         com_poll();
         if (device_reset_flag) {
             device_reset_flag = false;
-            // Give CDC a brief moment to flush before reboot
             sleep_ms(50);
-            // Reboot via watchdog (keeps core clean)
             watchdog_reboot(0, 0, 0);
-            // Fallback: busy-wait
             while (1) { tight_loop_contents(); }
         }
 
         if (wifi_apply_flag) {
             wifi_apply_flag = false;
-            program_main.init_wifi();
+            (void)program_main.reconnect_wifi();
         }
+
         if (program_main.is_wifi_enabled()) {
             cyw43_arch_poll();
         }
@@ -117,29 +117,31 @@ int main() {
                 (void)program_main.reconnect_wifi();
             } else {
                 program_main.set_wifi_enabled(false);
+                cyw43_arch_deinit(); 
                 tud_cdc_write_str("WIFI_DISABLED\n");
                 tud_cdc_write_flush();
             }
         }
 
-    static absolute_time_t next_check = {0};
-    if (absolute_time_diff_us(get_absolute_time(), next_check) >= 0) {
-            static uint32_t last_post_time = 0;
-            auto &cfgc = config_get();
-            if (cfgc.post_time_ms != last_post_time) {
-                last_post_time = cfgc.post_time_ms;
-                rearm_post_timer();
+        static absolute_time_t next_check = {0};
+        if (absolute_time_diff_us(get_absolute_time(), next_check) >= 0) {
+                static uint32_t last_post_time = 0;
+                auto &cfgc = config_get();
+                if (cfgc.post_time_ms != last_post_time) {
+                    last_post_time = cfgc.post_time_ms;
+                    rearm_post_timer();
+                }
+                next_check = make_timeout_time_ms(1000);
             }
-            next_check = make_timeout_time_ms(1000);
-        }
-        if (update_screen_flag) {
-            update_screen_flag = false;
-            program_main.display_measurement();
-        }
-        if (post_flag) {
-            post_flag = false;
-            program_main.send_data();
-        }
+            if (update_screen_flag) {
+                update_screen_flag = false;
+                program_main.display_measurement();
+            }
+            if (post_flag) {
+                post_flag = false;
+                program_main.send_data();
+            }
+            sleep_ms(1);
     }
 }
 

@@ -147,7 +147,7 @@ err_t TCP::tcp_connected_callback(void *arg, struct tcp_pcb *pcb, err_t err) {
  * @param pressure    The atmospheric pressure value to send.
  * @return true if the POST request was sent and a response was received successfully, false otherwise.
  */
-bool TCP::send_data_post_request(const char* timestamp, float temp, float hum, float pressure) {
+bool TCP::send_data_post_request(const char* timestamp = "", float temp = 0.0f, float hum = 0.0f, float pressure = 0.0f) {
     const auto &cfg = config_get();
     char json_body[512];
 

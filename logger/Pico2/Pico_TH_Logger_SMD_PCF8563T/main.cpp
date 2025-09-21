@@ -93,11 +93,8 @@ int main() {
         com_poll();
         if (device_reset_flag) {
             device_reset_flag = false;
-            // Give CDC a brief moment to flush before reboot
             sleep_ms(50);
-            // Reboot via watchdog (keeps core clean)
             watchdog_reboot(0, 0, 0);
-            // Fallback: busy-wait
             while (1) { tight_loop_contents(); }
         }
 

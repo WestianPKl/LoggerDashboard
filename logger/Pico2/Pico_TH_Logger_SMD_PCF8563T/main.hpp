@@ -40,8 +40,8 @@
 // Main settings:
 #define WIFI_SSID       "TP-Link_0A7B"
 #define WIFI_PASSWORD   "12345678"
-#define LOGGER_ID       3
-#define SENSOR_ID       5
+#define LOGGER_ID       1
+#define SENSOR_ID       4
 #define TOKEN_PATH      "/api/data/data-token"
 #define DATA_PATH        "/api/data/data-log"
 #define ERROR_PATH      "/api/common/error-log"
