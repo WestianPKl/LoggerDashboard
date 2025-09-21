@@ -58,31 +58,31 @@
           ""
         ],
         [
-          "unconnected_items|148110000|109737500|04a9af63-4628-4efd-998e-99b11ea7310b|23d8666d-677c-4024-9d6f-70684826bb29",
+          "unconnected_items|148110000|109737500|F.Cu|4|04a9af63-4628-4efd-998e-99b11ea7310b|23d8666d-677c-4024-9d6f-70684826bb29",
           ""
         ],
         [
-          "unconnected_items|148110000|84337500|be432e59-8d61-4010-aadb-0ba7f9cdeecd|23d8666d-677c-4024-9d6f-70684826bb29",
+          "unconnected_items|148110000|84337500|F.Cu|4|be432e59-8d61-4010-aadb-0ba7f9cdeecd|23d8666d-677c-4024-9d6f-70684826bb29",
           ""
         ],
         [
-          "unconnected_items|148110000|84337500|be432e59-8d61-4010-aadb-0ba7f9cdeecd|352eccce-82a1-4bae-9485-ef52d7564a57",
+          "unconnected_items|148110000|84337500|F.Cu|4|be432e59-8d61-4010-aadb-0ba7f9cdeecd|352eccce-82a1-4bae-9485-ef52d7564a57",
           ""
         ],
         [
-          "unconnected_items|150500000|70500000|973bbcd3-c143-41c2-9935-e28c97483f70|1285c393-cf95-4ab1-8c67-07f40bed14cd",
+          "unconnected_items|150500000|70500000|F.Cu|4|973bbcd3-c143-41c2-9935-e28c97483f70|1285c393-cf95-4ab1-8c67-07f40bed14cd",
           ""
         ],
         [
-          "unconnected_items|165890000|84337500|e55957da-4d3d-47e8-8a46-c37c7038ec9a|1285c393-cf95-4ab1-8c67-07f40bed14cd",
+          "unconnected_items|165890000|84337500|F.Cu|4|e55957da-4d3d-47e8-8a46-c37c7038ec9a|1285c393-cf95-4ab1-8c67-07f40bed14cd",
           ""
         ],
         [
-          "unconnected_items|165890000|97037500|1e8f70f5-ac55-49a9-b0b7-7e226ad048d1|f1baa90d-cb99-43c0-9e05-3d4e88146dfd",
+          "unconnected_items|165890000|97037500|F.Cu|4|1e8f70f5-ac55-49a9-b0b7-7e226ad048d1|f1baa90d-cb99-43c0-9e05-3d4e88146dfd",
           ""
         ],
         [
-          "unconnected_items|166052500|84500000|5530eebe-04b0-46eb-a168-0b3bdbca196d|1e8f70f5-ac55-49a9-b0b7-7e226ad048d1",
+          "unconnected_items|166052500|84500000|F.Cu|4|5530eebe-04b0-46eb-a168-0b3bdbca196d|1e8f70f5-ac55-49a9-b0b7-7e226ad048d1",
           ""
         ]
       ],
@@ -473,6 +473,7 @@
       "single_global_label": "ignore",
       "unannotated": "error",
       "unconnected_wire_endpoint": "warning",
+      "undefined_netclass": "error",
       "unit_value_mismatch": "error",
       "unresolved_variable": "error",
       "wire_dangling": "error"

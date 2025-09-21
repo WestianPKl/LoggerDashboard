@@ -58,27 +58,27 @@
           ""
         ],
         [
-          "unconnected_items|102000000|111500000|ff3ec928-08b0-4616-b9b7-3bd5026dba56|c24fe530-8a36-4d21-8915-f4f4a03b300a",
+          "unconnected_items|102000000|111500000|F.Cu|4|ff3ec928-08b0-4616-b9b7-3bd5026dba56|c24fe530-8a36-4d21-8915-f4f4a03b300a",
           ""
         ],
         [
-          "unconnected_items|116500000|72600000|7e8eb185-4a1e-49e4-8293-64995940043e|c83b8c9c-c3c7-4323-847e-e92e026c9163",
+          "unconnected_items|116500000|72600000|F.Cu|4|7e8eb185-4a1e-49e4-8293-64995940043e|c83b8c9c-c3c7-4323-847e-e92e026c9163",
           ""
         ],
         [
-          "unconnected_items|116500000|98000000|0bc525f6-c9ed-4349-ae72-8fed9098ed9d|c24fe530-8a36-4d21-8915-f4f4a03b300a",
+          "unconnected_items|116500000|98000000|F.Cu|4|0bc525f6-c9ed-4349-ae72-8fed9098ed9d|c24fe530-8a36-4d21-8915-f4f4a03b300a",
           ""
         ],
         [
-          "unconnected_items|90000000|80500000|6ac18cf6-22c7-4fdb-b6d8-94795f1fb59c|c83b8c9c-c3c7-4323-847e-e92e026c9163",
+          "unconnected_items|90000000|80500000|F.Cu|4|6ac18cf6-22c7-4fdb-b6d8-94795f1fb59c|c83b8c9c-c3c7-4323-847e-e92e026c9163",
           ""
         ],
         [
-          "unconnected_items|98520000|85500000|6a0cbce6-d1a1-4e46-86ed-7f4990336630|89f748d7-3d89-415c-9e7f-a3b246efd999",
+          "unconnected_items|98520000|85500000|F.Cu|4|6a0cbce6-d1a1-4e46-86ed-7f4990336630|89f748d7-3d89-415c-9e7f-a3b246efd999",
           ""
         ],
         [
-          "unconnected_items|98720000|98000000|89f748d7-3d89-415c-9e7f-a3b246efd999|38c6cbb5-bb5a-4db1-a135-2783e33d8691",
+          "unconnected_items|98720000|98000000|F.Cu|4|89f748d7-3d89-415c-9e7f-a3b246efd999|38c6cbb5-bb5a-4db1-a135-2783e33d8691",
           ""
         ]
       ],
@@ -469,6 +469,7 @@
       "single_global_label": "ignore",
       "unannotated": "error",
       "unconnected_wire_endpoint": "warning",
+      "undefined_netclass": "error",
       "unit_value_mismatch": "error",
       "unresolved_variable": "error",
       "wire_dangling": "error"

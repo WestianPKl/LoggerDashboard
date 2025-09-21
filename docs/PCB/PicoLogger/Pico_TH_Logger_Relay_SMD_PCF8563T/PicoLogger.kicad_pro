@@ -453,6 +453,7 @@
       "single_global_label": "ignore",
       "unannotated": "error",
       "unconnected_wire_endpoint": "warning",
+      "undefined_netclass": "error",
       "unit_value_mismatch": "error",
       "unresolved_variable": "error",
       "wire_dangling": "error"
@@ -657,6 +658,26 @@
     [
       "5949cffb-a456-4564-875c-3225b7b45037",
       "Root"
+    ],
+    [
+      "dca2a67d-7fce-485c-ab0d-6b08bc0389bb",
+      "relays"
+    ],
+    [
+      "8441e41a-d599-4431-a224-2e6fb2002343",
+      "isolation_relays"
+    ],
+    [
+      "4a835a31-39cf-4ae6-91ff-f3da8e710174",
+      "rtc"
+    ],
+    [
+      "ee16a6e9-c1a0-47c7-82b8-ab9544a4c8c6",
+      "peripherals"
+    ],
+    [
+      "45cdec0c-c675-4cd4-ae35-712b612c9f5f",
+      "connectors"
     ]
   ],
   "text_variables": {}

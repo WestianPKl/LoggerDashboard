@@ -58,35 +58,35 @@
           ""
         ],
         [
-          "unconnected_items|139405331|81345000|4b55e2f9-9642-49c8-a4ba-db0c8cd3b46a|8c0c06fa-07fb-4138-9255-2593204752a3",
+          "unconnected_items|139405331|81345000|F.Cu|4|4b55e2f9-9642-49c8-a4ba-db0c8cd3b46a|8c0c06fa-07fb-4138-9255-2593204752a3",
           ""
         ],
         [
-          "unconnected_items|160610000|67920000|1c5151e0-4ee8-473d-8fd0-e35236836c85|0ae491ce-42e9-476f-b1ff-383b44d7cd61",
+          "unconnected_items|160610000|67920000|F.Cu|4|1c5151e0-4ee8-473d-8fd0-e35236836c85|0ae491ce-42e9-476f-b1ff-383b44d7cd61",
           ""
         ],
         [
-          "unconnected_items|160610000|67920000|1c5151e0-4ee8-473d-8fd0-e35236836c85|3c95e9ea-efa2-4bce-bed4-bf30dd4f21c6",
+          "unconnected_items|160610000|67920000|F.Cu|4|1c5151e0-4ee8-473d-8fd0-e35236836c85|3c95e9ea-efa2-4bce-bed4-bf30dd4f21c6",
           ""
         ],
         [
-          "unconnected_items|160610000|93320000|afc9ede8-2ab8-43a0-85b5-4f04e5ec2dd0|6b7bb3a4-c3e1-4185-8dbf-87513e7465c5",
+          "unconnected_items|160610000|93320000|F.Cu|4|afc9ede8-2ab8-43a0-85b5-4f04e5ec2dd0|6b7bb3a4-c3e1-4185-8dbf-87513e7465c5",
           ""
         ],
         [
-          "unconnected_items|170800000|113000000|f58c381c-2313-40da-ad41-2d2dc56c4205|70f0dd86-eab1-45d9-bb1e-b90d5a3a7f4b",
+          "unconnected_items|170800000|113000000|F.Cu|4|f58c381c-2313-40da-ad41-2d2dc56c4205|70f0dd86-eab1-45d9-bb1e-b90d5a3a7f4b",
           ""
         ],
         [
-          "unconnected_items|178390000|80620000|d920a962-4827-4124-bdc5-c674b8817a28|495b0e26-998e-41ce-8f0a-8dd15ca7cb41",
+          "unconnected_items|178390000|80620000|F.Cu|4|d920a962-4827-4124-bdc5-c674b8817a28|495b0e26-998e-41ce-8f0a-8dd15ca7cb41",
           ""
         ],
         [
-          "unconnected_items|178390000|80620000|d920a962-4827-4124-bdc5-c674b8817a28|d728f26d-4aff-45ba-a696-64620d9344fe",
+          "unconnected_items|178390000|80620000|F.Cu|4|d920a962-4827-4124-bdc5-c674b8817a28|d728f26d-4aff-45ba-a696-64620d9344fe",
           ""
         ],
         [
-          "unconnected_items|181000000|65000000|baec4604-3293-4f60-b48b-7183c8b479e1|c4b95d6d-1439-4fa4-a47e-8e5698f47c44",
+          "unconnected_items|181000000|65000000|F.Cu|4|baec4604-3293-4f60-b48b-7183c8b479e1|c4b95d6d-1439-4fa4-a47e-8e5698f47c44",
           ""
         ]
       ],
@@ -477,6 +477,7 @@
       "single_global_label": "ignore",
       "unannotated": "error",
       "unconnected_wire_endpoint": "warning",
+      "undefined_netclass": "error",
       "unit_value_mismatch": "error",
       "unresolved_variable": "error",
       "wire_dangling": "error"
