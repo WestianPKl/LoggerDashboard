@@ -15,9 +15,9 @@ if(WIN32)
 else()
     set(USERHOME $ENV{HOME})
 endif()
-set(sdkVersion 2.1.1)
+set(sdkVersion 2.2.0)
 set(toolchainVersion 14_2_Rel1)
-set(picotoolVersion 2.1.1)
+set(picotoolVersion 2.2.0)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
     include(${picoVscode})
@@ -42,6 +42,8 @@ add_executable(Logger_Pico
     lcd_1602_i2c.cpp
     bme280.cpp
     tcp.cpp
+    config.cpp
+    com.cpp
 )
 
 
@@ -71,6 +73,7 @@ target_link_libraries(Logger_Pico
         hardware_pwm
         hardware_timer
         hardware_watchdog
+        hardware_flash
         pico_cyw43_arch_lwip_poll
         pico_lwip_sntp
         )

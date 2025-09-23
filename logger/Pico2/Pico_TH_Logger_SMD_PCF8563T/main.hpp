@@ -1,61 +1,70 @@
-
 /**
  * @file main.hpp
- * @brief Central compile-time configuration for the Pico TH Logger firmware (PCF8563T variant).
+ * @brief Central build-time configuration for the Pico_TH_Logger_Relay_SMD_PCF8563T firmware.
  *
- * Provides device identity, backend API endpoints, server connection details,
- * peripheral feature toggles, Wi‑Fi credentials, and telemetry timing.
+ * Defines compile-time constants controlling:
+ * - Backend/API endpoints:
+ *   - TOKEN_PATH: REST endpoint to obtain/refresh a data token.
+ *   - DATA_PATH: REST endpoint for periodic telemetry uploads.
+ *   - ERROR_PATH: REST endpoint for error reporting.
+ * - TCP connectivity:
+ *   - SERVER_IP: target host for TCP connections (string).
+ *   - SERVER_PORT: target TCP port (integer).
+ * - Identification:
+ *   - LOGGER_ID: unique logger identifier (integer).
+ *   - SENSOR_ID: unique sensor/module identifier (integer).
+ * - Equipment feature toggles:
+ *   - TEMPERATURE / HUMIDITY / PRESSURE: enable/disable measurements (1=enabled, 0=disabled).
+ *   - SHT: sensor family selector (allowed: 0=BME280, 30=SHT30, 40=SHT40).
+ *   - CLOCK: enable external RTC integration (1=enable).
+ *   - SET_TIME: set system time from RTC/network at startup (1=enable).
+ * - Wi‑Fi:
+ *   - WIFI_ENABLE: enable Wi‑Fi stack (1=enable).
+ *   - WIFI_SSID / WIFI_PASSWORD: Wi‑Fi credentials (use secrets management in production).
+ * - Telemetry scheduling:
+ *   - POST_TIME: interval between data posts in milliseconds (minimum effective runtime value: 1000 ms).
  *
- * Identity:
- * - LOGGER_ID: Unique device identifier used by the backend.
- * - SENSOR_ID: Physical sensor assembly identifier associated with readings.
+ * Usage notes:
+ * - These are preprocessor macros; changes require recompilation.
+ * - Ensure LOGGER_ID and SENSOR_ID match backend records for proper attribution.
+ * - When selecting SHT!=0, include the appropriate SHT3x/SHT4x drivers and disable BME280 in your build; when SHT==0, include BME280 support.
+ * - POST_TIME trades off network load vs. data latency; enforce a lower bound of 1000 ms at runtime.
+ * - Consider environment-specific overrides (e.g., separate header per deployment or generated config) to avoid hardcoding sensitive data.
  *
- * Backend/API:
- * - TOKEN_PATH: Relative endpoint to obtain an authorization/session token.
- * - DATA_PATH: Relative endpoint for posting telemetry data.
- * - ERROR_PATH: Relative endpoint for reporting firmware/runtime errors.
- * - SERVER_IP / SERVER_PORT: Backend host and TCP port.
- *
- * Sensors and peripherals:
- * - TEMPERATURE, HUMIDITY, PRESSURE: Feature switches (1 = enabled, 0 = disabled).
- * - SHT: Sensor selector (0 = BME280, 30 = SHT30, 40 = SHT40).
- * - CLOCK: Enables use of the external PCF8563T real-time clock.
- * - SET_TIME: If enabled, synchronize RTC time at startup.
- *
- * Connectivity:
- * - WIFI_ENABLE: Global Wi‑Fi switch (0 = disabled, 1 = enabled).
- * - WIFI_SSID / WIFI_PASSWORD: Network credentials used when Wi‑Fi is enabled.
- *
- * Telemetry:
- * - POST_TIME: Interval between data transmissions, in milliseconds.
- *
- * Notes:
- * - Adjust IDs, endpoints, and server settings per deployment.
- * - Treat Wi‑Fi credentials as secrets; avoid committing real values.
- * - Disabling unused features at compile time reduces footprint and power use.
+ * Security considerations:
+ * - Do not commit real WIFI_SSID/WIFI_PASSWORD to version control; inject via CI/CD or local, untracked headers.
+ * - Validate API endpoints and handle failures to avoid tight retry loops when posting to DATA_PATH/ERROR_PATH.
  */
 #ifndef __MAIN_HPP__
 #define __MAIN_HPP__
 
-// Main settings:
-#define WIFI_SSID       "TP-Link_0A7B"
-#define WIFI_PASSWORD   "12345678"
-#define LOGGER_ID       1
-#define SENSOR_ID       4
+// === Backend/API ===
 #define TOKEN_PATH      "/api/data/data-token"
-#define DATA_PATH        "/api/data/data-log"
+#define DATA_PATH       "/api/data/data-log"
 #define ERROR_PATH      "/api/common/error-log"
-#define SERVER_IP       "192.168.18.124"
+
+// === TCP ===
+#define SERVER_IP       "192.168.18.127"
 #define SERVER_PORT     3000
 
-// Equipment settings:
+// === Logger and Sensor IDs ===
+#define LOGGER_ID       1
+#define SENSOR_ID       4
+
+// === Equipment ===
 #define TEMPERATURE     1
 #define HUMIDITY        1
 #define PRESSURE        1
-#define SHT             0 // 0 - BME280 / 30 - SHT30 / 40 - SHT40
+#define SHT             0     // 0 - BME280 / 30 - SHT30 / 40 - SHT40
 #define CLOCK           1
-#define WIFI_ENABLE     1 // 0 - disabled / 1 - enabled
 #define SET_TIME        1
-#define POST_TIME       600000
+
+// === Wi-Fi ===
+#define WIFI_ENABLE     1
+#define WIFI_SSID       "TP-Link_0A7B"
+#define WIFI_PASSWORD   "12345678"
+
+// === Telemetry ===
+#define POST_TIME       600000  // ms (min. 1000 in runtime)
 
 #endif /* __MAIN_HPP__ */

@@ -1,39 +1,43 @@
 /**
- * @file com.hpp
- * @brief Communication service layer for USB CDC (TinyUSB) console integration.
+ * @file /Users/piotrklys/Documents/_Repositories/LoggerDashboard/logger/Pico2/Pico_TH_Logger_Relay_SMD_PCF8563T/com.hpp
+ * @brief Communication utilities for USB CDC on the Pico TH Logger.
  *
- * Declares the polling routine and the TinyUSB CDC receive callback used to
- * integrate the USB serial console with the application's main loop.
+ * Declares the non-blocking poll routine for the communication layer,
+ * a query for whether the initial "ready" banner has been transmitted,
+ * and the TinyUSB CDC receive callback.
+ *
+ * Include this header in application code integrating with TinyUSB.
+ * Unless noted otherwise, functions are intended to be called from the main loop.
  */
 
 /**
- * @brief Service the communication layer.
+ * @brief Services the communication layer.
  *
- * Non-blocking pump that processes received data, advances protocol/state machines,
- * and emits pending responses. Call this frequently from the main loop.
+ * Drives transmit/receive state machines and performs any deferred work.
+ * Call this frequently from the main loop or a periodic task; the function
+ * is non-blocking.
  *
- * Safe to call even when USB is not connected.
+ * @note Should not be called from interrupt context.
  */
  
 /**
- * @brief Check whether the "ready" banner has been sent to the host.
+ * @brief Indicates whether the "ready" banner has been sent over CDC.
  *
- * Use this to ensure the banner is printed only once per boot/session.
- * @return true if the banner was already sent; false otherwise.
+ * @return true if the banner has already been transmitted; false otherwise.
  */
-
+ 
 /**
  * @brief TinyUSB CDC receive callback.
  *
  * Invoked by TinyUSB when new data is available on a CDC interface.
- * Do minimal work here and avoid blocking. Typically, stash incoming bytes
- * into a buffer and let com_poll() process them later.
+ * Keep the implementation short; defer heavy processing to com_poll().
  *
  * @param itf CDC interface number that received data.
- * @note Called from TinyUSB context; avoid heavy work and blocking calls.
+ * @warning Typically called from TinyUSB context (ISR or TinyUSB task, depending on configuration);
+ *          avoid blocking operations and heavy processing here.
+ * @see com_poll()
  */
 #pragma once
-
 #ifndef __COM_HPP__
 #define __COM_HPP__
 
@@ -42,6 +46,7 @@
 
 void com_poll();
 bool com_ready_banner_sent();
+
 extern "C" void tud_cdc_rx_cb(uint8_t);
 
 #endif /* __COM_HPP__ */

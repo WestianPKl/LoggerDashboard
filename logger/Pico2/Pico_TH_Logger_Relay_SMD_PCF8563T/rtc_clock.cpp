@@ -1,177 +1,237 @@
 #include "rtc_clock.hpp"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
 
-#define PCF8563_I2C_ADDR 0x51
+#define PCF8563_I2C_ADDR  0x51
 
-/**
- * @brief Converts an unsigned decimal value to packed BCD (Binary-Coded Decimal).
- *
- * Transforms a base-10 value in the range 0–99 into packed BCD, where the upper nibble
- * encodes the tens digit and the lower nibble encodes the ones digit. This format is
- * commonly required by RTC devices and other peripherals that store numeric fields in BCD.
- *
- * @param val Decimal value to convert (expected range: 0–99).
- * @return Packed BCD representation of the input value (e.g., 42 -> 0x42, 7 -> 0x07).
- *
- * @note No range checking is performed. Values greater than 99 will produce an invalid
- *       or non-standard BCD encoding.
- */
-uint8_t dec2bcd(uint8_t val) { return ((val / 10) << 4) | (val % 10); }
-
-
-/**
- * @brief Convert a packed BCD (Binary-Coded Decimal) byte to its decimal value.
- *
- * @param val Packed BCD value (upper nibble = tens, lower nibble = ones). Expected range: 0x00–0x99.
- * @return Decimal value in the range 0–99 corresponding to the BCD input.
- *
- * @note The function does not validate that each nibble is a valid decimal digit (0–9);
- *       non-BCD inputs will yield a numerically computed but semantically invalid result.
- * @remark Commonly used to decode BCD-encoded RTC register fields (e.g., seconds/minutes).
- */
-uint8_t bcd2dec(uint8_t val) { return ((val >> 4) * 10) + (val & 0x0F); }
+#define REG_CTRL1         0x00
+#define REG_CTRL2         0x01
+#define REG_SECONDS       0x02
+#define REG_MINUTES       0x03
+#define REG_HOURS         0x04
+#define REG_DAY           0x05
+#define REG_WEEKDAY       0x06
+#define REG_MONTH         0x07
+#define REG_YEAR          0x08
+#define REG_ALRM_MIN      0x09
+#define REG_ALRM_HOUR     0x0A
+#define REG_ALRM_DAY      0x0B
+#define REG_ALRM_WDAY     0x0C
+#define REG_CLKOUT        0x0D
 
 /**
- * Initializes the PCF8563T real-time clock over I2C and enables a 1 Hz clock output.
+ * Converts an unsigned decimal value to packed BCD (Binary-Coded Decimal).
  *
- * This routine:
- * - Writes 0x00 to control/status registers 0x00 and 0x01 to place the device in normal mode,
- *   disable test/interrupt sources, and clear any pending flags.
- * - Enables a 1 Hz square-wave on the CLKOUT pin via pcf8563t_set_clkout_1hz(..., true).
+ * Recommended input range: 0–99.
+ * For values >= 100, only the last two decimal digits are encoded (val % 100).
+ * The tens digit is placed in the upper nibble; the ones digit in the lower nibble.
  *
- * Notes:
- * - The I2C peripheral must be initialized and configured (pins, speed) before calling.
- * - The device address is taken from PCF8563_I2C_ADDR, which must be defined elsewhere.
- * - Uses blocking I2C transfers and does not check or return error codes from the bus.
- * - This function does not set the current date/time registers.
+ * Examples: 7 -> 0x07, 42 -> 0x42.
+ * Commonly used when writing time/date fields to RTC registers (e.g., PCF8563T).
  *
- * Potential side effects:
- * - Drives the PCF8563T CLKOUT pin at 1 Hz, which may impact power consumption and pin muxing.
- *
- * Thread-safety:
- * - Not thread-safe if the same I2C instance is shared without external synchronization.
- *
- * @param i2c Pointer to the initialized I2C instance (e.g., i2c0 or i2c1) connected to the RTC.
+ * @param val Decimal value to convert.
+ * @return Packed BCD representation of the input.
  */
-void pcf8563t_init(i2c_inst_t *i2c){
-    uint8_t buf1[] = {0x00, 0x00};
-    i2c_write_blocking(i2c, PCF8563_I2C_ADDR, buf1, 2, false);
-    uint8_t buf2[] = {0x01, 0x00};
-    i2c_write_blocking(i2c, PCF8563_I2C_ADDR, buf2, 2, false);
-    pcf8563t_set_clkout_1hz(i2c, true);
+static inline uint8_t dec2bcd(uint8_t val) { return ((val / 10) << 4) | (val % 10); }
+
+/**
+ * Converts a packed Binary-Coded Decimal (BCD) byte to its decimal value.
+ *
+ * The input is expected to be in packed BCD format (0x00–0x99), where the high
+ * nibble encodes the tens digit (0–9) and the low nibble encodes the ones digit (0–9).
+ *
+ * @param val Packed BCD byte (e.g., 0x42 represents decimal 42).
+ * @return Unsigned 8-bit decimal value in the range 0–99.
+ *
+ * @note No validation is performed; if either nibble is greater than 9, the result
+ *       is not meaningful for non-BCD inputs.
+ */
+static inline uint8_t bcd2dec(uint8_t val) { return ((val >> 4) * 10) + (val & 0x0F); }
+
+/**
+ * @brief Portable equivalent of timegm: convert a UTC broken-down time to time_t.
+ *
+ * Temporarily sets the process time zone to UTC ("TZ=UTC0"), calls mktime(3) to
+ * interpret the provided struct tm as UTC, then restores the original time zone.
+ *
+ * @param t Pointer to a struct tm representing a UTC time. The structure may be
+ *          normalized/modified by mktime (e.g., fields adjusted, tm_isdst set).
+ *
+ * @return Seconds since the Unix epoch (UTC) on success; (time_t)-1 on failure
+ *         if the time cannot be represented.
+ *
+ * @note Not thread-safe or async-signal-safe: it modifies process-global state
+ *       (the TZ environment variable) and calls tzset(3). Prefer native timegm(3)
+ *       where available. The argument must not be null.
+ */
+static time_t timegm_compat(struct tm* t) {
+    const char* old_tz = getenv("TZ");
+    if (old_tz) old_tz = strdup(old_tz);
+
+    setenv("TZ", "UTC0", 1);
+    tzset();
+    time_t epoch = mktime(t);
+
+    if (old_tz) {
+        setenv("TZ", old_tz, 1);
+        free((void*)old_tz);
+    } else {
+        unsetenv("TZ");
+    }
+    tzset();
+    return epoch;
 }
 
 /**
- * @brief Set the current date and time on a PCF8563T RTC over I2C.
+ * @brief Initializes the PCF8563T real-time clock over I2C.
  *
- * Encodes the supplied date/time fields into BCD and writes RTC registers 0x02..0x08
- * in the order: seconds, minutes, hours, day-of-month, weekday, month (with century),
- * and year (00–99). The seconds VL (validity) flag is cleared, hours are encoded in
- * 24-hour format, and the month register’s century bit is set for years in 1900–1999.
+ * Writes default values to Control/Status 1 and 2 registers (0x00) to clear
+ * pending flags and ensure the oscillator runs, then disables the 1 Hz CLKOUT output.
  *
- * Ranges and encoding:
- * - sec: 0–59 (BCD), stored in 7 bits; VL bit (bit7) is forced to 0.
- * - min: 0–59 (BCD), stored in 7 bits.
- * - hour: 0–23 (BCD), stored in 6 bits (24-hour).
- * - day_of_week: 0–6 (BCD), stored in 3 bits; mapping is application-defined.
- * - day_of_month: 1–31 (BCD), stored in 6 bits.
- * - month: 1–12 (BCD), stored in 5 bits; month bit7 is the century flag (C).
- * - year: full year as 1900–2099; internally reduced to 00–99 (BCD).
- *   - 2000–2099: C=0 and year = year - 2000.
- *   - 1900–1999: C=1 and year = year - 1900.
- *   - Other years: clamped to 00 with C=1.
+ * @param i2c Pointer to an initialized I2C instance used to communicate with the PCF8563T.
+ * @return true if both control registers were written successfully; false otherwise.
  *
- * @param i2c          Pointer to an initialized I2C instance.
- * @param sec          Seconds [0..59].
- * @param min          Minutes [0..59].
- * @param hour         Hours [0..23].
- * @param day_of_week  Day of week [0..6] (application convention).
- * @param day_of_month Day of month [1..31].
- * @param month        Month [1..12].
- * @param year         Full year (e.g., 2025). Supported window: 1900–2099.
+ * @pre The I2C bus must be initialized and the device reachable at PCF8563_I2C_ADDR.
+ * @post The RTC oscillator is running; CLKOUT at 1 Hz is disabled; time/date registers are unchanged.
  *
- * @return true if all I2C writes succeed; false if any write fails.
- *
- * @pre The I2C bus must be initialized, the PCF8563T must be present at PCF8563_I2C_ADDR,
- *      and the provided fields must be within valid ranges.
- * @note No runtime validation beyond bitfield masking is performed; invalid inputs may
- *       produce undefined RTC state. Each register write issues a STOP condition.
+ * @note This routine relies on I2C ACKs only (no device ID readback) and ignores
+ *       any error returned by the CLKOUT configuration helper.
  */
-bool pcf8563t_set_time(i2c_inst_t *i2c, uint sec, uint min, uint hour,
-                       uint day_of_week, uint day_of_month,
-                       uint month, uint year) {
-    uint8_t bcd_sec    = dec2bcd(sec)  & 0x7F; // VL=0
-    uint8_t bcd_min    = dec2bcd(min)  & 0x7F;
-    uint8_t bcd_hour   = dec2bcd(hour) & 0x3F;
-    uint8_t bcd_day    = dec2bcd(day_of_month) & 0x3F;
-    uint8_t bcd_weekday= dec2bcd(day_of_week)  & 0x07;
-    uint8_t bcd_month  = dec2bcd(month) & 0x1F;
-    if (year >= 2000) {
-        year -= 2000;
-    } else {
-        bcd_month |= 0x80;
-        year = (year >= 1900) ? year - 1900 : 0;
-    }
-    uint8_t bcd_year = dec2bcd(year);
+bool pcf8563t_init(i2c_inst_t *i2c){
+    uint8_t wr1[] = {REG_CTRL1, 0x00};
+    uint8_t wr2[] = {REG_CTRL2, 0x00};
+    if (i2c_write_blocking(i2c, PCF8563_I2C_ADDR, wr1, sizeof(wr1), false) != (int)sizeof(wr1)) return false;
+    if (i2c_write_blocking(i2c, PCF8563_I2C_ADDR, wr2, sizeof(wr2), false) != (int)sizeof(wr2)) return false;
 
-    uint8_t current_val[7] = {
-        bcd_sec, bcd_min, bcd_hour, bcd_day, bcd_weekday, bcd_month, bcd_year
-    };
-
-    uint8_t buf[2];
-    for (int i = 0; i < 7; ++i) {
-        buf[0] = (uint8_t)(0x02 + i);
-        buf[1] = current_val[i];
-        int wr = i2c_write_blocking(i2c, PCF8563_I2C_ADDR, buf, 2, false);
-        if (wr < 0) return false;
-    }
+    pcf8563t_set_clkout_1hz(i2c, false);
     return true;
 }
 
 /**
- * @brief Read current time from a PCF8563/PCF8563T RTC over I2C and convert BCD fields to integers.
+ * @brief Sets the date and time on a PCF8563/PCF8563T RTC via I2C.
  *
- * Reads 7 bytes starting at register 0x02 (seconds..years). If the VL (Voltage Low/oscillator stopped)
- * flag is set in the seconds register, the function reports failure.
+ * Converts the provided time fields to BCD and writes the seconds through year
+ * registers in a single burst starting at REG_SECONDS. The seconds VL flag is
+ * cleared, the weekday is stored as a 3-bit value, and the month register’s
+ * century bit (bit 7) is managed automatically:
+ *   - year >= 2000: century bit cleared (0), year stored as (year - 2000).
+ *   - 1900 <= year < 2000: century bit set (1), year stored as (year - 1900).
+ *   - year  < 1900: century bit set (1), year stored as 00.
  *
- * Output layout (converted_time must have size >= 7):
- *   [0] seconds  (0–59)
- *   [1] minutes  (0–59)
- *   [2] hours    (0–23)
- *   [3] day      (1–31)
- *   [4] weekday  (0–6, 0 = Sunday per PCF8563)
- *   [5] month    (1–12)
- *   [6] year     (full year, e.g., 2025)
+ * Input validation:
+ *   - sec:          0..59
+ *   - min:          0..59
+ *   - hour:         0..23 (24-hour format)
+ *   - day_of_month: 1..31
+ *   - month:        1..12
+ *   - day_of_week:  0..6 (mapping is application-defined)
  *
- * All fields are decoded from BCD. The century is derived from the Century bit (bit 7) in the Months register:
- *   - 0 => year = 2000 + YY
- *   - 1 => year = 1900 + YY
+ * No cross-field validation is performed (e.g., month/day pairing or leap years).
+ * Performs a blocking I2C write; the operation is not re-entrant.
  *
- * @param i2c            Initialized Pico SDK I2C instance to use for the transaction.
- * @param converted_time Pointer to an array of at least 7 uint16_t elements to receive the decoded time.
- * @return true on success; false if the I2C transfer fails or if the VL flag indicates invalid time.
+ * @param i2c          Pointer to the I2C instance used for communication.
+ * @param sec          Seconds (0–59).
+ * @param min          Minutes (0–59).
+ * @param hour         Hours (0–23), 24-hour format.
+ * @param day_of_week  Day of week (0–6).
+ * @param day_of_month Day of month (1–31).
+ * @param month        Month (1–12).
+ * @param year         Absolute year (e.g., 2025). Intended range: 1900–2099.
  *
- * @note Performs a write of the start register followed by a read (repeated-start).
- * @warning Returns false if the oscillator has stopped (VL=1); time must be set before reliable reads.
+ * @return true on success (all bytes written); false if input validation fails
+ *         or the I2C write does not transfer the expected number of bytes.
+ *
+ * @warning Years outside 1900–2099 may produce undefined or unintended values in the RTC.
  */
-bool pcf8563t_read_time(i2c_inst_t *i2c, uint16_t *converted_time) {
-    uint8_t buffer[7];
-    uint8_t addr = 0x02;
-    int wr = i2c_write_blocking(i2c, PCF8563_I2C_ADDR, &addr, 1, true);
-    if (wr < 0) return false;
-    int rr = i2c_read_blocking(i2c, PCF8563_I2C_ADDR, buffer, 7, false);
-    if (rr < 0) return false;
-
-    if (buffer[0] & 0x80) {
+bool pcf8563t_set_time(i2c_inst_t *i2c, uint sec, uint min, uint hour,
+                       uint day_of_week, uint day_of_month,
+                       uint month, uint year) {
+    if (sec > 59 || min > 59 || hour > 23 ||
+        day_of_month < 1 || day_of_month > 31 ||
+        month < 1 || month > 12 ||
+        day_of_week > 6) {
         return false;
     }
 
-    converted_time[0] = bcd2dec(buffer[0] & 0x7F); // sec
-    converted_time[1] = bcd2dec(buffer[1] & 0x7F); // min
-    converted_time[2] = bcd2dec(buffer[2] & 0x3F); // hour
-    converted_time[3] = bcd2dec(buffer[3] & 0x3F); // day
-    converted_time[4] = bcd2dec(buffer[4] & 0x07); // weekday
-    converted_time[5] = bcd2dec(buffer[5] & 0x1F); // month
+    uint8_t bcd_sec     = dec2bcd((uint8_t)sec)          & 0x7F;
+    uint8_t bcd_min     = dec2bcd((uint8_t)min)          & 0x7F;
+    uint8_t bcd_hour    = dec2bcd((uint8_t)hour)         & 0x3F;
+    uint8_t bcd_day     = dec2bcd((uint8_t)day_of_month) & 0x3F;
+    uint8_t bin_wday    = (uint8_t)day_of_week & 0x07;
+    uint8_t bcd_month   = dec2bcd((uint8_t)month)        & 0x1F;
+
+    uint year2 = year;
+    if (year2 >= 2000) {
+        year2 -= 2000;
+    } else {
+        bcd_month |= 0x80;
+        year2 = (year2 >= 1900) ? (year2 - 1900) : 0;
+    }
+    uint8_t bcd_year = dec2bcd((uint8_t)year2);
+
+    uint8_t frame[1 + 7];
+    frame[0] = REG_SECONDS;
+    frame[1] = bcd_sec;
+    frame[2] = bcd_min;
+    frame[3] = bcd_hour;
+    frame[4] = bcd_day;
+    frame[5] = bin_wday;
+    frame[6] = bcd_month;
+    frame[7] = bcd_year;
+
+    int wr = i2c_write_blocking(i2c, PCF8563_I2C_ADDR, frame, (int)sizeof(frame), false);
+    return wr == (int)sizeof(frame);
+}
+
+/**
+ * @brief Reads the current time from a PCF8563 RTC over I2C and decodes it to integers.
+ *
+ * Performs a blocking I2C read of 7 consecutive registers starting at REG_SECONDS and
+ * converts BCD-encoded fields into human-readable integers. On success, writes the
+ * decoded values into the provided array as follows:
+ *   converted_time[0] = seconds (0–59)
+ *   converted_time[1] = minutes (0–59)
+ *   converted_time[2] = hours   (0–23)
+ *   converted_time[3] = day     (1–31)
+ *   converted_time[4] = weekday (0–6, as provided by the chip)
+ *   converted_time[5] = month   (1–12)
+ *   converted_time[6] = year    (full year, e.g., 1999 or 2025; century derived from Month register)
+ *
+ * The function fails and returns false if:
+ *   - converted_time is null,
+ *   - the I2C write or read operation fails,
+ *   - the oscillator stop (OS) flag is set in the Seconds register (time invalid/unstable).
+ *
+ * Century handling:
+ *   - If the Century bit (bit 7) in the Month register is set, year = 1900 + BCD(Year).
+ *   - Otherwise, year = 2000 + BCD(Year).
+ *
+ * @param i2c Initialized Pico SDK I2C instance connected to the PCF8563 device.
+ * @param[out] converted_time Pointer to an array of at least 7 uint16_t elements to receive the decoded time/date.
+ * @return true on success; false on error or if the OS flag indicates invalid time.
+ *
+ * @note This function uses blocking I2C transfers and does not allocate memory.
+ * @note Weekday is not BCD-encoded on PCF8563; it is masked to the lower 3 bits.
+ */
+bool pcf8563t_read_time(i2c_inst_t *i2c, uint16_t *converted_time) {
+    if (!converted_time) return false;
+
+    uint8_t addr = REG_SECONDS;
+    if (i2c_write_blocking(i2c, PCF8563_I2C_ADDR, &addr, 1, true) != 1) return false;
+
+    uint8_t buffer[7];
+    if (i2c_read_blocking(i2c, PCF8563_I2C_ADDR, buffer, 7, false) != 7) return false;
+
+    if (buffer[0] & 0x80) return false;
+
+    converted_time[0] = bcd2dec(buffer[0] & 0x7F);
+    converted_time[1] = bcd2dec(buffer[1] & 0x7F);
+    converted_time[2] = bcd2dec(buffer[2] & 0x3F);
+    converted_time[3] = bcd2dec(buffer[3] & 0x3F); 
+    converted_time[4] = (buffer[4] & 0x07);
+    converted_time[5] = bcd2dec(buffer[5] & 0x1F);
 
     if (buffer[5] & 0x80) {
         converted_time[6] = 1900 + bcd2dec(buffer[6]);
@@ -182,135 +242,234 @@ bool pcf8563t_read_time(i2c_inst_t *i2c, uint16_t *converted_time) {
 }
 
 /**
- * @brief Configures the PCF8563T CLKOUT pin for a 1 Hz square wave or disables it.
+ * @brief Enable or disable a 1 Hz square-wave on the PCF8563T CLKOUT pin.
  *
- * Writes the CLKOUT control register (0x0D) on the PCF8563T:
- * - When enable is true: sets CLKOUT_EN (bit 7) and COF[1:0] = 0b11 to output 1 Hz.
- * - When enable is false: writes 0x00 to disable CLKOUT (pin becomes high-impedance).
+ * Writes the CLKOUT control register of the PCF8563T to either enable a 1 Hz
+ * output on its CLKOUT pin or disable the output.
  *
- * This function performs a blocking I2C write and issues a STOP condition.
+ * @param i2c    Pointer to an initialized I2C instance used to communicate with the RTC.
+ * @param enable Set to true to enable CLKOUT at 1 Hz; set to false to disable CLKOUT.
  *
- * Preconditions:
- * - The provided I2C instance is initialized and connected to the PCF8563T.
- * - PCF8563_I2C_ADDR matches the device address on the bus.
+ * @pre The I2C bus must be initialized and the PCF8563T must be reachable at PCF8563_I2C_ADDR.
  *
- * Notes:
- * - The entire CLKOUT control register is overwritten; any previous CLKOUT configuration is lost.
- * - No error handling is performed here; I2C write failures are not reported to the caller.
+ * @post When enabled and the write succeeds, the CLKOUT pin outputs a 1 Hz square wave.
  *
- * @param i2c Pointer to the initialized I2C instance used to communicate with the RTC.
- * @param enable Set to true to enable 1 Hz on CLKOUT; set to false to disable CLKOUT.
+ * @note This function performs a blocking I2C write and ignores the return value.
+ *       If you need error handling, check the result of i2c_write_blocking().
+ *
+ * @details This call overwrites any previous CLKOUT frequency configuration.
  */
 void pcf8563t_set_clkout_1hz(i2c_inst_t *i2c, bool enable) {
-    uint8_t val = enable ? 0x80 | 0x03 : 0x00;
-    uint8_t buf[] = {0x0D, val};
-    i2c_write_blocking(i2c, PCF8563_I2C_ADDR, buf, 2, false);
+    uint8_t val = enable ? (uint8_t)(0x80 | 0x03) : (uint8_t)0x00;
+    uint8_t buf[] = {REG_CLKOUT, val};
+    (void)i2c_write_blocking(i2c, PCF8563_I2C_ADDR, buf, 2, false);
 }
 
 /**
- * Configure the PCF8563 alarm registers (minute, hour, day, weekday) and write them over I2C.
+ * Configure the PCF8563 alarm and enable/disable individual comparators.
  *
- * Behavior:
- * - Values are converted to BCD and masked to the PCF8563 field widths.
- * - For minute/hour/day, passing 0xFF disables matching for that field (AEN bit set).
- * - Weekday matching is controlled by use_weekday:
- *   - If true, the 'weekday' parameter (0–6 per PCF8563) is written to the weekday alarm register.
- *   - If false, the weekday alarm register is disabled (AEN bit set) regardless of 'weekday'.
- * - The PCF8563 alarm asserts only when all enabled fields match the current time.
- *   This means if both a valid 'day' and use_weekday=true are provided, both must match to trigger.
+ * Each alarm field (minute, hour, day-of-month, weekday) can be enabled for comparison
+ * or disabled ("don't care"). A field is disabled by passing 0xFF, which sets the field's
+ * AEN bit (bit 7). Enabled fields are written in BCD and masked to the device limits
+ * (minute: 0–59, hour: 0–23, day: 1–31, weekday: 0–6 per device convention).
  *
- * I2C transfer:
- * - Writes a 5-byte sequence starting at register 0x09 (minute alarm), followed by hour, day, and weekday.
- * - The transfer is performed with i2c_write_blocking to PCF8563_I2C_ADDR.
+ * If use_weekday is true, the weekday comparator is used; otherwise the weekday comparator
+ * is disabled regardless of the 'weekday' argument. The day-of-month comparator is controlled
+ * solely by the 'day' argument.
  *
- * Parameters:
- * - i2c:       RP2040 I2C instance to use.
- * - min:       0–59, or 0xFF to disable minute match.
- * - hour:      0–23, or 0xFF to disable hour match.
- * - day:       1–31, or 0xFF to disable day-of-month match.
- * - weekday:   0–6 (per PCF8563) when use_weekday is true; ignored when use_weekday is false.
- * - use_weekday: If true, enable weekday-based matching; if false, disable weekday matching.
+ * The function performs a single I2C write starting at REG_ALRM_MIN and does not modify
+ * control/status flags. Any pending alarm flags must be cleared separately.
  *
- * Notes:
- * - Field masks: minute uses 7 bits, hour 6 bits, day 6 bits, weekday 3 bits; bit 7 is the AEN disable bit.
- * - Invalid ranges are not validated here; the caller must provide values within the listed ranges.
+ * @param i2c         Initialized I2C instance to use.
+ * @param min         Alarm minute [0–59], or 0xFF to disable minute compare.
+ * @param hour        Alarm hour [0–23], or 0xFF to disable hour compare.
+ * @param day         Alarm day-of-month [1–31], or 0xFF to disable day compare.
+ * @param weekday     Alarm weekday [0–6], or 0xFF to disable; only considered when use_weekday is true.
+ * @param use_weekday When true, enable weekday comparison; when false, disable weekday comparison.
  */
 void rtc_alarm_set(i2c_inst_t *i2c, uint8_t min, uint8_t hour,
                    uint8_t day, uint8_t weekday, bool use_weekday) {
-    uint8_t alarm_min  = (min  == 0xFF) ? 0x80 : (dec2bcd(min)  & 0x7F);
-    uint8_t alarm_hour = (hour == 0xFF) ? 0x80 : (dec2bcd(hour) & 0x3F);
-    uint8_t alarm_day  = (day  == 0xFF) ? 0x80 : (dec2bcd(day)  & 0x3F);
-    uint8_t alarm_wday;
-    if (weekday == 0xFF) {
-        alarm_wday = 0x80;
-    } else {
-        alarm_wday = dec2bcd(weekday) & 0x07;
-    }
+    uint8_t alarm_min   = (min  == 0xFF) ? 0x80 : (dec2bcd(min)  & 0x7F);
+    uint8_t alarm_hour  = (hour == 0xFF) ? 0x80 : (dec2bcd(hour) & 0x3F);
+    uint8_t alarm_day   = (day  == 0xFF) ? 0x80 : (dec2bcd(day)  & 0x3F);
+    uint8_t alarm_wday  = (weekday == 0xFF) ? 0x80 : (weekday & 0x07);
 
     uint8_t seq[5] = {
-        0x09, alarm_min, alarm_hour, alarm_day, (use_weekday ? (alarm_wday & 0x07) : 0x80)
+        REG_ALRM_MIN,
+        alarm_min,
+        alarm_hour,
+        alarm_day,
+        use_weekday ? (alarm_wday & 0x07) : 0x80
     };
-    i2c_write_blocking(i2c, PCF8563_I2C_ADDR, seq, 5, false);
+    (void)i2c_write_blocking(i2c, PCF8563_I2C_ADDR, seq, 5, false);
 }
 
 /**
  * @brief Enable or disable the PCF8563 alarm interrupt.
  *
- * Reads the Control/Status 2 register (0x01) of the PCF8563 RTC, sets or clears
- * the Alarm Interrupt Enable (AIE) bit (bit 1) based on the requested state,
- * and writes the register back, preserving all other bits.
+ * Reads the Control/Status 2 register (REG_CTRL2) of the PCF8563 RTC, sets or clears
+ * the AIE bit (Alarm Interrupt Enable, bit 1), and writes the updated value back.
+ * All other bits in the register are preserved.
  *
- * @param i2c    Initialized I2C instance used to communicate with the RTC.
- * @param enable True to enable the alarm interrupt (set AIE); false to disable it (clear AIE).
+ * Behavior:
+ * - Performs a register address write without a stop, followed by a single-byte read.
+ * - If the address or read operation fails, the function returns early without changes.
+ * - The final write operation is attempted but its result is not checked.
+ * - Does not configure alarm time registers nor clear the AF (Alarm Flag) bit.
  *
- * @note This performs a read-modify-write via I2C using a repeated start for the read.
- *       No error checking is performed on I2C transactions; consider handling return values
- *       in production code.
+ * @pre The I2C peripheral must be initialized and the PCF8563 available at PCF8563_I2C_ADDR.
  *
- * @pre The I2C bus must be initialized and the PCF8563 accessible at PCF8563_I2C_ADDR.
- *
- * @see NXP PCF8563/PCF8563T datasheet, Control/Status 2 register (address 0x01), AIE bit (bit 1).
+ * @param i2c    Pointer to the Pico SDK I2C instance to use.
+ * @param enable Set to true to enable the alarm interrupt (AIE=1), false to disable it (AIE=0).
  */
 void rtc_alarm_enable(i2c_inst_t *i2c, bool enable) {
-    uint8_t addr = 0x01;
-    uint8_t val;
-    i2c_write_blocking(i2c, PCF8563_I2C_ADDR, &addr, 1, true);
-    i2c_read_blocking(i2c, PCF8563_I2C_ADDR, &val, 1, false);
+    uint8_t addr = REG_CTRL2;
+    if (i2c_write_blocking(i2c, PCF8563_I2C_ADDR, &addr, 1, true) != 1) return;
+    uint8_t val = 0;
+    if (i2c_read_blocking(i2c, PCF8563_I2C_ADDR, &val, 1, false) != 1) return;
 
-    if (enable) val |=  (1 << 1);
-    else        val &= ~(1 << 1);
+    if (enable) val |=  (1u << 1);
+    else        val &= ~(1u << 1);
 
-    uint8_t buf[] = {0x01, val};
-    i2c_write_blocking(i2c, PCF8563_I2C_ADDR, buf, 2, false);
+    uint8_t wr[] = {REG_CTRL2, val};
+    (void)i2c_write_blocking(i2c, PCF8563_I2C_ADDR, wr, 2, false);
 }
 
 /**
- * Clears the PCF8563 RTC alarm flag (AF) if it is set and reports its prior state.
+ * Clears the PCF8563 alarm flag (AF) and reports whether it was previously set.
  *
- * This function reads the Control/Status 2 register (address 0x01) of the PCF8563,
- * checks the Alarm Flag (bit 3), and, if set, writes the register back with AF cleared.
- * All other bits in the register are preserved.
+ * Reads Control/Status 2 (REG_CTRL2) from the PCF8563 via the provided I2C
+ * instance, checks bit 3 (AF). If set, writes the register back with AF
+ * cleared. Returns whether AF was set before this call.
  *
- * Parameters:
- *  - i2c: Pointer to the initialized I2C instance configured for the PCF8563 device.
+ * @param i2c Pointer to an initialized I2C instance connected to the PCF8563.
+ * @return true if the alarm flag was set prior to the call (an attempt to clear
+ *         it is made); false if the flag was not set or if an I2C operation
+ *         failed during the address or read phase.
  *
- * Returns:
- *  - true if the alarm flag was set before this call (and is now cleared).
- *  - false if the alarm flag was not set.
- *
- * Notes:
- *  - Assumes PCF8563_I2C_ADDR is defined and the I2C bus is initialized.
- *  - No explicit error handling is performed; I2C failures may leave the flag uncleared.
+ * @note The AF bit is bit 3 of Control/Status 2 (REG_CTRL2).
+ * @warning This function does not distinguish between "flag not set" and I2C
+ *          failure; both yield false. It also does not verify that the clearing
+ *          write succeeds, so it may return true even if the flag was not
+ *          successfully cleared.
+ * @pre i2c is non-null, initialized, and configured for PCF8563_I2C_ADDR.
+ * @post If AF was set, a write is issued to clear it; otherwise, no write occurs.
  */
 bool rtc_alarm_flag_clear(i2c_inst_t *i2c) {
-    uint8_t addr = 0x01, val;
-    i2c_write_blocking(i2c, PCF8563_I2C_ADDR, &addr, 1, true);
-    i2c_read_blocking(i2c, PCF8563_I2C_ADDR, &val, 1, false);
-    bool was_set = (val & (1 << 3)) != 0;
+    uint8_t addr = REG_CTRL2;
+    if (i2c_write_blocking(i2c, PCF8563_I2C_ADDR, &addr, 1, true) != 1) return false;
+    uint8_t val = 0;
+    if (i2c_read_blocking(i2c, PCF8563_I2C_ADDR, &val, 1, false) != 1) return false;
+
+    bool was_set = (val & (1u << 3)) != 0;
     if (was_set) {
-        val &= ~(1 << 3);
-        uint8_t buf[] = {0x01, val};
-        i2c_write_blocking(i2c, PCF8563_I2C_ADDR, buf, 2, false);
+        val &= ~(1u << 3);
+        uint8_t wr[] = {REG_CTRL2, val};
+        (void)i2c_write_blocking(i2c, PCF8563_I2C_ADDR, wr, 2, false);
     }
     return was_set;
+}
+
+/**
+ * Sets the PCF8563T RTC date/time from a Unix epoch value.
+ *
+ * Converts the supplied Unix time (seconds since 1970-01-01 00:00:00 UTC) to
+ * calendar fields using either UTC or the current local time zone, then writes
+ * the result to the PCF8563T via I2C.
+ *
+ * Parameters:
+ * - i2c       Pointer to the initialized I2C instance connected to the PCF8563T.
+ * - epoch_utc Unix timestamp in seconds since the Unix epoch (UTC).
+ * - as_local  If true, converts the epoch to local civil time (localtime_r) and
+ *             programs the RTC with local time; if false, uses UTC (gmtime_r).
+ *
+ * Returns:
+ * - true on success; false if time conversion fails or the underlying RTC write fails.
+ *
+ * Notes:
+ * - When as_local is true, the current process time zone and DST settings are honored.
+ * - The valid timestamp range is limited by the platform’s time_t and localtime_r/gmtime_r,
+ *   as well as the calendar range supported by the PCF8563T.
+ * - Writes second, minute, hour, day-of-week, day-of-month, month, and year fields;
+ *   sub-second precision is not supported.
+ * - Thread-safe: uses reentrant time conversion functions and no internal static state.
+ */
+bool pcf8563t_set_time_epoch(i2c_inst_t* i2c, time_t epoch_utc, bool as_local) {
+    struct tm tmv;
+    memset(&tmv, 0, sizeof(tmv));
+    if (as_local) {
+        if (!localtime_r(&epoch_utc, &tmv)) return false;
+    } else {
+        if (!gmtime_r(&epoch_utc, &tmv)) return false;
+    }
+    uint y   = (uint)(tmv.tm_year + 1900);
+    uint mon = (uint)(tmv.tm_mon + 1);
+    uint dom = (uint)tmv.tm_mday;
+    uint dow = (uint)tmv.tm_wday;
+    uint hh  = (uint)tmv.tm_hour;
+    uint mm  = (uint)tmv.tm_min;
+    uint ss  = (uint)tmv.tm_sec;
+    return pcf8563t_set_time(i2c, ss, mm, hh, dow, dom, mon, y);
+}
+
+/**
+ * @brief Read the current date/time from a PCF8563T RTC and return it as Unix epoch seconds (UTC).
+ *
+ * This function queries the PCF8563T over the given I2C instance, assembles a struct tm
+ * from the RTC fields, and converts it to a time_t epoch value. The value written to
+ * out_epoch_utc is always seconds since 1970-01-01 00:00:00 UTC, regardless of how the
+ * RTC fields are interpreted.
+ *
+ * @param i2c               Initialized I2C instance used to communicate with the PCF8563T.
+ *                          Must not be null and must be configured for the RTC bus.
+ * @param out_epoch_utc     Output pointer that receives the resulting Unix epoch (UTC).
+ *                          Must not be null. Updated only on success.
+ * @param fields_are_local  If true, interpret the RTC fields as local time and convert
+ *                          using mktime() (affected by the process time zone/DST settings).
+ *                          If false, interpret the RTC fields as UTC and convert using
+ *                          timegm_compat(). In both cases, the returned epoch is UTC.
+ *
+ * @return true on success; false on error (null output pointer, I2C read failure, or
+ *         failed time conversion).
+ *
+ * @note The conversion path depends on fields_are_local:
+ *       - fields_are_local == true: mktime() is used and is sensitive to the current
+ *         time zone and DST configuration of the process/environment.
+ *       - fields_are_local == false: timegm_compat() interprets the fields as UTC.
+ *
+ * @warning The function treats a conversion result of (time_t)-1 as failure. If your
+ *          platform represents a legitimate timestamp as -1, this may be indistinguishable
+ *          from a conversion error.
+ *
+ * @pre The PCF8563T must be present on the I2C bus and responding. If fields_are_local
+ *      is true, ensure the environment time zone is configured as expected.
+ *
+ * @post On success, *out_epoch_utc contains the UTC epoch seconds. On failure, the
+ *       value pointed to by out_epoch_utc is not modified.
+ *
+ * @thread_safety The function does not use static state, but the mktime() path depends
+ *                on process-global time zone settings and may be affected by concurrent
+ *                changes to TZ or tzset().
+ *
+ * @see pcf8563t_read_time(), timegm_compat(), mktime()
+ */
+bool pcf8563t_read_time_epoch(i2c_inst_t* i2c, time_t* out_epoch_utc, bool fields_are_local) {
+    if (!out_epoch_utc) return false;
+    uint16_t t[7];
+    if (!pcf8563t_read_time(i2c, t)) return false;
+
+    struct tm tmv;
+    memset(&tmv, 0, sizeof(tmv));
+    tmv.tm_year = (int)t[6] - 1900;
+    tmv.tm_mon  = (int)t[5] - 1;
+    tmv.tm_mday = (int)t[3];
+    tmv.tm_hour = (int)t[2];
+    tmv.tm_min  = (int)t[1];
+    tmv.tm_sec  = (int)t[0];
+    tmv.tm_wday = (int)t[4];
+
+    time_t epoch = fields_are_local ? mktime(&tmv) : timegm_compat(&tmv);
+    if (epoch == (time_t)-1) return false;
+    *out_epoch_utc = epoch;
+    return true;
 }

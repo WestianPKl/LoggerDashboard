@@ -8,12 +8,30 @@ void lcd_send_byte(uint8_t , int);
 static inline void lcd_char(char);
 
 /**
- * @brief Writes a single byte to the I2C device at the specified address.
+ * @brief Writes a single byte to the current I2C slave using a blocking transfer.
  *
- * This function sends the provided byte value over the I2C bus using the default I2C instance.
- * The operation is performed only if the `i2c_default` macro is defined.
+ * Sends one byte on the default I2C controller (i2c_default) to the device at the
+ * address specified by the global/static variable `addr`. A STOP condition is issued
+ * at the end of the transfer.
  *
- * @param val The byte value to write to the I2C device.
+ * Compilation:
+ * - If i2c_default is not defined at compile time, this function compiles to a no-op.
+ *
+ * Preconditions:
+ * - i2c_default is defined and the I2C peripheral has been initialized (e.g., i2c_init and pin setup).
+ * - `addr` contains a valid 7-bit I2C slave address.
+ *
+ * Behavior:
+ * - Blocking; execution halts until the byte is transmitted or the transfer fails.
+ *
+ * Error handling:
+ * - No status is returned to the caller; transmission errors are not reported by this function.
+ *   Use the underlying I2C API directly if you need error/status information.
+ *
+ * Thread-safety:
+ * - Not thread-safe for concurrent use on the same I2C instance without external synchronization.
+ *
+ * @param val The 8-bit value to transmit on the I2C bus.
  */
 void i2c_write_byte(uint8_t val) {
 #ifdef i2c_default
@@ -22,13 +40,24 @@ void i2c_write_byte(uint8_t val) {
 }
 
 /**
- * @brief Toggles the enable bit on the LCD to latch data/commands.
+ * @brief Generate an enable pulse to latch the current LCD data/command nibble via I2C.
  *
- * This function generates the necessary enable pulse for the LCD by setting and clearing
- * the LCD_ENABLE_BIT in the provided value. It introduces delays before and after toggling
- * to ensure proper timing as required by the LCD controller.
+ * This function briefly asserts and then clears the LCD enable (EN) bit while preserving
+ * the other control/data bits provided in val. It performs two I2C writes separated by
+ * microsecond-scale delays to satisfy HD44780-compatible timing requirements.
  *
- * @param val The value to be sent to the LCD, typically containing data or command bits.
+ * @param val The base byte to send to the I2C expander (data nibble, RS, backlight, etc.).
+ *            The function will OR this value with LCD_ENABLE_BIT to set EN high, then clear
+ *            the bit to bring EN low and latch the nibble.
+ *
+ * @pre I2C has been initialized and the LCD is configured. The desired data or command nibble
+ *      must already be encoded into val before calling.
+ *
+ * @note Introduces blocking delays of roughly 600 µs before, between, and after the EN pulse
+ *       (~1.8 ms total). Typically called once per nibble (twice per byte in 4-bit mode).
+ *
+ * @warning This call performs blocking waits and I2C transactions; ensure it is not used in
+ *          time-critical paths without consideration of the added latency.
  */
 void lcd_toggle_enable(uint8_t val) {
 #define DELAY_US 600
@@ -40,14 +69,21 @@ void lcd_toggle_enable(uint8_t val) {
 }
 
 /**
- * @brief Sends a byte to the LCD over I2C, splitting it into high and low nibbles.
+ * @brief Send an 8-bit value to an HD44780-compatible LCD over I2C in 4-bit mode.
  *
- * This function prepares the given byte by splitting it into high and low nibbles,
- * adds the specified mode (command or data), and includes the LCD backlight flag.
- * Each nibble is sent sequentially to the LCD via I2C, with enable toggling to latch the data.
+ * Splits the byte into high and low nibbles (MSB first), ORs each with the provided
+ * control mode and LCD_BACKLIGHT, writes them over I2C, and pulses the enable line
+ * after each nibble to latch the transfer.
  *
- * @param val  The byte value to send to the LCD.
- * @param mode The mode flag (e.g., command or data) to specify the type of transmission.
+ * @param val  The 8-bit value to transmit (command or character data).
+ * @param mode Control bits to OR with the data; typically includes RS
+ *             (0 = command, 1 = data). RW must be 0 (write). The E line is
+ *             driven internally by lcd_toggle_enable().
+ *
+ * @pre The I2C interface and the LCD’s I2C expander/backpack are initialized.
+ * @note This function always ORs LCD_BACKLIGHT into the transfer and does not alter
+ *       backlight state beyond that.
+ * @see lcd_toggle_enable(), i2c_write_byte()
  */
 void lcd_send_byte(uint8_t val, int mode) {
     uint8_t high = mode | (val & 0xF0) | LCD_BACKLIGHT;
@@ -59,22 +95,37 @@ void lcd_send_byte(uint8_t val, int mode) {
 }
 
 /**
- * @brief Clears all content displayed on the LCD screen.
+ * @brief Clears the LCD display.
  *
- * Sends the clear display command to the LCD, removing all characters and resetting the cursor position.
+ * Sends the HD44780-compatible "clear display" command via I2C, removing all
+ * characters from the screen and returning the cursor to the home position
+ * (row 0, column 0).
+ *
+ * Note:
+ * - This instruction takes longer than most LCD commands (typically ~1.5–2 ms).
+ *   Ensure the command path handles the required delay or busy-flag polling.
+ *
+ * Preconditions:
+ * - The LCD interface has been initialized and is ready to accept commands.
+ *
+ * Side effects:
+ * - Display memory is cleared and the cursor position is reset to home.
  */
 void lcd_clear() {
     lcd_send_byte(LCD_CLEARDISPLAY, LCD_COMMAND);
 }
 
 /**
- * @brief Sets the cursor position on a 16x2 LCD display using I2C.
+ * @brief Set the LCD cursor to a given line and column.
  *
- * This function positions the cursor at the specified line and position
- * on the LCD. Line 0 corresponds to the first row, and line 1 to the second row.
+ * Computes and sends the HD44780 DDRAM address for the requested position
+ * (0x80 for line 0, 0xC0 for line 1, plus the column offset) as a command.
  *
- * @param line The line number (0 for first row, 1 for second row).
- * @param position The position on the line (0-based index).
+ * @param line Line index: 0 = first line, 1 = second line.
+ * @param position Column index on the selected line (typically 0–15 for a 16x2 LCD).
+ * @pre The LCD must be initialized and ready to accept commands.
+ * @note Out-of-range values may wrap per the controller’s addressing behavior.
+ * @see lcd_send_byte, LCD_COMMAND
  */
 void lcd_set_cursor(int line, int position) {
     int val = (line == 0) ? 0x80 + position : 0xC0 + position;
@@ -82,25 +133,34 @@ void lcd_set_cursor(int line, int position) {
 }
 
 /**
- * @brief Sends a single character to the LCD display.
+ * @brief Write a single character to the LCD at the current cursor position.
  *
- * This function writes the specified character to the LCD module
- * via the I2C interface. It is intended for internal use within
- * the LCD driver and is marked as inline for performance.
+ * Sends the given byte as character data (not a command) to the display.
  *
- * @param val The character to be displayed on the LCD.
+ * @param val Character to write (ASCII or CGRAM code). Control characters (e.g., '\n') are not interpreted.
+ *
+ * @pre The LCD and I2C interface must be initialized and ready.
+ * @note Cursor movement and wrapping follow the LCD controller's current entry mode settings.
  */
 static inline void lcd_char(char val) {
     lcd_send_byte(val, LCD_CHARACTER);
 }
 
 /**
- * @brief Displays a null-terminated string on the LCD.
+ * Writes a null-terminated C string to the LCD, sending one character at a time via lcd_char().
  *
- * Iterates through each character in the provided string and sends it to the LCD
- * using the lcd_char function.
+ * Each byte from the input buffer is forwarded to lcd_char(), which is responsible for any
+ * device-specific timing, cursor movement, and character mapping.
  *
- * @param s Pointer to a null-terminated string to be displayed on the LCD.
+ * Complexity: O(n), where n is the number of characters in the string.
+ *
+ * @pre s != nullptr and points to a null-terminated string.
+ * @param s Pointer to the null-terminated string to display.
+ *
+ * @warning Passing a null pointer results in undefined behavior.
+ * @note Multi-byte encodings (e.g., UTF-8) are sent as raw bytes and may not render correctly
+ *       on HD44780-compatible 16x2 displays.
+ * @see lcd_char
  */
 void lcd_string(const char *s) {
     while (*s) {
@@ -109,16 +169,22 @@ void lcd_string(const char *s) {
 }
 
 /**
- * @brief Initializes the LCD display in 4-bit mode with the desired configuration.
+ * @brief Initialize the HD44780-compatible 16x2 LCD over I2C.
  *
- * This function sends the necessary command sequence to the LCD to:
- * - Set the interface to 4-bit mode.
- * - Configure the display for 2 lines.
- * - Set the entry mode to increment and no shift.
- * - Turn on the display.
- * - Clear the display.
+ * Configures the controller for 4-bit operation, sets 2-line mode,
+ * enables left-to-right entry mode, turns the display on, and clears
+ * the screen, returning the cursor to the home position.
  *
- * It must be called before using any other LCD functions.
+ * This follows the standard HD44780 4-bit initialization sequence and
+ * relies on lcd_send_byte() to perform command writes and required delays.
+ *
+ * @pre I2C bus and any I/O expander/backpack required by the LCD are initialized
+ *      and configured; lcd_send_byte() and lcd_clear() are functional.
+ * @post Display DDRAM is cleared; cursor is at (0,0); display is enabled.
+ *
+ * @note Call once after power-up and before any other LCD API calls.
+ * @warning This operation erases any existing display contents.
+ * @see lcd_send_byte(), lcd_clear()
  */
 void lcd_init() {
     lcd_send_byte(0x03, LCD_COMMAND);

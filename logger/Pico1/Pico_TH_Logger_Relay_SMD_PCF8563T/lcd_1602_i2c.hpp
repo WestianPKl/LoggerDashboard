@@ -1,24 +1,165 @@
 /**
  * @file lcd_1602_i2c.hpp
- * @brief Constants and function declarations for controlling a 1602 LCD display via I2C.
+ * @brief Public API and command/flag definitions for a 16x2 HD44780-compatible LCD over I2C.
+ * @details
+ *   Provides symbolic command codes, bit flags, and a minimal set of helper functions to:
+ *   - Initialize the LCD
+ *   - Position the cursor
+ *   - Print text
+ *   - Clear the display
  *
- * This header defines command constants and function prototypes for interfacing with
- * a 16x2 character LCD using the I2C protocol, typically with a PCF8574 I/O expander.
- *
- * Constants:
- * - LCD command codes (e.g., LCD_CLEARDISPLAY, LCD_RETURNHOME)
- * - LCD display control flags (e.g., LCD_DISPLAYON, LCD_CURSORON, LCD_BLINKON)
- * - LCD function set flags (e.g., LCD_2LINE, LCD_8BITMODE, LCD_5x10DOTS)
- * - LCD backlight and enable bit definitions
- * - Default I2C address (addr)
- * - LCD_CHARACTER and LCD_COMMAND for data/command mode
- * - MAX_LINES and MAX_CHARS for display dimensions
- *
- * Functions:
- * - lcd_clear(): Clear the LCD display and return cursor to home position.
- * - lcd_set_cursor(int col, int row): Set the cursor to the specified column and row.
- * - lcd_string(const char *str): Display a string on the LCD at the current cursor position.
- * - lcd_init(): Initialize the LCD display and I2C interface.
+ *   Typical modules use an I2C backpack at address 0x27. Adjust the address if your hardware differs.
+ */
+
+/**
+ * @var LCD_CLEARDISPLAY
+ * @brief Command: Clear the display and reset DDRAM address to 0. Cursor returns to home (0,0).
+ * @note Execution time is relatively long (≈1.5–2 ms); avoid calling in tight loops.
+ */
+
+/**
+ * @var LCD_RETURNHOME
+ * @brief Command: Return cursor to home (0,0) without clearing display contents.
+ */
+
+/**
+ * @var LCD_ENTRYMODESET
+ * @brief Command: Set text entry mode (combine with LCD_ENTRYLEFT and/or LCD_ENTRYSHIFTINCREMENT).
+ */
+
+/**
+ * @var LCD_DISPLAYCONTROL
+ * @brief Command: Control display, cursor, and blink (combine with LCD_DISPLAYON, LCD_CURSORON, LCD_BLINKON).
+ */
+
+/**
+ * @var LCD_CURSORSHIFT
+ * @brief Command: Move cursor or shift the display (combine with LCD_DISPLAYMOVE and LCD_MOVERIGHT).
+ */
+
+/**
+ * @var LCD_FUNCTIONSET
+ * @brief Command: Set interface data length, number of display lines, and font (combine with LCD_8BITMODE, LCD_2LINE, LCD_5x10DOTS).
+ */
+
+/**
+ * @var LCD_SETCGRAMADDR
+ * @brief Command: Set CGRAM address to define custom characters.
+ */
+
+/**
+ * @var LCD_SETDDRAMADDR
+ * @brief Command: Set DDRAM address (cursor position on the visible display).
+ */
+
+/**
+ * @var LCD_ENTRYSHIFTINCREMENT
+ * @brief Entry mode flag: Shift the display when writing (instead of moving the cursor).
+ */
+
+/**
+ * @var LCD_ENTRYLEFT
+ * @brief Entry mode flag: Left-to-right text entry (cursor moves right after each character).
+ */
+
+/**
+ * @var LCD_BLINKON
+ * @brief Display control flag: Enable blinking block/underline at the cursor position.
+ */
+
+/**
+ * @var LCD_CURSORON
+ * @brief Display control flag: Show the cursor.
+ */
+
+/**
+ * @var LCD_DISPLAYON
+ * @brief Display control flag: Turn the display on.
+ */
+
+/**
+ * @var LCD_MOVERIGHT
+ * @brief Cursor/display shift flag: Move to the right (cursor or display depending on LCD_DISPLAYMOVE).
+ */
+
+/**
+ * @var LCD_DISPLAYMOVE
+ * @brief Cursor/display shift flag: Shift the entire display instead of moving the cursor.
+ */
+
+/**
+ * @var LCD_5x10DOTS
+ * @brief Function set flag: Select 5x10 dots character font (usually valid only for 1-line mode).
+ */
+
+/**
+ * @var LCD_2LINE
+ * @brief Function set flag: Enable 2-line display mode.
+ */
+
+/**
+ * @var LCD_8BITMODE
+ * @brief Function set flag: Use 8-bit interface mode (typically not used with I2C backpacks).
+ */
+
+/**
+ * @var LCD_BACKLIGHT
+ * @brief Backpack control bit: Toggle the LCD backlight.
+ */
+
+/**
+ * @var LCD_ENABLE_BIT
+ * @brief Backpack control bit: Pulse to latch data (E signal).
+ */
+
+/**
+ * @var addr
+ * @brief Default I2C address of the LCD backpack.
+ * @details Many common modules use 0x27; some variants use 0x3F. Adjust as needed for your hardware.
+ */
+
+/**
+ * @def LCD_CHARACTER
+ * @brief RS mode value indicating data (character bytes).
+ */
+
+/**
+ * @def LCD_COMMAND
+ * @brief RS mode value indicating a command byte.
+ */
+
+/**
+ * @def MAX_LINES
+ * @brief Maximum number of display lines supported by this driver.
+ */
+
+/**
+ * @def MAX_CHARS
+ * @brief Maximum number of characters per line supported by this driver.
+ */
+
+/**
+ * @brief Clear the LCD and return the cursor to the home position.
+ * @note This command takes longer than most operations; consider debouncing its usage.
+ */
+ 
+/**
+ * @brief Set the cursor position.
+ * @param col Zero-based column index (0..MAX_CHARS-1).
+ * @param row Zero-based row index (0..MAX_LINES-1).
+ * @note Values outside the expected ranges may be ignored or clamped depending on implementation.
+ */
+
+/**
+ * @brief Print a null-terminated string at the current cursor position.
+ * @param str C-string to write to the display.
+ * @note Characters beyond the visible width may be truncated or wrap depending on calling logic.
+ */
+
+/**
+ * @brief Initialize the LCD over I2C and configure it for 16x2 operation.
+ * @details Typically sets function mode, entry mode, display control, and backlight state.
+ * @note Call this once before any other LCD operations.
  */
 #ifndef __LCD_1602_I2C_HPP__
 #define __LCD_1602_I2C_HPP__
