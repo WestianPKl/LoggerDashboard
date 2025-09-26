@@ -146,6 +146,7 @@ class App:
             "sht",
             "clock",
             "set_time",
+            "logging_enabled",
             "wifi_enabled",
         ]:
             match key:
@@ -153,6 +154,8 @@ class App:
                     name = "Set time on connect"
                 case "wifi_enabled":
                     name = "Wi-Fi Enabled"
+                case "logging_enabled":
+                    name = "Logging Enabled"
                 case "sht":
                     name = "SHT Sensor"
                 case "clock":

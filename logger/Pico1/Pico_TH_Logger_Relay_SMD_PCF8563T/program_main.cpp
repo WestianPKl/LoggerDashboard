@@ -16,6 +16,8 @@ extern "C" {
 #include "main.hpp"
 #include "config.hpp"
 
+extern volatile bool device_reset_flag;
+
 #define LED_BLUE    6
 #define LED_GREEN   8
 #define LED_RED     7
@@ -24,6 +26,8 @@ extern "C" {
 #define RELAY_2     13
 #define RELAY_3     14
 #define RELAY_4     15
+#define SWITCH_1    21
+#define SWITCH_2    20
 
 using namespace std;
 
@@ -225,29 +229,59 @@ bool ProgramMain::synchronize_time() {
 }
 
 /**
- * @brief Initialize all peripherals and modules required by ProgramMain.
+ * @brief Initialize all board peripherals and application subsystems.
  *
- * Performs the following:
- * - Configures PWM for RGB LEDs and the buzzer; sets 8-bit wrap and zero duty.
- * - Uses RGB LED to indicate status: white during startup, green on successful init.
- * - Sets up I2C at 400 kHz, configures SDA/SCL with pull-ups, and publishes pin metadata.
- * - Initializes four relay GPIOs as outputs and ensures they are OFF (driven low).
- * - Initializes the LCD, clears it, and displays a "Starting..." message.
- * - Instantiates a BME280 sensor in forced mode (selection currently unaffected by config.sht).
- * - Optionally creates a TCP instance if Wi‑Fi is enabled in configuration.
- * - Optionally initializes the PCF8563T RTC over I2C if enabled in configuration.
+ * This routine performs a full hardware bring-up sequence for the logger/relay controller.
+ * It should be called exactly once during system startup before other components are used.
  *
- * Preconditions:
- * - Pin definitions and helper routines (e.g., setup_pwm, set_pwm_duty, set_rgb_color, lcd_*).
- * - A valid runtime configuration accessible via config_get().
+ * Initialization sequence overview:
+ *  1. Configure PWM slices for RGB LEDs and the buzzer, set 8-bit wrap (0–255), zero their duty cycles.
+ *  2. Momentarily sets RGB LED to white, later finalizes status indication to green (ready).
+ *  3. Initialize the I2C bus at 400 kHz and configure SDA/SCL pins with pull-ups.
+ *  4. Initialize user input switches as inputs with pull-ups.
+ *  5. Initialize relay GPIOs as outputs and ensure they start in the OFF (low) state.
+ *  6. Initialize LCD, kick/extend backlight timer, clear display, and print a startup banner.
+ *  7. Load configuration flags (e.g., logging_enabled).
+ *  8. Dynamically allocate and configure the environmental sensor (BME280 in forced mode).
+ *     (Current conditional branches allocate the same sensor; structure suggests future sensor variants.)
+ *  9. Conditionally allocate a TCP networking object if Wi-Fi is enabled in configuration.
+ * 10. Initialize the real-time clock: external PCF8563T if enabled, otherwise fall back to internal RTC.
+ * 11. Set RGB LED to green to indicate successful initialization.
  *
  * Side effects:
- * - Reconfigures hardware (PWM, GPIO, I2C, LCD).
- * - Allocates heap objects for myBME280 (and myTCP when Wi‑Fi is enabled).
+ *  - Configures multiple GPIO pins (direction, function, pull-ups, output levels).
+ *  - Starts and configures PWM slices.
+ *  - Claims and configures the I2C bus at 400 kHz.
+ *  - Allocates heap objects (BME280, optionally TCP) without ownership transfer; no deletion here.
+ *  - Modifies global/application state: logging_enabled and internal peripheral singletons.
+ *  - Produces visible (LCD text, LED color) and potential audible (buzzer PWM ready) effects.
  *
- * Usage notes:
- * - Intended to be called once during system startup.
- * - Repeated calls without teardown may leak resources or disturb active peripherals.
+ * Memory management notes:
+ *  - Uses dynamic allocation (new BME280 / new TCP). If re-invoked, this may leak unless prior instances are deleted.
+ *  - Consider converting these to smart pointers or singleton patterns if multiple calls are possible or for safer teardown.
+ *
+ * Error handling:
+ *  - Assumes all hardware initialization calls succeed; no explicit error checks or fallbacks implemented.
+ *  - If any peripheral fails (e.g., I2C device absent), subsequent operations may behave unpredictably.
+ *
+ * Concurrency:
+ *  - Not thread-safe. Should be executed in a single-threaded startup context before other tasks access peripherals.
+ *
+ * Preconditions:
+ *  - config_get() must return a valid configuration structure.
+ *  - Pin constants (LED_RED, LED_GREEN, etc.) must be defined and mapped correctly.
+ *  - Underlying SDK (e.g., Pico SDK) must be initialized prior to call (clock system, stdio if needed).
+ *
+ * Postconditions:
+ *  - All declared peripherals are in a known base state.
+ *  - LED indicates success (green) unless later overridden.
+ *  - Environmental sensor and (optionally) networking stack are ready for first use.
+ *
+ * @warning Calling this function more than once without cleanup may cause resource leaks or reconfiguration hazards.
+ * @todo Add error checking (return status or exceptions) for sensor / RTC init.
+ * @todo Differentiate sensor initialization branches if additional sensor types are introduced.
+ * @todo Provide a matching deinit() to release dynamically allocated resources.
+ * @todo Abstract hardware setup into smaller testable units.
  *
  * @return void
  */
@@ -275,6 +309,15 @@ void ProgramMain::init_equipment() {
     gpio_pull_up(I2C_SCL);
     bi_decl(bi_2pins_with_func(I2C_SDA, I2C_SCL, GPIO_FUNC_I2C));
 
+    gpio_init(SWITCH_1);
+    gpio_init(SWITCH_2);
+
+    gpio_set_dir(SWITCH_1, GPIO_IN);
+    gpio_set_dir(SWITCH_2, GPIO_IN);
+
+    gpio_pull_up(SWITCH_1);
+    gpio_pull_up(SWITCH_2);
+
     gpio_init(RELAY_1);
     gpio_init(RELAY_2);
     gpio_init(RELAY_3);
@@ -293,6 +336,8 @@ void ProgramMain::init_equipment() {
     lcd_init();
     lcd_clear();
     lcd_string("Starting...");
+
+    logging_enabled = (config_get().logging_enabled != 0);
 
     if  (config_get().sht == 30){
         myBME280 = new BME280(BME280::MODE::MODE_FORCED);
@@ -315,6 +360,7 @@ void ProgramMain::init_equipment() {
     }
 
     set_rgb_color(0, 255, 0);
+    backlight_kick(30000);
 }
 
 /**
@@ -379,7 +425,7 @@ uint8_t ProgramMain::init_wifi() {
         set_wifi_enabled(false);
         return WIFI_CONN_FAIL;
     }
-
+    sleep_ms(2000);
     set_rgb_color(0, 255, 0);
     synchronize_time();
     return WIFI_OK;
@@ -551,7 +597,9 @@ void ProgramMain::display_measurement() {
              timev[6], timev[5], timev[3], timev[2], timev[1]);
 
     if (option == 0) {
-        set_rgb_color(0, 255, 0);
+        if (is_logging_enabled()) set_rgb_color(0, 255, 0);
+        else set_rgb_color(0, 0, 255);
+
         if(config_get().temperature == 1 && config_get().humidity == 1)
             snprintf(line2, sizeof(line2), "T:%.1fC H:%.1f%%", values.temperature, values.humidity);
         else if(config_get().temperature == 1)
@@ -640,9 +688,8 @@ void ProgramMain::display_measurement() {
  * - Not thread-safe unless external synchronization protects shared resources (I2C, myTCP, sensor state).
  */
 void ProgramMain::send_data() {
-    if (!is_wifi_enabled()) {
-        return;
-    }
+    if (!is_logging_enabled()) return;
+    if (!is_wifi_enabled()) return;
     bool time_ok = false;
     uint16_t tarr[7];
     if (config_get().clock_enabled == 1) {
@@ -740,5 +787,216 @@ extern "C" void sntp_set_system_time(uint32_t secs) {
         pcf8563t_set_time(I2C_PORT, dt.sec, dt.min, dt.hour, dt.dotw, dt.day, dt.month, dt.year);
     }else if (config_get().clock_enabled == 0 && config_get().set_time_enabled == 1) {
         rtc_set_datetime(&dt);
+    }
+}
+
+/**
+ * @brief Polls the two front-panel buttons, applying debounce and long-press logic.
+ *
+ * This method should be called periodically (e.g. in the main loop) to update
+ * internal button state machines for SWITCH_1 (btn21) and SWITCH_2 (btn20).
+ * Buttons are treated as active-low (a logical 0 from gpio_get() indicates pressed).
+ *
+ * Behavior:
+ *   - Debounce: Both buttons use a 50 ms debounce window to filter mechanical chatter.
+ *
+ *   Button 1 (SWITCH_1 / "btn21"):
+ *     - Short press (press and release before 10 s):
+ *         Toggles the LCD backlight. When turning it on, a backlight timeout
+ *         (e.g. 30 s) is (re)armed via backlight_kick(); when turning it off the
+ *         deadline is cleared.
+ *     - Long press (>= 10 000 ms):
+ *         Triggers a device reset request by setting device_reset_flag = true.
+ *         The long-press action fires only once per press cycle (guarded by
+ *         btn21_long_fired).
+ *
+ *   Button 2 (SWITCH_2 / "btn20"):
+ *     - Long press (>= 3 000 ms):
+ *         Toggles the persistent logging_enabled state:
+ *           * Updates in-memory flag (logging_enabled).
+ *           * Writes the updated configuration (config_mut() + config_save()).
+ *           * Sets the RGB LED to white (as feedback).
+ *           * Updates the first two LCD lines with a status message:
+ *               "Logging enabled "  or
+ *               "Logging disabled"
+ *         The long-press action executes only once per continuous press
+ *         (guarded by btn20_long_fired).
+ *     - Short press / release:
+ *         Currently no action besides clearing the pressed state.
+ *
+ * Internal State Tracking (per button):
+ *   - prev level (btn20_prev / btn21_prev) to detect edges.
+ *   - last_ms timestamp for debounce gating.
+ *   - press_start timestamp to measure hold duration.
+ *   - pressed flag indicating an active press cycle.
+ *   - long_fired flag preventing repeated long-press actions.
+ *
+ * Timing Constants:
+ *   - DEBOUNCE_MS = 50 ms
+ *   - HOLD20_MS   = 3000 ms (logging toggle threshold)
+ *   - HOLD21_MS   = 10000 ms (reset trigger threshold)
+ *
+ * Side Effects:
+ *   - May toggle LCD backlight and related timeout state.
+ *   - May set device_reset_flag (requesting a system reset elsewhere).
+ *   - May modify persistent configuration (logging_enabled).
+ *   - Writes status text to the LCD.
+ *   - Changes RGB LED color.
+ *
+ * Concurrency / Usage Notes:
+ *   - Must be called frequently enough (<< smallest hold threshold) for accurate
+ *     long-press detection (e.g. every few milliseconds).
+ *   - Assumes monotonic millisecond tick from now_ms().
+ *   - Not thread-safe; intended for single-threaded / main-loop invocation.
+ *
+ * @return void
+ */
+void ProgramMain::poll_buttons() {
+    constexpr uint32_t DEBOUNCE_MS = 50;
+    constexpr uint32_t HOLD20_MS   = 3000;
+    constexpr uint32_t HOLD21_MS   = 10000;
+
+    const uint32_t tms = now_ms();
+
+    bool b21 = gpio_get(SWITCH_1);
+    if (!b21) { 
+        if (btn21_prev && (tms - btn21_last_ms) > DEBOUNCE_MS) {
+            btn21_pressed     = true;
+            btn21_press_start = tms;
+            btn21_long_fired  = false;
+            btn21_last_ms     = tms;
+        }
+        if (btn21_pressed && !btn21_long_fired && (tms - btn21_press_start) >= HOLD21_MS) {
+            btn21_long_fired = true;
+            device_reset_flag = true;
+        }
+    } else {
+        if (!btn21_prev && (tms - btn21_last_ms) > DEBOUNCE_MS) {
+            if (btn21_pressed && !btn21_long_fired) {
+                bool on = lcd_get_backlight();
+                lcd_set_backlight(!on);
+                if (!on) backlight_kick(30000);
+                else     backlight_deadline_ms = 0;
+            }
+            btn21_pressed = false;
+            btn21_last_ms = tms;
+        }
+    }
+    btn21_prev = b21;
+
+    bool b20 = gpio_get(SWITCH_2);
+    if (!b20) {
+        if (btn20_prev && (tms - btn20_last_ms) > DEBOUNCE_MS) {
+            btn20_pressed     = true;
+            btn20_press_start = tms;
+            btn20_long_fired  = false;
+            btn20_last_ms     = tms;
+        }
+        if (btn20_pressed && !btn20_long_fired && (tms - btn20_press_start) >= HOLD20_MS) {
+            btn20_long_fired = true;
+            if(!logging_enabled){
+                logging_enabled = true;
+                auto &cfg = config_mut();
+                cfg.logging_enabled = 1;
+                config_save();
+                set_rgb_color(255, 255, 255);
+                lcd_set_cursor(0, 0);
+                lcd_string("Logging enabled ");
+                lcd_set_cursor(1, 0);
+                lcd_string("                ");
+            } else {
+                logging_enabled = false;
+                auto &cfg = config_mut();
+                cfg.logging_enabled = 0;
+                config_save();
+                set_rgb_color(255, 255, 255);
+                lcd_set_cursor(0, 0);
+                lcd_string("Logging disabled");
+                lcd_set_cursor(1, 0);
+                lcd_string("                ");
+            }
+        }
+    } else {
+        if (!btn20_prev && (tms - btn20_last_ms) > DEBOUNCE_MS) {
+            btn20_pressed = false;
+            btn20_last_ms = tms;
+        }
+    }
+    btn20_prev = b20;
+}
+
+/**
+ * Brief: Keeps the LCD backlight illuminated for at least the specified duration from now.
+ *
+ * This function "kicks" (refreshes/extends) the backlight timeout. If the backlight is currently
+ * off, it is turned on immediately. The internal deadline (backlight_deadline_ms) is updated to
+ * now_ms() + ms, so repeated calls extend the active period.
+ *
+ * Typical usage: Call whenever user interaction occurs (e.g., button press) to prevent the
+ * backlight from timing out.
+ *
+ * Parameter:
+ *   ms - Number of milliseconds from the current time that the backlight should remain enabled.
+ *
+ * Side effects:
+ *   - May enable the backlight (if it was off).
+ *   - Updates the backlight timeout deadline.
+ *
+ * Concurrency considerations:
+ *   If called from multiple execution contexts (e.g., ISR + main loop), ensure that access to
+ *   backlight_deadline_ms is atomic or otherwise protected.
+ *
+ * Notes:
+ *   - Assumes now_ms() is a monotonically increasing millisecond tick counter (wrap-around
+ *     handling, if any, should be implemented where the deadline is consumed).
+ *   - Passing very small values (e.g., 0) may cause the backlight to turn on and then be turned
+ *     off almost immediately by the timeout handler.
+ */
+void ProgramMain::backlight_kick(uint32_t ms) {
+    if (!lcd_get_backlight()) lcd_set_backlight(true);
+    backlight_deadline_ms = now_ms() + ms;
+}
+
+/**
+ * @brief Periodic handler that enforces automatic LCD backlight timeout.
+ *
+ * This function should be called regularly (e.g. from a scheduler or main loop).
+ * If a backlight auto-off deadline is armed (backlight_deadline_ms != 0) and the
+ * current millisecond timestamp has reached or passed that deadline, the LCD
+ * backlight is turned off and the deadline is cleared (set to 0 to indicate
+ * that auto-off is no longer pending).
+ *
+ * Wrap‑around safety:
+ * The comparison (int32_t)(now_ms() - backlight_deadline_ms) >= 0 uses signed
+ * arithmetic to yield a correct result even when the underlying 32-bit millisecond
+ * counter wraps around, as long as the deadline was set no more than 2^31 - 1 ms
+ * (~24.9 days) in the future.
+ *
+ * Side effects:
+ * - Calls lcd_set_backlight(false) when the deadline expires.
+ * - Resets backlight_deadline_ms to 0 after auto-off triggers.
+ *
+ * Preconditions:
+ * - backlight_deadline_ms contains either 0 (disabled) or an absolute millisecond
+ *   timestamp previously obtained from now_ms().
+ *
+ * Postconditions:
+ * - If the deadline was reached, the backlight is off and auto-off is disarmed.
+ *
+ * Typical usage:
+ * 1. When user activity occurs, set backlight_deadline_ms = now_ms() + timeout_ms.
+ * 2. Call this tick function periodically to enforce the timeout.
+ *
+ * Thread-safety:
+ * - If backlight_deadline_ms can be modified from ISRs or other threads, ensure
+ *   appropriate synchronization (e.g. atomic access or critical section) around
+ *   writes that race with this tick.
+ */
+void ProgramMain::backlight_autoff_tick() {
+    if (backlight_deadline_ms == 0) return;
+    uint32_t t = now_ms();
+    if ((int32_t)(t - backlight_deadline_ms) >= 0) {
+        lcd_set_backlight(false);
+        backlight_deadline_ms = 0;
     }
 }

@@ -1,39 +1,67 @@
+
 /**
  * @file main.hpp
- * @brief Central build-time configuration for the Pico_TH_Logger_Relay_SMD_PCF8563T firmware.
+ * @brief Central configuration header defining compile‑time constants for networking, logging, sensors, and runtime features
+ *        of the Pico_TH_Logger_Relay_SMD_PCF8563T project.
  *
- * Defines compile-time constants controlling:
- * - Backend/API endpoints:
- *   - TOKEN_PATH: REST endpoint to obtain/refresh a data token.
- *   - DATA_PATH: REST endpoint for periodic telemetry uploads.
- *   - ERROR_PATH: REST endpoint for error reporting.
- * - TCP connectivity:
- *   - SERVER_IP: target host for TCP connections (string).
- *   - SERVER_PORT: target TCP port (integer).
- * - Identification:
- *   - LOGGER_ID: unique logger identifier (integer).
- *   - SENSOR_ID: unique sensor/module identifier (integer).
- * - Equipment feature toggles:
- *   - TEMPERATURE / HUMIDITY / PRESSURE: enable/disable measurements (1=enabled, 0=disabled).
- *   - SHT: sensor family selector (allowed: 0=BME280, 30=SHT30, 40=SHT40).
- *   - CLOCK: enable external RTC integration (1=enable).
- *   - SET_TIME: set system time from RTC/network at startup (1=enable).
- * - Wi‑Fi:
- *   - WIFI_ENABLE: enable Wi‑Fi stack (1=enable).
- *   - WIFI_SSID / WIFI_PASSWORD: Wi‑Fi credentials (use secrets management in production).
- * - Telemetry scheduling:
- *   - POST_TIME: interval between data posts in milliseconds (minimum effective runtime value: 1000 ms).
+ * SECTION: Backend / API
+ * - TOKEN_PATH  : (const char*) Relative REST endpoint used to obtain or refresh an authorization / data token.
+ * - DATA_PATH   : (const char*) Relative REST endpoint for regular telemetry (environmental data) submissions.
+ * - ERROR_PATH  : (const char*) Relative REST endpoint dedicated to reporting errors or fault conditions.
  *
- * Usage notes:
- * - These are preprocessor macros; changes require recompilation.
- * - Ensure LOGGER_ID and SENSOR_ID match backend records for proper attribution.
- * - When selecting SHT!=0, include the appropriate SHT3x/SHT4x drivers and disable BME280 in your build; when SHT==0, include BME280 support.
- * - POST_TIME trades off network load vs. data latency; enforce a lower bound of 1000 ms at runtime.
- * - Consider environment-specific overrides (e.g., separate header per deployment or generated config) to avoid hardcoding sensitive data.
+ * SECTION: TCP / Server
+ * - SERVER_IP   : (const char*) IPv4 address (string) of the backend server the device will connect to.
+ * - SERVER_PORT : (int)        TCP port corresponding to the backend service handling token/data/error requests.
  *
- * Security considerations:
- * - Do not commit real WIFI_SSID/WIFI_PASSWORD to version control; inject via CI/CD or local, untracked headers.
- * - Validate API endpoints and handle failures to avoid tight retry loops when posting to DATA_PATH/ERROR_PATH.
+ * SECTION: Logger and Sensor Identity
+ * - LOGGER_ID   : (int) Unique numeric identifier for the physical logger unit (used for backend association).
+ * - SENSOR_ID   : (int) Unique numeric identifier for the attached sensor module or channel grouping.
+ *
+ * SECTION: Equipment Feature Flags
+ * - TEMPERATURE    : (0|1) Enable (1) temperature measurement acquisition pipeline.
+ * - HUMIDITY       : (0|1) Enable (1) humidity measurement acquisition pipeline.
+ * - PRESSURE       : (0|1) Enable (1) barometric pressure measurement acquisition pipeline.
+ * - SHT            : (int) Sensor type selector:
+ *                      0  = BME280 (default path when SHT series not used)
+ *                      30 = SHT30
+ *                      40 = SHT40
+ *                    Code should branch on this to instantiate the proper driver.
+ * - CLOCK          : (0|1) Enable (1) use of external RTC (PCF8563T) for timekeeping.
+ * - SET_TIME       : (0|1) If 1, perform an RTC time set/synchronization routine at startup (e.g., via NTP or server).
+ * - LOGGING_ENABLE : (0|1) Master switch to enable periodic local logging / buffering of sensor data.
+ *
+ * SECTION: Wi‑Fi Configuration
+ * - WIFI_ENABLE  : (0|1) Enable (1) Wi‑Fi subsystem initialization and network operations.
+ * - WIFI_SSID    : (const char*) SSID of the target Wi‑Fi network (plaintext).
+ * - WIFI_PASSWORD: (const char*) WPA/WPA2 passphrase for the specified SSID (plaintext).
+ *                  NOTE: Consider refactoring for secure storage (e.g., flash partition, secure element).
+ *
+ * SECTION: Telemetry Timing
+ * - POST_TIME : (unsigned long, ms) Minimum interval between successive telemetry POST operations.
+ *               Constraint: Must be >= 1000 ms at runtime (code should validate and clamp if necessary).
+ *
+ * USAGE GUIDELINES:
+ * 1. Modify these macros prior to compilation to adapt device behavior (no runtime reconfiguration implied).
+ * 2. Keep identifiers (LOGGER_ID, SENSOR_ID) synchronized with backend registry to avoid data collisions.
+ * 3. For production, do not hard‑code credentials; integrate a secure provisioning flow.
+ * 4. When adding new endpoints or feature flags, document them here to maintain a single source of truth.
+ *
+ * EXTENSIBILITY NOTES:
+ * - Consider migrating to a structured configuration object (constexpr struct) for stronger type safety.
+ * - Introduce environment‑specific overrides (e.g., via CMake or build system -D flags) to avoid editing source.
+ * - Add validation layer in initialization code to assert compatibility (e.g., SHT value vs enabled sensors).
+ *
+ * SECURITY CONSIDERATIONS:
+ * - Plaintext Wi‑Fi credentials in firmware can be extracted; employ encryption or dynamic provisioning for deployment.
+ * - Token endpoint path suggests authentication flow; ensure tokens are not logged inadvertently in error logs.
+ *
+ * THREADING / TIMING:
+ * - POST_TIME influences network duty cycle and power consumption; adjust based on battery / throughput needs.
+ * - If using an RTC (CLOCK=1) and SET_TIME=1, ensure network is available early or queue time sync attempts.
+ *
+ * MAINTENANCE:
+ * - Incrementally refactor magic numbers (e.g., sensor selector values) into scoped enum classes for clarity.
+ * - Ensure any changes to SERVER_IP / SERVER_PORT propagate to DNS or load balancer strategy if introduced later.
  */
 #ifndef __MAIN_HPP__
 #define __MAIN_HPP__
@@ -44,7 +72,7 @@
 #define ERROR_PATH      "/api/common/error-log"
 
 // === TCP ===
-#define SERVER_IP       "192.168.18.127"
+#define SERVER_IP       "192.168.18.158"
 #define SERVER_PORT     3000
 
 // === Logger and Sensor IDs ===
@@ -58,6 +86,7 @@
 #define SHT             0     // 0 - BME280 / 30 - SHT30 / 40 - SHT40
 #define CLOCK           1
 #define SET_TIME        1
+#define LOGGING_ENABLE  1
 
 // === Wi-Fi ===
 #define WIFI_ENABLE     1

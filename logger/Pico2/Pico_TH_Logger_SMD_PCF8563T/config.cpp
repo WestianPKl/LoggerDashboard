@@ -37,6 +37,7 @@ struct ConfigV3 {
     uint8_t  clock_enabled;
     uint8_t  set_time_enabled;
     uint8_t  wifi_enabled;
+    uint8_t  logging_enabled;
     char     wifi_ssid[33];
     char     wifi_password[65];
     uint32_t post_time_ms;
@@ -200,6 +201,7 @@ void config_set_defaults() {
     g_config.clock_enabled   = CLOCK;
     g_config.set_time_enabled= SET_TIME;
     g_config.wifi_enabled    = WIFI_ENABLE;
+    g_config.logging_enabled = LOGGING_ENABLE;
 
     std::memset(g_config.wifi_ssid,     0, sizeof(g_config.wifi_ssid));
     std::memset(g_config.wifi_password, 0, sizeof(g_config.wifi_password));
@@ -279,6 +281,7 @@ bool config_load() {
         g_config.clock_enabled    = old.clock_enabled;
         g_config.set_time_enabled = old.set_time_enabled;
         g_config.wifi_enabled     = old.wifi_enabled;
+        g_config.logging_enabled  = old.logging_enabled;
 
         std::strncpy(g_config.wifi_ssid,     old.wifi_ssid,     sizeof(g_config.wifi_ssid) - 1);
         std::strncpy(g_config.wifi_password, old.wifi_password, sizeof(g_config.wifi_password) - 1);

@@ -26,47 +26,44 @@ static void rearm_post_timer();
 static repeating_timer_t screen_timer;
 static repeating_timer_t post_timer;
 
-
 /**
- * @brief Application entry point for the Pico TH Logger with Wi‑Fi and display.
+ * @brief Application entry point for the Pico-based logger.
  *
- * @details
- * Bootstraps IO and configuration, initializes hardware and Wi‑Fi, schedules periodic tasks,
- * and enters a cooperative event loop that services USB, networking, UI updates, and data posts.
+ * Responsibilities:
+ *  - Initialize standard IO and introduce a startup delay to allow USB enumeration.
+ *  - Load persisted configuration (config_init).
+ *  - Initialize hardware abstractions and peripherals (ProgramMain::init_equipment).
+ *  - Initialize (and optionally enable) Wi-Fi subsystem (ProgramMain::init_wifi).
+ *  - Set up:
+ *      - A repeating screen update timer (1s period).
+ *      - A configurable data post timer (rearm_post_timer, period driven by config).
+ *  - Enter the cooperative main loop that:
+ *      - Services TinyUSB tasks (tud_task) and network/CYW43 timeouts (sys_check_timeouts / cyw43_arch_poll).
+ *      - Polls communication channels (com_poll) and UI inputs (poll_buttons).
+ *      - Manages LCD backlight auto-off logic (backlight_autoff_tick).
+ *      - Reacts to asynchronous flags raised by ISRs or other subsystems:
+ *          * device_reset_flag: Cleanly deinitialize Wi-Fi, flush USB CDC, then trigger watchdog reboot.
+ *          * wifi_apply_flag: Attempt to reconnect Wi-Fi using possibly updated credentials.
+ *          * wifi_reconnect_flag: Conditionally enable/disable Wi-Fi per current configuration, with user feedback.
+ *          * update_screen_flag: Refresh displayed measurement data.
+ *          * post_flag: Transmit collected sensor/logging data (send_data).
+ *      - Periodically (every ~1s) re-evaluates configuration changes affecting the post timer interval and rearms it.
+ *  - Uses minimal sleep (sleep_ms(1)) to yield CPU while maintaining responsive polling semantics.
  *
- * Startup sequence:
- * - Initializes stdio and delays ~2 s for host attachment.
- * - Loads configuration.
- * - Initializes equipment (sensors/relays/display) and Wi‑Fi (via ProgramMain).
- * - Starts a 1 s repeating timer for screen updates and arms the data post timer.
+ * Concurrency / Timing Notes:
+ *  - Flag variables are assumed to be set atomically (e.g., bool / volatile) from callbacks/IRQs.
+ *  - Timers and periodic checks avoid blocking operations; Wi-Fi reconnection is invoked non-blockingly where possible.
+ *  - Watchdog reboot path ensures output flushing to prevent log truncation.
  *
- * Main loop responsibilities:
- * - Runs TinyUSB device tasks and network timeouts.
- * - Polls application communications/commands.
- * - Handles a pending device reboot:
- *   cleanly deinitializes Wi‑Fi, flushes USB CDC, then reboots via watchdog.
- * - Applies Wi‑Fi changes on demand and polls the Wi‑Fi stack when enabled.
- * - Reacts to Wi‑Fi reconnect requests according to current configuration:
- *   enables and reconnects, or disables Wi‑Fi and reports "WIFI_DISABLED" over USB CDC.
- * - Every second, checks for changes to the posting interval (config.post_time_ms) and
- *   re-arms the post timer when modified.
- * - Responds to timer/ISR-driven flags:
- *   - update_screen_flag: renders the current measurement to the display.
- *   - post_flag: sends the current telemetry/data payload.
- * - Yields briefly each iteration to keep the system responsive.
+ * Error Handling:
+ *  - Wi-Fi (re)connection attempts ignore return status intentionally (cast to void) to allow continued operation.
+ *  - Deinitialization paths are defensive (cyw43_arch_deinit) before reboot or Wi-Fi disablement.
  *
- * Flags consumed:
- * - device_reset_flag
- * - wifi_apply_flag
- * - wifi_reconnect_flag
- * - update_screen_flag
- * - post_flag
+ * Extension Points:
+ *  - Add new periodic tasks by integrating into the 1s check block or creating additional repeating timers.
+ *  - Introduce new flags for asynchronous events; handle them inside the main loop following existing patterns.
  *
- * Timers:
- * - screen timer (1 s): sets update_screen_flag via screen_update_callback.
- * - post timer: interval defined by configuration (post_time_ms), set via rearm_post_timer.
- *
- * @return Always 0; function does not return during normal operation (infinite loop).
+ * @return int Always returns 0 on normal termination (though in practice the loop does not exit).
  */
 int main() {
     stdio_init_all();
@@ -88,6 +85,9 @@ int main() {
         sys_check_timeouts();
 
         com_poll();
+
+        program_main.poll_buttons();
+        program_main.backlight_autoff_tick();
 
         if (device_reset_flag) {
             device_reset_flag = false;

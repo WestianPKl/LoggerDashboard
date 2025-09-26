@@ -35,15 +35,18 @@ static const char* s_help_lines[] = {
     "Keys for set:",
     "  logger_id, sensor_id, server_ip, server_port",
     "  temperature, humidity, pressure, sht",
-    "  clock, set_time, wifi_enabled",
+    "  clock, set_time, wifi_enabled, logging_enabled",
     "  wifi_ssid, wifi_password",
     "  post_time_ms (ms)",
     "",
     "Examples:",
     "  show",
     "  set server_ip=192.168.1.10",
+    "  set server_port 3000",
     "  set wifi_enabled 1",
     "  set wifi_enabled 0",
+    "  set logging_enabled 1",
+    "  set logging_enabled 0",
     "  set logger_id 42",
     "  save",
     "  help size=8   (set page size)",
@@ -169,6 +172,7 @@ static void process_show_output() {
     cdc_write_linef("sht=%u\n", cfg.sht);
     cdc_write_linef("clock=%u\n", cfg.clock_enabled);
     cdc_write_linef("set_time=%u\n", cfg.set_time_enabled);
+    cdc_write_linef("logging_enabled=%u\n", cfg.logging_enabled);
     cdc_write_linef("wifi_enabled=%u\n", cfg.wifi_enabled);
     cdc_write_linef("wifi_ssid=%s\n", cfg.wifi_ssid);
     cdc_write_linef("wifi_password=%s\n", cfg.wifi_password);
@@ -354,6 +358,7 @@ void com_poll() {
  *     - sht (uint8)
  *     - clock (uint8)
  *     - set_time (uint8)
+ *     - logging_enabled (uint8)
  *     - wifi_enabled (uint8) -> also sets wifi_apply_flag = true
  *     - wifi_ssid (string; truncated to fit)
  *     - wifi_password (string; truncated to fit)
@@ -520,6 +525,7 @@ extern "C" void tud_cdc_rx_cb(uint8_t) {
             else if (strcmp(key_lc, "sht")           == 0) cfg.sht            = (uint8_t)strtoul(val_raw, nullptr, 10);
             else if (strcmp(key_lc, "clock")         == 0) cfg.clock_enabled  = (uint8_t)strtoul(val_raw, nullptr, 10);
             else if (strcmp(key_lc, "set_time")      == 0) cfg.set_time_enabled = (uint8_t)strtoul(val_raw, nullptr, 10);
+            else if (strcmp(key_lc, "logging_enabled") == 0) cfg.logging_enabled = (uint8_t)strtoul(val_raw, nullptr, 10);
             else if (strcmp(key_lc, "wifi_enabled")  == 0) { cfg.wifi_enabled = (uint8_t)strtoul(val_raw, nullptr, 10); wifi_apply_flag = true; }
             else if (strcmp(key_lc, "wifi_ssid")     == 0) snprintf(cfg.wifi_ssid, sizeof(cfg.wifi_ssid), "%s", val_raw);
             else if (strcmp(key_lc, "wifi_password") == 0) snprintf(cfg.wifi_password, sizeof(cfg.wifi_password), "%s", val_raw);

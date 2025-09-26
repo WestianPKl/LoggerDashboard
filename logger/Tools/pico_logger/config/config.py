@@ -16,6 +16,7 @@ class ConfigInformations:
             "sht",
             "clock",
             "set_time",
+            "logging_enabled",
             "wifi_enabled",
         ]
         self.STR_KEYS = [
@@ -35,6 +36,7 @@ class ConfigInformations:
             "sht",
             "clock",
             "set_time",
+            "logging_enabled",
             "wifi_enabled",
             "wifi_ssid",
             "wifi_password",

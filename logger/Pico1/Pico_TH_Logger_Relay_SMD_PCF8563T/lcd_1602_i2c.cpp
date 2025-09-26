@@ -2,6 +2,8 @@
 #include "hardware/i2c.h"
 #include "lcd_1602_i2c.hpp"
 
+static volatile bool s_backlight_on = true;
+
 void i2c_write_byte(uint8_t);
 void lcd_toggle_enable(uint8_t);
 void lcd_send_byte(uint8_t , int);
@@ -86,8 +88,9 @@ void lcd_toggle_enable(uint8_t val) {
  * @see lcd_toggle_enable(), i2c_write_byte()
  */
 void lcd_send_byte(uint8_t val, int mode) {
-    uint8_t high = mode | (val & 0xF0) | LCD_BACKLIGHT;
-    uint8_t low = mode | ((val << 4) & 0xF0) | LCD_BACKLIGHT;
+    uint8_t bl = s_backlight_on ? LCD_BACKLIGHT : 0;
+    uint8_t high = mode | (val & 0xF0) | bl;
+    uint8_t low = mode | ((val << 4) & 0xF0) | bl;
     i2c_write_byte(high);
     lcd_toggle_enable(high);
     i2c_write_byte(low);
@@ -195,4 +198,44 @@ void lcd_init() {
     lcd_send_byte(LCD_FUNCTIONSET | LCD_2LINE, LCD_COMMAND);
     lcd_send_byte(LCD_DISPLAYCONTROL | LCD_DISPLAYON, LCD_COMMAND);
     lcd_clear();
+}
+
+/**
+ * @brief Enable or disable the LCD backlight.
+ *
+ * Updates the internal backlight state flag and writes the appropriate control
+ * value over I2C to physically switch the LCD module's backlight on or off.
+ *
+ * @param on true to turn the backlight on, false to turn it off.
+ *
+ * @note This function performs an immediate I2C write; ensure the I2C bus is
+ *       initialized prior to calling. If multiple tasks/threads may access the
+ *       display, external synchronization should be applied around calls to
+ *       this function to avoid interleaved I2C transactions.
+ */
+void lcd_set_backlight(bool on) {
+    s_backlight_on = on;
+    uint8_t val = on ? LCD_BACKLIGHT : 0x00;
+    i2c_write_byte(val);
+}
+
+/**
+ * Retrieves the current state of the LCD backlight.
+ *
+ * This accessor returns the last known backlight state tracked internally
+ * (i.e., whether the backlight is considered ON or OFF). It does not
+ * actively query the hardware; instead, it reflects the value maintained
+ * by the driver logic (s_backlight_on).
+ *
+ * Returns:
+ *   true  - the driver considers the backlight enabled
+ *   false - the driver considers the backlight disabled
+ *
+ * Thread-safety:
+ *   If the backlight state may be modified from multiple contexts (e.g.,
+ *   ISR vs main loop), ensure appropriate synchronization around writes
+ *   to the underlying state variable.
+ */
+bool lcd_get_backlight() {
+    return s_backlight_on;
 }

@@ -1,200 +1,80 @@
+
 /**
  * @file program_main.hpp
- * @brief Main application interface for a Pico-based temperature/humidity logger with Wi-Fi and RTC support.
+ * @brief Core application coordinator for the Pico-based temperature/humidity logging and Wi-Fi relay system.
  *
- * This header declares the ProgramMain class, which orchestrates:
- * - I2C peripherals initialization (e.g., BME280 environmental sensor, PCF8563T RTC).
- * - Wi-Fi/TCP connectivity setup and reconnection logic.
- * - System time synchronization from RTC or network (when available).
- * - PWM handling for an RGB indicator.
- * - Acquisition, display, and transmission of sensor measurements.
+ * This header declares the ProgramMain class, responsible for:
+ *  - Initializing and orchestrating hardware peripherals (I2C sensors, PWM backlight, RGB output).
+ *  - Managing the BME280 environmental sensor lifecycle and measurement display.
+ *  - Handling TCP/Wi-Fi connectivity (initialization, reconnection, enable/disable control).
+ *  - Time synchronization (RTC to Unix time conversion and system clock alignment).
+ *  - Button debouncing, edge detection, press/long-press handling, and related actions.
+ *  - Backlight auto-off timing with activity "kick" extension.
+ *  - Conditional logging enable/disable.
+ *  - Periodic data transmission to a remote endpoint.
  *
- * Dependencies:
- * - bme280.hpp: BME280 sensor driver.
- * - tcp.hpp: TCP client/transport utilities.
- * - time.h: time_t and related C time utilities.
+ * Macros:
+ *  - I2C_PORT, I2C_SDA, I2C_SCL: Pin and bus configuration for the sensor interface.
+ *  - WIFI_INIT_FAIL / WIFI_CONN_FAIL / WIFI_OK: Status codes for Wi-Fi initialization and connection attempts.
  *
- * Hardware mapping:
- * - I2C port: i2c0
- * - SDA: GPIO 0
- * - SCL: GPIO 1
+ * Button Handling:
+ *  - Two buttons (on GPIO 20 & 21 implied externally) are tracked with debounced previous states,
+ *    press start timestamps, and long-press one-shot flags.
+ *  - Short vs long press differentiation is implemented via duration thresholds (logic in poll_buttons()).
  *
- * Status codes:
- * - WIFI_OK (0): Wi-Fi initialization/connection succeeded.
- * - WIFI_CONN_FAIL (1): Wi-Fi connection failed after initialization.
- * - WIFI_INIT_FAIL (255): Wi-Fi hardware/stack initialization failed.
- */
-
-
-/** I2C peripheral used to communicate with the sensor/RTC. Place above the corresponding #define. */
-/// I2C port identifier used by the application (RP2040: i2c0).
-
-/** I2C SDA pin. Place above the corresponding #define. */
-/// GPIO index for I2C SDA line (default: 0).
-
-/** I2C SCL pin. Place above the corresponding #define. */
-/// GPIO index for I2C SCL line (default: 1).
-
-/** Wi-Fi error/success codes. Place above the corresponding #define block. */
-/// Wi-Fi initialization failure status code (non-recoverable).
-/// Wi-Fi connection failure status code (recoverable; retry may succeed).
-/// Wi-Fi success status code.
-
-
-/**
- * @class ProgramMain
- * @brief High-level controller for sensor I/O, networking, timekeeping, and RGB indication.
+ * Backlight Control:
+ *  - A deadline timestamp (backlight_deadline_ms) governs automatic shutoff.
+ *  - backlight_kick() extends visibility (default 30 seconds) upon user interaction.
  *
- * Responsibilities:
- * - Initialize and manage BME280 sensor over I2C.
- * - Establish and monitor TCP connectivity over Wi-Fi.
- * - Synchronize the system clock from an RTC and/or network sources.
- * - Drive PWM channels to indicate status via an RGB LED.
- * - Collect, display, and publish measurement data.
+ * Time Utilities:
+ *  - make_time_utc_from_rtc_fields() converts discrete RTC fields to a UTC time_t.
+ *  - synchronize_time() attempts to align system time (e.g., via network or RTC source).
  *
- * Notes:
- * - This class is not thread-safe; call its methods from a single execution context.
- * - Ensure hardware (I2C pins, Wi-Fi module, RGB LED) is wired/configured as expected.
- */
-
-
-/** Pointer to the BME280 driver instance (owned by ProgramMain). */
-/** Pointer to the TCP transport/client instance (owned by ProgramMain). */
-/** Global Wi-Fi enable/disable flag (runtime-configurable). */
-
-
-/**
- * @brief Convert discrete UTC date/time fields into a time_t epoch value.
+ * PWM Utilities:
+ *  - setup_pwm() configures a GPIO for PWM output.
+ *  - set_pwm_duty() adjusts duty cycle (e.g., brightness or LED intensity).
  *
- * @param y  Full year (e.g., 2025).
- * @param m  Month in range [1..12].
- * @param d  Day of month in range [1..31].
- * @param hh Hour in range [0..23].
- * @param mm Minute in range [0..59].
- * @param ss Second in range [0..60] (leap second inclusive).
- * @return UTC time as seconds since Unix epoch, or (time_t)-1 on invalid input.
+ * Networking:
+ *  - init_wifi() performs initial Wi-Fi bring-up; reconnect_wifi() attempts recovery after drop.
+ *  - Wi-Fi can be toggled at runtime (set_wifi_enabled()) allowing low-power / offline operation.
  *
- * @note Intended to translate RTC register fields into a standard epoch value.
- * @warning No timezone or DST adjustments are applied (strict UTC).
- */
-
-
-/**
- * @brief Configure PWM on a specified GPIO pin.
+ * Logging & Display:
+ *  - display_measurement() renders current sensor data to the user interface.
+ *  - send_data() packages and transmits readings (e.g., to a remote logging service).
+ *  - set_logging_enabled() gates data transmission and possibly local record buffering.
  *
- * Initializes the PWM slice/channel, sets a default frequency/resolution, and
- * prepares the pin for duty-cycle updates.
+ * RGB Control:
+ *  - set_rgb_color() allows setting an RGB indicator (e.g., status / alert states).
  *
- * @param gpio_pin GPIO number to be configured for PWM output.
- * @pre gpio_init must have been called for the pin, or this method must handle pin init.
- * @post The pin outputs PWM with an initial duty (implementation-defined).
- */
-
-
-/**
- * @brief Set PWM duty cycle on a specified GPIO pin.
+ * Public Lifecycle:
+ *  - init_equipment() performs aggregated hardware init (sensors, display, networking prerequisites).
  *
- * @param gpio_pin GPIO number configured for PWM.
- * @param duty_u16 16-bit duty cycle value in range [0..65535], where 0 is 0% and 65535 is ~100%.
- * @pre The pin must be configured for PWM via setup_pwm.
- * @note Actual resolution/linearity may depend on the configured PWM clock and wrap value.
- */
-
-
-/**
- * @brief Synchronize the system time.
+ * Thread-Safety / Concurrency:
+ *  - The class is designed for single-threaded cooperative invocation (e.g., from a main loop).
+ *    External synchronization would be required if accessed from ISRs or RTOS tasks.
  *
- * Attempts to read the current time from the RTC and update the system clock. If Wi-Fi
- * is enabled and network time is available, an implementation may also use network time
- * as a fallback or to validate/adjust the RTC value.
+ * Performance Notes:
+ *  - Time comparisons rely on millisecond ticks from to_ms_since_boot(), assumed monotonic.
+ *  - Avoid blocking operations inside frequently called methods (e.g., poll_buttons()).
  *
- * @return true if the system time was updated successfully; false otherwise.
- * @note Should be called after I2C and, if applicable, Wi-Fi are initialized.
- */
-
-
-/**
- * @brief Initialize all attached equipment and subsystems.
+ * Extension Points:
+ *  - Add new sensor types by extending init_equipment() and display_measurement().
+ *  - Enhance networking by adding retry backoff logic in reconnect_wifi().
+ *  - Integrate persistent storage for offline buffering when Wi-Fi is disabled.
  *
- * Typical steps:
- * - Initialize I2C bus and probe the BME280 sensor.
- * - Initialize RTC access.
- * - Initialize PWM channels for RGB LED control.
- * - Perform an initial time synchronization.
+ * Error Handling:
+ *  - Wi-Fi functions return explicit status codes instead of exceptions.
+ *  - Sensor or network object pointers (myBME280, myTCP) should be checked before use.
  *
- * @throws May assert or log errors if critical peripherals are unavailable.
- * @note Call this early in application startup.
- */
-
-
-/**
- * @brief Initialize the Wi-Fi stack and attempt to connect.
+ * Invariants:
+ *  - myBME280 and myTCP are nullptr until initialized.
+ *  - Button state flags reflect the most recent poll cycle.
  *
- * @return Status code:
- * - WIFI_OK on success.
- * - WIFI_CONN_FAIL if initialization succeeded but connection failed.
- * - WIFI_INIT_FAIL if Wi-Fi hardware/stack could not be initialized.
+ * @note This class intentionally keeps hardware abstraction minimal; consider refactoring into
+ *       specialized managers (SensorManager, NetworkManager, UIManager) if complexity grows.
  *
- * @note Respects the global Wi-Fi enable flag; if Wi-Fi is disabled, may return WIFI_INIT_FAIL or skip work.
- */
-
-
-/**
- * @brief Attempt to reconnect to Wi-Fi if disconnected.
- *
- * @return Status code:
- * - WIFI_OK if already connected or reconnection succeeded.
- * - WIFI_CONN_FAIL if reconnection attempts failed.
- * - WIFI_INIT_FAIL if Wi-Fi is disabled or not initialized.
- *
- * @note Useful to call periodically when connectivity is required for data upload.
- */
-
-
-/**
- * @brief Enable or disable Wi-Fi at runtime.
- *
- * When disabled, network operations (including reconnection attempts) should be suppressed.
- *
- * @param enabled true to enable Wi-Fi features; false to disable.
- */
-
-
-/**
- * @brief Check if Wi-Fi features are currently enabled.
- *
- * @return true if Wi-Fi is enabled; false otherwise.
- */
-
-
-/**
- * @brief Set the RGB indicator color using per-channel 8-bit intensities.
- *
- * @param r Red channel intensity [0..255].
- * @param g Green channel intensity [0..255].
- * @param b Blue channel intensity [0..255].
- *
- * @note Internally maps 8-bit values to PWM duty cycles. Channel-to-pin mapping is board-specific.
- */
-
-
-/**
- * @brief Display the latest sensor measurement locally.
- *
- * Typically logs temperature, humidity, and pressure for debugging/monitoring (e.g., via serial console).
- * The exact output medium and formatting are implementation-defined.
- *
- * @note Assumes the BME280 has been initialized and a reading is available.
- */
-
-
-/**
- * @brief Send the latest measurement data over the network.
- *
- * Uses the TCP transport to publish readings to a remote server or service.
- * Handles connection setup if necessary (subject to Wi-Fi enable state).
- *
- * @note Ensure Wi-Fi is enabled and connected before calling. Errors should be logged/handled gracefully.
+ * @warning Ensure poll_buttons() is called at a sufficiently high frequency to guarantee
+ *          accurate press duration classification (e.g., <= 10–20 ms cadence).
  */
 #ifndef __PROGRAM_MAIN_HPP__
 #define __PROGRAM_MAIN_HPP__
@@ -216,6 +96,23 @@ class ProgramMain{
     TCP* myTCP = nullptr;
     bool wifi_active = true;
 
+    bool logging_enabled = true;
+    bool btn21_prev = true;
+    bool btn20_prev = true;
+    uint32_t btn21_last_ms = 0;
+    uint32_t btn20_last_ms = 0;
+
+    bool     btn20_pressed = false;
+    bool     btn21_pressed = false;
+    uint32_t btn20_press_start = 0;
+    uint32_t btn21_press_start = 0;
+    bool     btn20_long_fired = false;
+    bool     btn21_long_fired = false;
+
+    uint32_t backlight_deadline_ms = 0;
+    inline uint32_t now_ms() { return to_ms_since_boot(get_absolute_time()); }
+    void backlight_kick(uint32_t ms = 30000);
+
 private:
     static time_t make_time_utc_from_rtc_fields(uint16_t y, uint16_t m, uint16_t d,
                                                 uint16_t hh, uint16_t mm, uint16_t ss);
@@ -229,6 +126,10 @@ public:
     uint8_t reconnect_wifi();
     void set_wifi_enabled(bool enabled) { wifi_active = enabled; }
     bool is_wifi_enabled() const { return wifi_active; }
+    void poll_buttons();
+    void backlight_autoff_tick();
+    void set_logging_enabled(bool en) { logging_enabled = en; }
+    bool is_logging_enabled() const { return logging_enabled; }
     void set_rgb_color(uint8_t, uint8_t, uint8_t);
     void display_measurement();
     void send_data();
