@@ -479,23 +479,6 @@ void ProgramMain::set_rgb_color(uint8_t red, uint8_t green, uint8_t blue) {
 }
 
 /**
- * @brief Sets the RGB LED color by adjusting the PWM duty cycle for each color channel.
- *
- * This function sets the intensity of the red, green, and blue channels of an RGB LED
- * by configuring the PWM duty cycle for each channel. The values for each color should
- * be in the range 0-255, where 0 is off and 255 is maximum brightness.
- *
- * @param red   Intensity of the red channel (0-255).
- * @param green Intensity of the green channel (0-255).
- * @param blue  Intensity of the blue channel (0-255).
- */
-void ProgramMain::set_rgb_color(uint8_t red, uint8_t green, uint8_t blue) {
-    set_pwm_duty(LED_RED, red);
-    set_pwm_duty(LED_GREEN, green);
-    set_pwm_duty(LED_BLUE, blue);
-}
-
-/**
  * @brief Display timestamp and environmental measurements; report errors; and control relays.
  *
  * @details
