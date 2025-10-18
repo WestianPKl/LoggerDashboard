@@ -1,173 +1,409 @@
-from machine import Pin, SoftI2C, Timer, PWM
-from program import Program
-
+import machine
+from machine import Pin, I2C, Timer, PWM, ADC
+import time
+import network
 import ntptime
+from config import Config
+from rtc_clock import RTC_Clock
+from i2c_lcd import I2cLcd
+from sht30 import SHT30
+from sht40 import SHT40
+from bme280_i2c import BME280
 import urequests as requests
 import json
+import gc
 
-TOKEN_URL = "http://192.168.18.6/api/data/data-token"
-DATA_URL = "http://192.168.18.6/api/data/data-log"
-ERROR_URL = "http://192.168.18.6/api/common/error-log"
-
-LOGGER_ID = 1
-SENSOR_ID = 4
+cfg = Config()
 i = 0
-TEMPERATURE = 1
-HUMIDITY = 1
-PRESSURE = 1
+
+debounce_delay_ms = 50
+LONG_PRESS_MS = 3000
+
+backlight_off_time = 20
+backlight_on = True
+
+btn1_dirty = False
+btn1_pressed = False
+btn1_press_start = None
+btn1_long_fired = False
+btn1_last_stable_change = 0
+btn2_dirty = False
+btn2_pressed = False
+btn2_press_start = None
+btn2_long_fired = False
+btn2_last_stable_change = 0
+long_press_reset = False
+
+
+def network_connection():
+    ssid = cfg.get_ssid()
+    password = cfg.get_password()
+
+    station = network.WLAN(network.STA_IF)
+    station.active(True)
+    station.connect(ssid, password)
+
+    timeout = 0
+    while station.isconnected() == False and timeout < 20:
+        time.sleep(1)
+        timeout += 1
+
+    if station.isconnected():
+        try:
+            ntptime.settime()
+        except Exception as e:
+            print("NTP time sync error:", e)
+    else:
+        print("WiFi connection failed!")
+
+
+def set_time(clock):
+    try:
+        aT = time.localtime(time.time() + 2 * 60 * 60)
+        year = aT[0]
+        month = aT[1]
+        day = aT[2]
+        hour = aT[3]
+        minute = aT[4]
+        second = aT[5]
+        clock.set_time((year, month, day, 0, hour, minute, second))
+    except Exception as e:
+        send_error_log("Failed to set RTC time", str(e))
+
+
+def send_error_log(message, details=None):
+    try:
+        payload = {
+            "equipmentId": cfg.get_logger_id(),
+            "message": message,
+            "details": details,
+            "severity": "error",
+            "type": "Equipment",
+        }
+        try:
+            resp = requests.post(
+                f"{cfg.get_base_url()}{cfg.get_error_url()}",
+                json=payload,
+                timeout=3,
+            )
+        finally:
+            if resp:
+                resp.close()
+    except Exception as e:
+        print("Cannot send message to backend:", e)
+
+
+def map_color(color):
+    return int(color * 65535 / 255)
+
+
+def set_color(leds, red, green, blue):
+    try:
+        leds[0].duty_u16(map_color(red))
+        leds[1].duty_u16(map_color(green))
+        leds[2].duty_u16(map_color(blue))
+    except Exception as e:
+        print("Cannot set LED:", e)
+
+
+def button1_irq(pin):
+    global btn1_dirty
+    btn1_dirty = True
+
+
+def button2_irq(pin):
+    global btn2_dirty
+    btn2_dirty = True
+
+
+def button1_handler():
+    global backlight_on, backlight_off_time
+    if not backlight_on:
+        cfg.set_backlight_flag(2)
+    else:
+        cfg.set_backlight_flag(1)
+
+
+def button1_long_handler():
+    global long_press_reset
+    long_press_reset = True
+
+
+def button2_handler():
+    print("Button 2 pressed")
+
+
+def button2_long_handler():
+    cfg.set_logging_enabled(not cfg.is_logging_enabled())
+
+
+def update_button(which, pin):
+    global debounce_delay_ms, LONG_PRESS_MS, btn1_dirty, btn1_pressed, btn1_press_start, btn1_long_fired, btn1_last_stable_change
+    global btn2_dirty, btn2_pressed, btn2_press_start, btn2_long_fired, btn2_last_stable_change
+    now = time.ticks_ms()
+    if which == 1:
+        dirty = "btn1_dirty"
+        pressed = "btn1_pressed"
+        start = "btn1_press_start"
+        fired = "btn1_long_fired"
+        last = "btn1_last_stable_change"
+        on_short = button1_handler
+        on_long = button1_long_handler
+    else:
+        dirty = "btn2_dirty"
+        pressed = "btn2_pressed"
+        start = "btn2_press_start"
+        fired = "btn2_long_fired"
+        last = "btn2_last_stable_change"
+        on_short = button2_handler
+        on_long = button2_long_handler
+    need_check = (
+        globals()[dirty] or time.ticks_diff(now, globals()[last]) >= debounce_delay_ms
+    )
+    if need_check:
+        raw_pressed = pin.value() == 0
+        if (
+            raw_pressed != globals()[pressed]
+            and time.ticks_diff(now, globals()[last]) >= debounce_delay_ms
+        ):
+            globals()[last] = now
+            globals()[pressed] = raw_pressed
+            if raw_pressed:
+                globals()[start] = now
+                globals()[fired] = False
+            else:
+                ps = globals()[start]
+                lf = globals()[fired]
+                if ps is not None and not lf:
+                    dur = time.ticks_diff(now, ps)
+                    if dur >= debounce_delay_ms:
+                        try:
+                            on_short()
+                        except Exception as e:
+                            print("Button short callback error:", e)
+                globals()[start] = None
+                globals()[fired] = False
+        globals()[dirty] = False
+    if globals()[pressed] and globals()[start] is not None and not globals()[fired]:
+        held = time.ticks_diff(now, globals()[start])
+        if held >= LONG_PRESS_MS:
+            globals()[fired] = True
+            try:
+                on_long()
+            except Exception as e:
+                print("Button long callback error:", e)
 
 
 def main():
-    """
-    Main entry point for the Micropython logger application.
-    Initializes hardware components including LEDs, I2C, and buzzer, and sets up the main program logic.
-    Defines a periodic measurement function (`counter_measurement`) that:
-        - Reads temperature, humidity, and pressure from the sensor (if enabled).
-        - Handles sensor read errors and updates LED color to indicate status.
-        - Formats and displays measurement data.
-        - Every other cycle, sends measurement data to a remote server via HTTP POST, handling authentication and error logging.
-        - Updates LED color to indicate success or failure of data transmission.
-    Starts a periodic timer to invoke the measurement function every 3 seconds.
-    """
-    pins = [8, 7, 6]
+    sda_pin = 0
+    scl_pin = 1
+    I2C_ADDR = 0x27
+    totalRows = 2
+    totalColumns = 16
+    conversion_factor = 3.3 / (65535)
+    gain = (100000 + 100000) / 100000
+
+    i2c = I2C(0, scl=Pin(scl_pin), sda=Pin(sda_pin), freq=100000)
+    lcd = I2cLcd(i2c, I2C_ADDR, totalRows, totalColumns)
+    lcd.move_to(0, 0)
+    lcd.putstr("Logger ready")
+    lcd.move_to(0, 1)
+    lcd.putstr("Initializing...")
+    network_connection()
+
+    pins = cfg.get_led_pins()
     leds = [PWM(Pin(pin)) for pin in pins]
     for led in leds:
         led.freq(1000)
-    i2c = SoftI2C(scl=Pin(1), sda=Pin(0), freq=10000)
-    buzzer = PWM(Pin(13))
-    main_program = Program(leds, buzzer, i2c, LOGGER_ID, ERROR_URL)
-    main_program.init_program()
+    adc_pin = Pin(26, mode=Pin.IN)
+    adc = ADC(adc_pin)
+    clock = RTC_Clock(i2c)
+    if cfg.is_set_time_enabled():
+        set_time(clock)
+    if cfg.get_sht_type() == 30:
+        sensor = SHT30(i2c)
+    elif cfg.get_sht_type() == 40:
+        sensor = SHT40(i2c)
+    elif cfg.get_sht_type() == 0:
+        sensor = BME280(i2c)
+    set_color(leds, 0, 255, 255)
+    switch1 = Pin(cfg.get_switch_pins()[0], Pin.IN, Pin.PULL_UP)
+    switch2 = Pin(cfg.get_switch_pins()[1], Pin.IN, Pin.PULL_UP)
+    switch1.irq(
+        trigger=Pin.IRQ_FALLING,
+        handler=button1_irq,
+    )
+    switch2.irq(
+        trigger=Pin.IRQ_FALLING,
+        handler=button2_irq,
+    )
+    time.sleep(2)
+    lcd.clear()
 
-    def counter_measurement(timer):
-        """
-        Callback function for periodic sensor measurement and data transmission.
-        This function is intended to be called by a timer interrupt. It performs the following tasks:
-        - Reads temperature, humidity, and pressure values from the sensor if enabled.
-        - Handles sensor reading errors and updates the device status LED accordingly.
-        - Formats and displays the measured values on the device.
-        - Every second invocation, synchronizes time via NTP, prepares a data payload, retrieves an API token, and sends the data to a remote server.
-        - Logs errors related to sensor readings, data formatting, or API communication.
-        Args:
-            timer: The timer object triggering this callback (not used directly).
-        Globals:
-            i (int): Counter to determine when to send data.
-            TEMPERATURE (int): Flag to enable temperature measurement.
-            HUMIDITY (int): Flag to enable humidity measurement.
-            PRESSURE (int): Flag to enable pressure measurement.
-            LOGGER_ID (str/int): Logger identifier for data payload.
-            SENSOR_ID (str/int): Sensor identifier for data payload.
-            TOKEN_URL (str): URL to retrieve API token.
-            DATA_URL (str): URL to send measurement data.
-        Raises:
-            None. All exceptions are caught and logged internally.
-        """
-        global i
-        temp_raw = hum_raw = pressure_raw = None
-        temp_send = hum_send = pressure_send = None
+    def buttons_tick(_t):
+        update_button(1, switch1)
+        update_button(2, switch2)
+
+    def timer_callback(timer):
+        global backlight_off_time, backlight_on, i, long_press_reset
         error = False
-
+        if cfg.get_backlight_flag() == 2:
+            lcd.backlight_on()
+            backlight_off_time = 20
+            backlight_on = True
+            cfg.set_backlight_flag(0)
+        elif cfg.get_backlight_flag() == 1:
+            backlight_off_time = 0
+            backlight_on = False
+            cfg.set_backlight_flag(0)
+            lcd.backlight_off()
+        if backlight_on and backlight_off_time <= 0:
+            lcd.backlight_off()
+            backlight_on = False
         try:
-            if TEMPERATURE == 1:
-                temp_raw = round(main_program.sensor.temperature(), 1)
-                temp_send = round(main_program.sensor.temperature(), 2)
-            if HUMIDITY == 1:
-                hum_raw = round(main_program.sensor.relative_humidity(), 1)
-                hum_send = round(main_program.sensor.relative_humidity(), 2)
-            if PRESSURE == 1:
-                pressure_raw = round(main_program.sensor.pressure(), 1)
-                pressure_send = round(main_program.sensor.pressure(), 2)
+            batt_raw = adc.read_u16()
+            batt_v = batt_raw * conversion_factor * gain
+            current_time = clock.read_time()
+            if i % 2 == 0:
+                set_color(leds, 0, 0, 0)
+                formated_time = "{}-{:02d}-{:02d} {:02d}:{:02d}".format(
+                    current_time[0],
+                    current_time[1],
+                    current_time[2],
+                    current_time[3],
+                    current_time[4],
+                    current_time[5],
+                )
+            elif i % 2 != 0:
+                if cfg.is_logging_enabled() and batt_v >= 1.5:
+                    set_color(leds, 0, 255, 0)
+                elif batt_v < 1.5:
+                    set_color(leds, 255, 255, 0)
+                else:
+                    set_color(leds, 255, 255, 255)
+                formated_time = "{}-{:02d}-{:02d} {:02d} {:02d}".format(
+                    current_time[0],
+                    current_time[1],
+                    current_time[2],
+                    current_time[3],
+                    current_time[4],
+                    current_time[5],
+                )
+                if batt_v < 1.5:
+                    formated_time = "LOW BATT.       "
         except Exception as e:
-            main_program.send_error_log("Sensor reading error", str(e))
-            main_program.set_color(255, 0, 0)
+            send_error_log("RTC read error", str(e))
             error = True
-
-        if error or temp_raw is None or hum_raw is None:
-            return
-
-        date = main_program.get_date()
-        if temp_raw <= 15 or temp_raw >= 35 or hum_raw <= 25 or hum_raw >= 75:
-            main_program.set_color(255, 0, 0)
-        else:
-            main_program.set_color(0, 255, 0)
-        temp = str(temp_raw)
-        hum = str(hum_raw)
-        if temp_raw < 10:
-            temp = "0{}".format(temp_raw)
-        if hum_raw < 10:
-            hum = "0{}".format(hum_raw)
-        time_send = "{}-{}-{} {}:{}:{}".format(
-            date[0], date[1], date[2], date[3], date[4], date[5]
-        )
-        if i % 2 == 0:
-            time_formated = "{}-{}-{} {}:{}".format(
-                date[0], date[1], date[2], date[3], date[4]
+        try:
+            temperature = sensor.temperature()
+            humidity = sensor.relative_humidity()
+            if cfg.is_pressure_enabled() == 1:
+                pressure = sensor.atm_pressure()
+            else:
+                pressure = None
+        except Exception as e:
+            send_error_log("Sensor read error", str(e))
+            error = True
+        try:
+            lcd.move_to(0, 0)
+            lcd.putstr(
+                "T/H: {}C {}% ".format(round(temperature, 1), round(humidity, 1))
             )
-        else:
-            time_formated = "{}-{}-{} {} {}".format(
-                date[0], date[1], date[2], date[3], date[4]
-            )
-        main_program.display_measurement(temp_raw, temp, hum, time_formated)
-
-        if i == 1 and not error:
+            lcd.move_to(0, 1)
+            lcd.putstr(formated_time)
+        except Exception as e:
+            send_error_log("LCD display error", str(e))
+            error = True
+        if i == cfg.get_post_time():
+            data = []
+            # 1 cycle = 1s
+            # 10 cycles = 10s
+            # 600 cycles = 10min
             try:
-                data = [
-                    {
+                time_send = "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(
+                    current_time[0],
+                    current_time[1],
+                    current_time[2],
+                    current_time[3],
+                    current_time[4],
+                    current_time[5],
+                )
+                temp_send = round(temperature, 2)
+                hum_send = round(humidity, 2)
+                if cfg.is_pressure_enabled() == 1 and pressure is not None:
+                    pressure_send = round(pressure, 2)
+                if cfg.is_temperature_enabled() == 1 and temp_send is not None:
+                    temp_entry = {
                         "time": time_send,
                         "value": temp_send,
                         "definition": "temperature",
-                        "equLoggerId": LOGGER_ID,
-                        "equSensorId": SENSOR_ID,
-                    },
-                    {
+                        "equLoggerId": cfg.get_logger_id(),
+                        "equSensorId": cfg.get_sensor_id(),
+                    }
+                    data.append(temp_entry)
+                if cfg.is_humidity_enabled() == 1 and hum_send is not None:
+                    hum_entry = {
                         "time": time_send,
                         "value": hum_send,
                         "definition": "humidity",
-                        "equLoggerId": LOGGER_ID,
-                        "equSensorId": SENSOR_ID,
-                    },
-                    {
+                        "equLoggerId": cfg.get_logger_id(),
+                        "equSensorId": cfg.get_sensor_id(),
+                    }
+                    data.append(hum_entry)
+                if cfg.is_pressure_enabled() == 1 and pressure_send is not None:
+                    pressure_entry = {
                         "time": time_send,
                         "value": pressure_send,
                         "definition": "atmPressure",
-                        "equLoggerId": LOGGER_ID,
-                        "equSensorId": SENSOR_ID,
-                    },
-                ]
-                ntptime.settime()
+                        "equLoggerId": cfg.get_logger_id(),
+                        "equSensorId": cfg.get_sensor_id(),
+                    }
+                    data.append(pressure_entry)
+            except Exception as e:
+                send_error_log("Preparing data fail", str(e))
+                error = True
+            if cfg.is_logging_enabled() and not error and len(data) > 0:
                 try:
-                    get_token = requests.get(TOKEN_URL, timeout=2).text
-                    token = json.loads(get_token)["token"]
-                    send_package = requests.post(
-                        DATA_URL,
+                    resp = requests.get(
+                        f"{cfg.get_base_url()}{cfg.get_token_url()}",
+                        timeout=0.5,
+                    )
+                    try:
+                        token = json.loads(resp.text)["token"]
+                    finally:
+                        resp.close()
+                    resp2 = requests.post(
+                        f"{cfg.get_base_url()}{cfg.get_data_url()}",
                         headers={"Authorization": "Bearer {}".format(token)},
                         json=data,
-                        timeout=2,
+                        timeout=0.5,
                     )
-                    if (
-                        send_package.status_code == 201
-                        or send_package.status_code == 200
-                    ):
-                        main_program.set_color(255, 255, 255)
-                    else:
-                        main_program.send_error_log(
-                            "Data sending error", str(send_package.status_code)
-                        )
-                        main_program.set_color(255, 0, 0)
+                    try:
+                        status_code = resp2.status_code
+                        if status_code not in (200, 201):
+                            send_error_log(
+                                "Data post error",
+                                f"Status code: {status_code}, data could not be send",
+                            )
+                    finally:
+                        resp2.close()
+                        gc.collect()
                 except Exception as e:
-                    main_program.send_error_log("API communication error", str(e))
-                    main_program.set_color(255, 0, 0)
-            except Exception as e:
-                main_program.send_error_log("Wrong data format", str(e))
-                main_program.set_color(255, 0, 0)
-            main_program.set_color(0, 255, 0)
+                    send_error_log("Wrong data format", str(e))
             i = 0
         i += 1
+        backlight_off_time -= 1
+        if backlight_off_time < 0:
+            backlight_off_time = 0
+        if long_press_reset:
+            long_press_reset = False
+            machine.reset()
 
-    Timer(-1).init(mode=Timer.PERIODIC, period=3000, callback=counter_measurement)
+    logger_timer = Timer()
+    logger_timer.init(mode=Timer.PERIODIC, period=1000, callback=timer_callback)
+    btn_timer = Timer(-1)
+    btn_timer.init(mode=Timer.PERIODIC, period=10, callback=buttons_tick)
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print("Program critical error:", e)
+    main()

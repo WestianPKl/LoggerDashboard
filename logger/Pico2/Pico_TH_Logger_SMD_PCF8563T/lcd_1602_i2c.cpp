@@ -220,7 +220,7 @@ void lcd_set_backlight(bool on) {
 }
 
 /**
- * Retrieves the current state of the LCD backlight.
+ * Retrieves the current state of self.i2c.writeto(self.i2c_addr, bytes([0]))the LCD backlight.
  *
  * This accessor returns the last known backlight state tracked internally
  * (i.e., whether the backlight is considered ON or OFF). It does not
