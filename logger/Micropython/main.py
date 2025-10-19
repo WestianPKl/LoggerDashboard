@@ -275,12 +275,13 @@ def main():
                     current_time[5],
                 )
             elif i % 2 != 0:
-                if cfg.is_logging_enabled() and batt_v >= 1.5:
-                    set_color(leds, 0, 255, 0)
-                elif batt_v < 1.5:
-                    set_color(leds, 255, 255, 0)
-                else:
-                    set_color(leds, 255, 255, 255)
+                if current_time[3] <= 20 and current_time[3] >= 8:
+                    if cfg.is_logging_enabled() and batt_v >= 1.5:
+                        set_color(leds, 0, 255, 0)
+                    elif batt_v < 1.5:
+                        set_color(leds, 255, 255, 0)
+                    else:
+                        set_color(leds, 255, 255, 255)
                 formated_time = "{}-{:02d}-{:02d} {:02d} {:02d}".format(
                     current_time[0],
                     current_time[1],
