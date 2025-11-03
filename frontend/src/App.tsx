@@ -20,7 +20,7 @@ export default function App() {
 	const timeout = useAppSelector(selectTimeout)
 	const message = useAppSelector(selectMessage)
 	const severity = useAppSelector(selectSeverity)
-	const alertTimeout = useRef<number | null>(null)
+	const alertTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
 	useEffect(() => {
 		if (isActive) {
