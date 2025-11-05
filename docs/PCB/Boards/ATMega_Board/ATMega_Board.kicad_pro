@@ -656,18 +656,6 @@
     [
       "e3206b16-e8f3-47ce-a5f5-509cef5844a5",
       "Root"
-    ],
-    [
-      "bf7a9728-1423-4fc2-9833-0c2699ca43e7",
-      "com_level"
-    ],
-    [
-      "63aeeab3-5648-4041-ad89-0c3ed4be2dfe",
-      "loads"
-    ],
-    [
-      "fa3545ed-28a0-4d29-b9a9-21ab69fcab99",
-      "connectors"
     ]
   ],
   "text_variables": {}
