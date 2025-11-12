@@ -1114,6 +1114,170 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:R_Potentiometer"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "RV"
+				(at -4.445 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R_Potentiometer"
+				(at -2.54 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Potentiometer"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "resistor variable"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Potentiometer*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "R_Potentiometer_0_1"
+				(rectangle
+					(start 1.016 2.54)
+					(end -1.016 -2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.143 0) (xy 2.286 0.508) (xy 2.286 -0.508) (xy 1.143 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(polyline
+					(pts
+						(xy 2.54 0) (xy 1.524 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_Potentiometer_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 1.27)
+					(name "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Switch:SW_Push"
 			(pin_numbers
 				(hide yes)
@@ -1872,6 +2036,28 @@
 			)
 		)
 	)
+	(global_label "RV3_3"
+		(shape input)
+		(at 241.3 100.33 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "0d469795-3fe0-4b46-8d0c-c82b4849f703")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 250.0304 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "Load_L_OUT_5"
 		(shape output)
 		(at 64.77 135.89 0)
@@ -2017,6 +2203,28 @@
 		(uuid "233316cd-1444-4be7-a012-4c14f2f38e89")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 170.1412 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "RV2_3"
+		(shape input)
+		(at 241.3 88.9 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "28226b12-19c0-476b-b7b1-5681b05c6c8d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 250.0304 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2268,6 +2476,28 @@
 			)
 		)
 	)
+	(global_label "RV1_3"
+		(shape input)
+		(at 241.3 77.47 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "496f5f8d-8ede-4a90-b140-fcc3ad7290c1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 250.0304 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "Divider_GND_1"
 		(shape input)
 		(at 57.15 76.2 180)
@@ -2325,6 +2555,28 @@
 		(uuid "618c70dc-ad8a-4bdd-bb77-8f58973cb99d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 80.9993 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "RV2_1"
+		(shape input)
+		(at 241.3 81.28 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "66957e63-135d-4d5a-aad9-3d3933fd9a82")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 250.0304 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2457,6 +2709,28 @@
 		(uuid "709d15ca-7594-4eac-bb7a-f47065a46fbb")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 148.1883 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "RV1_1"
+		(shape input)
+		(at 241.3 69.85 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "72cf2d60-4dff-456e-b494-136af503e277")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 250.0304 69.85 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2928,6 +3202,28 @@
 			)
 		)
 	)
+	(global_label "RV3_1"
+		(shape input)
+		(at 241.3 92.71 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "b30b63f8-afcc-4992-9b0f-206f1e7d6524")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 250.0304 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "Load_C_IN_7"
 		(shape input)
 		(at 139.7 127 180)
@@ -3170,6 +3466,28 @@
 			)
 		)
 	)
+	(global_label "RV1_2"
+		(shape input)
+		(at 245.11 73.66 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "dbaefb96-fc0c-4a79-bea0-af79608f84fd")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 253.8404 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "T2_2"
 		(shape output)
 		(at 200.66 124.46 180)
@@ -3188,6 +3506,50 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "RV2_2"
+		(shape input)
+		(at 245.11 85.09 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "e25e0196-7c9b-43bb-8434-6b7e64f0f5ad")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 253.8404 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "RV3_2"
+		(shape input)
+		(at 245.11 96.52 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "ed7f9019-ef00-40cb-af1c-177d4ce09301")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 253.8404 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 				(hide yes)
 			)
 		)
@@ -3973,6 +4335,79 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:R_Potentiometer")
+		(at 241.3 96.52 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "180b020f-ae4f-401e-a2af-3514a2e05f23")
+		(property "Reference" "RV3"
+			(at 238.76 95.2499 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "R_Potentiometer"
+			(at 238.76 97.7899 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Potentiometer_THT:Potentiometer_Runtron_RM-065_Vertical"
+			(at 241.3 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 241.3 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Potentiometer"
+			(at 241.3 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "608ae4f2-90e5-40ee-9552-71a79a31d004")
+		)
+		(pin "3"
+			(uuid "bfcbc29f-74d0-4944-b557-9d58155f8a50")
+		)
+		(pin "2"
+			(uuid "d4522c6a-4d4d-4864-be87-6c0f397f10fa")
+		)
+		(instances
+			(project "Load_Board"
+				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5/63aeeab3-5648-4041-ad89-0c3ed4be2dfe"
+					(reference "RV3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:Crystal")
 		(at 185.42 82.55 0)
 		(unit 1)
@@ -4101,6 +4536,79 @@
 			(project "Load_Board"
 				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5/63aeeab3-5648-4041-ad89-0c3ed4be2dfe"
 					(reference "Y1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R_Potentiometer")
+		(at 241.3 85.09 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "23add1be-fcfb-416a-8c36-a31f41293c2d")
+		(property "Reference" "RV2"
+			(at 238.76 83.8199 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "R_Potentiometer"
+			(at 238.76 86.3599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Potentiometer_THT:Potentiometer_Runtron_RM-065_Vertical"
+			(at 241.3 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 241.3 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Potentiometer"
+			(at 241.3 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e0e16258-e455-4fcd-92bc-c843674dc06e")
+		)
+		(pin "3"
+			(uuid "cd582bcc-0130-48d5-9526-719b15fbc3ef")
+		)
+		(pin "2"
+			(uuid "65cdf8de-0b0a-4f73-ba12-1fd852bf8724")
+		)
+		(instances
+			(project "Load_Board"
+				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5/63aeeab3-5648-4041-ad89-0c3ed4be2dfe"
+					(reference "RV2")
 					(unit 1)
 				)
 			)
@@ -5347,6 +5855,79 @@
 			(project "Load_Board"
 				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5/63aeeab3-5648-4041-ad89-0c3ed4be2dfe"
 					(reference "R26")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R_Potentiometer")
+		(at 241.3 73.66 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "913f2022-4928-4515-a66e-62793ed036b6")
+		(property "Reference" "RV1"
+			(at 238.76 72.3899 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "R_Potentiometer"
+			(at 238.76 74.9299 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Potentiometer_THT:Potentiometer_Runtron_RM-065_Vertical"
+			(at 241.3 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 241.3 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Potentiometer"
+			(at 241.3 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "341c6504-adef-47a2-8886-24ad8ae4d59c")
+		)
+		(pin "3"
+			(uuid "6bb61c35-c988-46bb-af96-775f08c83399")
+		)
+		(pin "2"
+			(uuid "6ee927c8-3b9e-4a6d-b85a-fe25a15fa076")
+		)
+		(instances
+			(project ""
+				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5/63aeeab3-5648-4041-ad89-0c3ed4be2dfe"
+					(reference "RV1")
 					(unit 1)
 				)
 			)
