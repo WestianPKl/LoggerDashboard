@@ -8,7 +8,7 @@
 	)
 	(paper "A4")
 	(title_block
-		(title "CAN_Board")
+		(title "ATMegaSMD_Board")
 		(date "2025-10-26")
 		(rev "1.0")
 		(company "PKl")

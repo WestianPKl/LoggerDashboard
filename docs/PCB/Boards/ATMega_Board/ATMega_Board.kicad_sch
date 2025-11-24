@@ -5,7 +5,7 @@
 	(uuid "e3206b16-e8f3-47ce-a5f5-509cef5844a5")
 	(paper "A4")
 	(title_block
-		(title "CAN_Board")
+		(title "ATMega_Board")
 		(date "2025-10-26")
 		(rev "1.0")
 		(company "PKl")
