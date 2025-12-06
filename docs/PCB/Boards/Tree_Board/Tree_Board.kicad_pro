@@ -503,7 +503,7 @@
       "plot": "PROD/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "Tree_Board.step",
       "svg": "",
       "vrml": ""
     },

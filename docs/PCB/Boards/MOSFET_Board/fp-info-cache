@@ -1,4 +1,4 @@
-26337594562067775
+26339358753417649
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -68880,6 +68880,13 @@ MOSFET (N-Channel)
 7
 7
 Library
+Mikrofon
+Electret Condenser microphone, Project Unlimited (PU) Audio, https://api.puiaudio.com/file/b7e03aec-9603-48da-8064-9a0e0468047c.pdf
+microphone electret
+0
+2
+2
+Library
 RaspberryPi_Pico_Common
 Raspberry Pi Pico (wireless & original) versatile footprint for surface-mount or through-hole hand soldering, default socket model has height of 8.51mm, https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf
 Raspberry Pi Pico module usb pcb antenna handsolder
@@ -69063,7 +69070,7 @@ Raspberry Pi Pico module usb pcb antenna virtual
 0
 Library
 SOIC127P600X175-8N
-(OA)8-Lead(SOIC)
+soic -2
 Integrated Circuit
 0
 8
