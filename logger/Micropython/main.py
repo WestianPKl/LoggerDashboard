@@ -1,455 +1,411 @@
 import machine
-import utime
-from machine import Pin, PWM, ADC, I2C
+from machine import Pin, I2C, Timer, PWM, ADC
+import time
+import network
+import ntptime
+from config import Config
 from rtc_clock import RTC_Clock
-import _thread
+from i2c_lcd import I2cLcd
+from sht30 import SHT30
+from sht40 import SHT40
+from bme280_i2c import BME280
+import urequests as requests
+import json
+import gc
 
-relay = 0
-rtc = 0
-if relay != 1:
-    buzzer = PWM(Pin(15))
-    buzzer.freq(1000)
+cfg = Config()
+i = 0
 
-if relay == 1:
-    relay1 = Pin(14, Pin.OUT)
-    relay2 = Pin(15, Pin.OUT)
+debounce_delay_ms = 50
+LONG_PRESS_MS = 3000
 
-if rtc == 1:
-    adc_rtc = ADC(Pin(26))
-    rtc_on = Pin(11, Pin.OUT)
-    rtc_int = Pin(12, Pin.IN)
-    rtc_clk = Pin(13, Pin.IN)
+backlight_off_time = 20
+backlight_on = True
 
-led_red = PWM(Pin(9))
-led_green = PWM(Pin(10))
-led_blue = PWM(Pin(8))
-
-led_red.freq(1000)
-led_green.freq(1000)
-led_blue.freq(1000)
-
-led_on_off_1 = PWM(Pin(2))
-led_on_off_2 = PWM(Pin(3))
-led_on_off_1.freq(1000)
-led_on_off_2.freq(1000)
-
-adc = ADC(Pin(27))
-
-button1 = Pin(21, Pin.IN, Pin.PULL_UP)
-button2 = Pin(22, Pin.IN, Pin.PULL_UP)
-
-test_running = True
+btn1_dirty = False
+btn1_pressed = False
+btn1_press_start = None
+btn1_long_fired = False
+btn1_last_stable_change = 0
+btn2_dirty = False
+btn2_pressed = False
+btn2_press_start = None
+btn2_long_fired = False
+btn2_last_stable_change = 0
+long_press_reset = False
 
 
-def read_voltage():
-    """Odczyt napięcia z dzielnika 100k/200k"""
-    adc_value = adc.read_u16()
-    voltage_adc = (adc_value / 65535) * 3.3
-    voltage_input = voltage_adc * 1.5
-    return voltage_input, voltage_adc, adc_value
+def network_connection():
+    ssid = cfg.get_ssid()
+    password = cfg.get_password()
 
-def test_buzzer():
-    """Test buzzera - podstawowy + muzyka"""
-    print("=== TEST BUZZER (GPIO15) ===")
-    print("Test podstawowy:")
-    buzzer.duty_u16(32768)
-    print("Buzzer ON (1 sek)")
-    utime.sleep(1)
-    buzzer.duty_u16(0)
-    print("Buzzer OFF")
-    utime.sleep(0.5)
-    print("Skala muzyczna C-dur:")
-    notes = [(262, "C"), (294, "D"), (330, "E"), (349, "F"), 
-             (392, "G"), (440, "A"), (494, "B"), (523, "C")]
-    
-    for freq, note in notes:
-        print(f"Nuta {note} ({freq}Hz)")
-        buzzer.freq(freq)
-        buzzer.duty_u16(32768)
-        utime.sleep(0.5)
-        buzzer.duty_u16(0)
-        utime.sleep(0.1)
-    
-    buzzer.duty_u16(0)
-    print("Test buzzer zakończony\n")
+    station = network.WLAN(network.STA_IF)
+    station.active(True)
+    station.connect(ssid, password)
 
-def test_rgb_led():
-    """Test LED RGB z podstawowymi kolorami"""
-    print("=== TEST LED RGB (GPIO8=blue, GPIO9=red, GPIO10=green) ===")
-    
-    colors = [
-        ("Czerwony", 65535, 0, 0),
-        ("Zielony", 0, 65535, 0),
-        ("Niebieski", 0, 0, 65535),
-        ("Żółty", 65535, 65535, 0),
-        ("Magenta", 65535, 0, 65535),
-        ("Cyjan", 0, 65535, 65535),
-        ("Biały", 65535, 65535, 65535)
-    ]
-    
-    for color_name, r, g, b in colors:
-        print(f"Kolor: {color_name}")
-        led_red.duty_u16(r)
-        led_green.duty_u16(g)
-        led_blue.duty_u16(b)
-        utime.sleep(1)
-    led_red.duty_u16(0)
-    led_green.duty_u16(0)
-    led_blue.duty_u16(0)
-    print("Test LED RGB zakończony\n")
+    timeout = 0
+    while station.isconnected() == False and timeout < 20:
+        time.sleep(1)
+        timeout += 1
 
-def test_rgb_fade():
-    """Test fade RGB"""
-    print("=== TEST FADE RGB ===")
-    print("Fade czerwony...")
-    for duty in range(0, 65536, 2000):
-        led_red.duty_u16(duty)
-        utime.sleep_ms(30)
-    for duty in range(65535, -1, -2000):
-        led_red.duty_u16(duty)
-        utime.sleep_ms(30)
-    print("Fade zielony...")
-    for duty in range(0, 65536, 2000):
-        led_green.duty_u16(duty)
-        utime.sleep_ms(30)
-    for duty in range(65535, -1, -2000):
-        led_green.duty_u16(duty)
-        utime.sleep_ms(30)
-    print("Fade niebieski...")
-    for duty in range(0, 65536, 2000):
-        led_blue.duty_u16(duty)
-        utime.sleep_ms(30)
-    for duty in range(65535, -1, -2000):
-        led_blue.duty_u16(duty)
-        utime.sleep_ms(30)
-    
-    led_red.duty_u16(0)
-    led_green.duty_u16(0)
-    led_blue.duty_u16(0)
-    
-    print("Test fade RGB zakończony\n")
-
-def test_simple_leds():
-    """Test prostych LED GPIO2 i GPIO3"""
-    print("=== TEST LED GPIO2 i GPIO3 ===")
-    print("Test ON/OFF:")
-    print("LED GPIO2 ON")
-    led_on_off_1.duty_u16(65535)
-    utime.sleep(1)
-    print("LED GPIO2 OFF")
-    led_on_off_1.duty_u16(0)
-    utime.sleep(0.5)
-    print("LED GPIO3 ON")
-    led_on_off_2.duty_u16(65535)
-    utime.sleep(1)
-    print("LED GPIO3 OFF")
-    led_on_off_2.duty_u16(0)
-    utime.sleep(0.5)
-    print("Oba LED ON")
-    led_on_off_1.duty_u16(65535)
-    led_on_off_2.duty_u16(65535)
-    utime.sleep(1)
-    print("Oba LED OFF")
-    led_on_off_1.duty_u16(0)
-    led_on_off_2.duty_u16(0)
-    utime.sleep(0.5)
-    print("Test prostych LED zakończony\n")
-
-def test_simple_leds_fade():
-    """Test fade prostych LED"""
-    print("=== TEST FADE LED GPIO2/3 ===")
-    print("Fade LED GPIO2...")
-    for duty in range(0, 65536, 2000):
-        led_on_off_1.duty_u16(duty)
-        utime.sleep_ms(20)
-    for duty in range(65535, -1, -2000):
-        led_on_off_1.duty_u16(duty)
-        utime.sleep_ms(20)
-    utime.sleep(0.3)
-    print("Fade LED GPIO3...")
-    for duty in range(0, 65536, 2000):
-        led_on_off_2.duty_u16(duty)
-        utime.sleep_ms(20)
-    for duty in range(65535, -1, -2000):
-        led_on_off_2.duty_u16(duty)
-        utime.sleep_ms(20)
-    utime.sleep(0.3)
-    print("Synchroniczne fade...")
-    for duty in range(0, 65536, 1000):
-        led_on_off_1.duty_u16(duty)
-        led_on_off_2.duty_u16(duty)
-        utime.sleep_ms(15)
-    for duty in range(65535, -1, -1000):
-        led_on_off_1.duty_u16(duty)
-        led_on_off_2.duty_u16(duty)
-        utime.sleep_ms(15)
-    led_on_off_1.duty_u16(0)
-    led_on_off_2.duty_u16(0)
-    print("Test fade prostych LED zakończony\n")
-
-def test_adc():
-    """Test odczytu ADC - dzielnik 100k/200k, oczekiwane 5V"""
-    print("=== TEST ADC (GPIO27) ===")
-    print("Dzielnik napięciowy 100k/200k")
-    print("Oczekiwane napięcie wejściowe: ~5V")
-    print()
-    
-    measurements = []
-    for i in range(5):
-        voltage_input, voltage_adc, adc_raw = read_voltage()
-        print(f"Pomiar {i+1}: ADC={adc_raw:5d}, Vadc={voltage_adc:.3f}V, Vin={voltage_input:.3f}V")
-        measurements.append(voltage_input)
-        utime.sleep(0.5)
-    
-    avg_voltage = sum(measurements) / len(measurements)
-    print(f"\nŚrednie napięcie wejściowe: {avg_voltage:.3f}V")
-    
-    if 4.5 <= avg_voltage <= 5.5:
-        print("✓ Napięcie w normie (4.5V - 5.5V)")
-    else:
-        print("⚠ Napięcie poza normą")
-    
-    print("Test ADC zakończony\n")
-    
-def test_relay1():
-    """Test załączenia przekaźnika 1"""
-    print("=== TEST PRZEKAŹNIK 1 (GPIO14) ===")
-    print("Oczekiwane załączenie przekaźnika 1")
-    print()
-    relay1.value(1)
-    utime.sleep(2)
-    relay1.value(0)
-    utime.sleep(2)
-    
-def test_relay2():
-    """Test załączenia przekaźnika 2"""
-    print("=== TEST PRZEKAŹNIK 2 (GPIO15) ===")
-    print("Oczekiwane załączenie przekaźnika 2")
-    print()
-    relay2.value(1)
-    utime.sleep(2)
-    relay2.value(0)
-    utime.sleep(2)
-    
-def test_rtc():
-    """Test zegara RTC"""
-    print("=== TEST RTC PCF8563 ===")
-    print("• GPIO11: Włącznik zasilania RTC")
-    print("• GPIO26 (ADC2): Pomiar napięcia baterii")
-    print("• GPIO12: Przerwanie RTC")
-    print("• GPIO13: Wyjście zegarowe 1Hz")
-    print("• I2C1: SDA=GPIO6, SCL=GPIO7")
-    print()
-    
-    try:
-        print("Włączenie układu zasilającego RTC...")
-        rtc_on.value(1)
-        utime.sleep(0.1)
-        
-        i2c = I2C(1, scl=Pin(7), sda=Pin(6), freq=100000)
-        clock = RTC_Clock(i2c)
-        
-        print("Test komunikacji I2C z PCF8563...")
-        devices = i2c.scan()
-        if 0x51 in devices:
-            print("✓ PCF8563 znaleziony na adresie 0x51")
-        else:
-            print("⚠ PCF8563 nie odpowiada!")
-            print(f"Znalezione urządzenia I2C: {[hex(addr) for addr in devices]}")
-        
-        print("Ustawianie aktualnego czasu...")
-        current_time = (2025, 12, 22, 3, 22, 33, 44)
-        clock.set_time(current_time)
-        
-        print("Odczyt ustawionego czasu...")
-        read_time = clock.read_time()
-        formatted_time = "{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(
-            read_time[0], read_time[1], read_time[2], 
-            read_time[3], read_time[4], read_time[5]
-        )
-        print(f"Czas z RTC: {formatted_time}")
-        
-        print("Pomiar napięcia baterii...")
-        batt_raw = adc_rtc.read_u16()
-        conversion_factor = 3.3 / 65535
-        gain = (100000 + 100000) / 100000
-        batt_v = batt_raw * conversion_factor * gain
-        print(f"ADC baterii: {batt_raw}, Napięcie: {batt_v:.3f}V")
-        
-        if batt_v > 2.5:
-            print("✓ Napięcie baterii OK")
-        else:
-            print("⚠ Napięcie baterii niskie")
-
-        print("Test sygnałów RTC (5 sekund)...")
-        for i in range(25):
-            int_state = rtc_int.value()
-            clk_state = rtc_clk.value()
-            print(f"INT: {int_state}, CLK: {clk_state}", end="\r")
-            utime.sleep_ms(200)
-        print()
-        
-        print("✓ Test RTC zakończony")
-        
-    except Exception as e:
-        print(f"⚠ Błąd podczas testu RTC: {e}")
-    finally:
-        rtc_on.value(0)
-        print("Zasilanie RTC wyłączone")
-    
-    print()
-    
-def button_monitor():
-    """Monitor przycisków"""
-    global test_running
-    
-    last_button1_state = True
-    last_button2_state = True
-    
-    while test_running:
-        button1_state = button1.value()
-        if last_button1_state and not button1_state:
-            print(">>> PRZYCISK 1 (GPIO21) NACIŚNIĘTY! <<<")
-        last_button1_state = button1_state
-        button2_state = button2.value()
-        if last_button2_state and not button2_state:
-            print(">>> PRZYCISK 2 (GPIO22) NACIŚNIĘTY! <<<")
-        last_button2_state = button2_state
-        
-        utime.sleep_ms(50)
-
-def run_all_tests():
-    """Uruchom wszystkie testy"""
-    print("="*50)
-    print(" RASPBERRY PI PICO - TEST PODSTAWOWYCH FUNKCJI")
-    print("="*50)
-    
-    if relay != 1:
-        test_buzzer()
-    test_rgb_led()
-    test_rgb_fade()
-    test_simple_leds()
-    test_simple_leds_fade()
-    test_adc()
-    if relay == 1:
-        test_relay1()
-        test_relay2()
-    if rtc == 1:
-        test_rtc()
-    print("="*40)
-    print(" WSZYSTKIE TESTY ZAKOŃCZONE")
-    print("="*40)
-
-def interactive_mode():
-    """Tryb interaktywny - uproszczony"""
-    global test_running
-    
-    print("\n" + "="*50)
-    print(" TRYB TESTOWY - UPROSZCZONY")
-    print("="*50)
-    print("Dostępne opcje:")
-    if relay != 1:
-        print("1 - Test buzzer + muzyka")
-    print("2 - Test LED RGB")
-    print("3 - Test fade RGB")
-    print("4 - Test LED GPIO2/3")
-    print("5 - Test fade LED GPIO2/3")
-    print("6 - Test ADC")
-    print("7 - Uruchom wszystkie testy")
-    if relay == 1:
-        print("8 - Test Przekaźnik 1")
-        print("9 - Test Przekaźnik 2")
-    if rtc == 1:
-        print("10 - Test RTC")
-    print("q - Zakończ")
-    print("\nPrzyciski GPIO21/22 monitorowane w tle")
-    print("="*50)
-    _thread.start_new_thread(button_monitor, ())
-    
-    while True:
+    if station.isconnected():
         try:
-            command = input("\nWybierz opcję (1-7) lub 'q': ").strip()
-            
-            if command == 'q':
-                test_running = False
-                print("Zakończenie programu...")
-                break
-            elif command == '1' and relay != 1:
-                test_buzzer()
-            elif command == '2':
-                test_rgb_led()
-            elif command == '3':
-                test_rgb_fade()
-            elif command == '4':
-                test_simple_leds()
-            elif command == '5':
-                test_simple_leds_fade()
-            elif command == '6':
-                test_adc()
-            elif command == '7':
-                run_all_tests()
-            elif command == '8' and relay == 1:
-                test_relay1()
-            elif command == '9' and relay == 1:
-                test_relay2()
-            elif command == '10' and rtc == 1:
-                test_rtc()
-            else:
-                print("Nieprawidłowa opcja!")
-                
-        except KeyboardInterrupt:
-            test_running = False
-            print("\nPrzerwano przez użytkownika")
-            break
+            ntptime.settime()
         except Exception as e:
-            print(f"Błąd: {e}")
+            print("NTP time sync error:", e)
+    else:
+        print("WiFi connection failed!")
+
+
+def set_time(clock):
+    try:
+        aT = time.localtime(time.time() + 1 * 60 * 60)
+        year = aT[0]
+        month = aT[1]
+        day = aT[2]
+        hour = aT[3]
+        minute = aT[4]
+        second = aT[5]
+        clock.set_time((year, month, day, 0, hour, minute, second))
+    except Exception as e:
+        send_error_log("Failed to set RTC time", str(e))
+
+
+def send_error_log(message, details=None):
+    try:
+        payload = {
+            "equipmentId": cfg.get_logger_id(),
+            "message": message,
+            "details": details,
+            "severity": "error",
+            "type": "Equipment",
+        }
+        try:
+            resp = requests.post(
+                f"{cfg.get_base_url()}{cfg.get_error_url()}",
+                json=payload,
+                timeout=3,
+            )
+        finally:
+            if resp:
+                resp.close()
+    except Exception as e:
+        print("Cannot send message to backend:", e)
+
+
+def map_color(color):
+    return int(color * 65535 / 255)
+
+
+def set_color(leds, red, green, blue):
+    try:
+        leds[0].duty_u16(map_color(red))
+        leds[1].duty_u16(map_color(green))
+        leds[2].duty_u16(map_color(blue))
+    except Exception as e:
+        print("Cannot set LED:", e)
+
+
+def button1_irq(pin):
+    global btn1_dirty
+    btn1_dirty = True
+
+
+def button2_irq(pin):
+    global btn2_dirty
+    btn2_dirty = True
+
+
+def button1_handler():
+    global backlight_on, backlight_off_time
+    if not backlight_on:
+        cfg.set_backlight_flag(2)
+    else:
+        cfg.set_backlight_flag(1)
+
+
+def button1_long_handler():
+    global long_press_reset
+    long_press_reset = True
+
+
+def button2_handler():
+    print("Button 2 pressed")
+
+
+def button2_long_handler():
+    cfg.set_logging_enabled(not cfg.is_logging_enabled())
+
+
+def update_button(which, pin):
+    global debounce_delay_ms, LONG_PRESS_MS, btn1_dirty, btn1_pressed, btn1_press_start, btn1_long_fired, btn1_last_stable_change
+    global btn2_dirty, btn2_pressed, btn2_press_start, btn2_long_fired, btn2_last_stable_change
+    now = time.ticks_ms()
+    if which == 1:
+        dirty = "btn1_dirty"
+        pressed = "btn1_pressed"
+        start = "btn1_press_start"
+        fired = "btn1_long_fired"
+        last = "btn1_last_stable_change"
+        on_short = button1_handler
+        on_long = button1_long_handler
+    else:
+        dirty = "btn2_dirty"
+        pressed = "btn2_pressed"
+        start = "btn2_press_start"
+        fired = "btn2_long_fired"
+        last = "btn2_last_stable_change"
+        on_short = button2_handler
+        on_long = button2_long_handler
+    need_check = (
+        globals()[dirty] or time.ticks_diff(now, globals()[last]) >= debounce_delay_ms
+    )
+    if need_check:
+        raw_pressed = pin.value() == 0
+        if (
+            raw_pressed != globals()[pressed]
+            and time.ticks_diff(now, globals()[last]) >= debounce_delay_ms
+        ):
+            globals()[last] = now
+            globals()[pressed] = raw_pressed
+            if raw_pressed:
+                globals()[start] = now
+                globals()[fired] = False
+            else:
+                ps = globals()[start]
+                lf = globals()[fired]
+                if ps is not None and not lf:
+                    dur = time.ticks_diff(now, ps)
+                    if dur >= debounce_delay_ms:
+                        try:
+                            on_short()
+                        except Exception as e:
+                            print("Button short callback error:", e)
+                globals()[start] = None
+                globals()[fired] = False
+        globals()[dirty] = False
+    if globals()[pressed] and globals()[start] is not None and not globals()[fired]:
+        held = time.ticks_diff(now, globals()[start])
+        if held >= LONG_PRESS_MS:
+            globals()[fired] = True
+            try:
+                on_long()
+            except Exception as e:
+                print("Button long callback error:", e)
+
 
 def main():
-    """Główna funkcja programu - uproszczona"""
-    print("Raspberry Pi Pico - Test płytki prototypowej")
-    print("Konfiguracja:")
-    if relay != 1:
-        print("• GPIO15: Buzzer PWM")
-    print("• GPIO8: LED niebieski, GPIO9: LED czerwony, GPIO10: LED zielony")
-    print("• GPIO2, GPIO3: LED ON/OFF z PWM")
-    print("• GPIO27 (ADC1): Pomiar napięcia 5V (dzielnik 100k/200k)")
-    print("• GPIO21, GPIO22: Przyciski")
-    if relay == 1:
-        print("• GPIO14: Przekaźnik 1")
-        print("• GPIO15: Przekaźnik 2")
-    
-    try:
-        led_red.duty_u16(0)
-        led_green.duty_u16(0)
-        led_blue.duty_u16(0)
-        led_on_off_1.duty_u16(0)
-        led_on_off_2.duty_u16(0)
-        if relay != 1:
-            buzzer.duty_u16(0)
-        if relay == 1:
-            relay1.value(0)
-            relay2.value(0)
-        if rtc == 1:
-            rtc_on.value(0)
-        interactive_mode()
-        
-    except Exception as e:
-        print(f"Błąd główny: {e}")
-    finally:
-        test_running = False
-        led_red.duty_u16(0)
-        led_green.duty_u16(0)
-        led_blue.duty_u16(0)
-        led_on_off_1.duty_u16(0)
-        led_on_off_2.duty_u16(0)
-        if relay != 1:
-            buzzer.duty_u16(0)
-        if relay == 1:
-            relay1.value(0)
-            relay2.value(0)
-        if rtc == 1:
-            rtc_on.value(0)
-        print("Program zakończony - wszystkie piny wyłączone")
+    sda_pin = 0
+    scl_pin = 1
+    I2C_ADDR = 0x27
+    totalRows = 2
+    totalColumns = 16
+    conversion_factor = 3.3 / (65535)
+    gain = (100000 + 100000) / 100000
+
+    i2c = I2C(0, scl=Pin(scl_pin), sda=Pin(sda_pin), freq=100000)
+    lcd = I2cLcd(i2c, I2C_ADDR, totalRows, totalColumns)
+    lcd.move_to(0, 0)
+    lcd.putstr("Logger ready")
+    lcd.move_to(0, 1)
+    lcd.putstr("Initializing...")
+    network_connection()
+
+    pins = cfg.get_led_pins()
+    leds = [PWM(Pin(pin)) for pin in pins]
+    for led in leds:
+        led.freq(1000)
+    adc_pin = Pin(26, mode=Pin.IN)
+    adc = ADC(adc_pin)
+    clock = RTC_Clock(i2c)
+    if cfg.is_set_time_enabled():
+        set_time(clock)
+    if cfg.get_sht_type() == 30:
+        sensor = SHT30(i2c)
+    elif cfg.get_sht_type() == 40:
+        sensor = SHT40(i2c)
+    elif cfg.get_sht_type() == 0:
+        sensor = BME280(i2c)
+    set_color(leds, 0, 255, 255)
+    switch1 = Pin(cfg.get_switch_pins()[0], Pin.IN, Pin.PULL_UP)
+    switch2 = Pin(cfg.get_switch_pins()[1], Pin.IN, Pin.PULL_UP)
+    switch1.irq(
+        trigger=Pin.IRQ_FALLING,
+        handler=button1_irq,
+    )
+    switch2.irq(
+        trigger=Pin.IRQ_FALLING,
+        handler=button2_irq,
+    )
+    time.sleep(2)
+    lcd.clear()
+
+    def buttons_tick(_t):
+        update_button(1, switch1)
+        update_button(2, switch2)
+
+    def timer_callback(timer):
+        global backlight_off_time, backlight_on, i, long_press_reset
+        error = False
+        if cfg.get_backlight_flag() == 2:
+            lcd.backlight_on()
+            backlight_off_time = 20
+            backlight_on = True
+            cfg.set_backlight_flag(0)
+        elif cfg.get_backlight_flag() == 1:
+            backlight_off_time = 0
+            backlight_on = False
+            cfg.set_backlight_flag(0)
+            lcd.backlight_off()
+        if backlight_on and backlight_off_time <= 0:
+            lcd.backlight_off()
+            backlight_on = False
+        try:
+            batt_raw = adc.read_u16()
+            batt_v = batt_raw * conversion_factor * gain
+            current_time = clock.read_time()
+            if i % 2 == 0:
+                set_color(leds, 0, 0, 0)
+                formated_time = "{}-{:02d}-{:02d} {:02d}:{:02d}".format(
+                    current_time[0],
+                    current_time[1],
+                    current_time[2],
+                    current_time[3],
+                    current_time[4],
+                    current_time[5],
+                )
+            elif i % 2 != 0:
+                if current_time[3] <= 20 and current_time[3] >= 8:
+                    if cfg.is_logging_enabled() and batt_v >= 1.5:
+                        set_color(leds, 0, 255, 0)
+                    elif batt_v < 1.5:
+                        set_color(leds, 255, 255, 0)
+                    else:
+                        set_color(leds, 255, 255, 255)
+                formated_time = "{}-{:02d}-{:02d} {:02d} {:02d}".format(
+                    current_time[0],
+                    current_time[1],
+                    current_time[2],
+                    current_time[3],
+                    current_time[4],
+                    current_time[5],
+                )
+                if batt_v < 1.5:
+                    formated_time = "LOW BATT.       "
+        except Exception as e:
+            send_error_log("RTC read error", str(e))
+            error = True
+        try:
+            temperature = sensor.temperature()
+            humidity = sensor.relative_humidity()
+            if cfg.is_pressure_enabled() == 1:
+                pressure = sensor.atm_pressure()
+            else:
+                pressure = None
+        except Exception as e:
+            send_error_log("Sensor read error", str(e))
+            error = True
+        try:
+            lcd.move_to(0, 0)
+            lcd.putstr(
+                "T/H: {}C {}% ".format(round(temperature, 1), round(humidity, 1))
+            )
+            lcd.move_to(0, 1)
+            lcd.putstr(formated_time)
+        except Exception as e:
+            send_error_log("LCD display error", str(e))
+            error = True
+        if i == cfg.get_post_time():
+            data = []
+            # 1 cycle = 1s
+            # 10 cycles = 10s
+            # 600 cycles = 10min
+            try:
+                time_send = "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(
+                    current_time[0],
+                    current_time[1],
+                    current_time[2],
+                    current_time[3],
+                    current_time[4],
+                    current_time[5],
+                )
+                temp_send = round(temperature, 2)
+                hum_send = round(humidity, 2)
+                if cfg.is_pressure_enabled() == 1 and pressure is not None:
+                    pressure_send = round(pressure, 2)
+                if cfg.is_temperature_enabled() == 1 and temp_send is not None:
+                    temp_entry = {
+                        "time": time_send,
+                        "value": temp_send,
+                        "definition": "temperature",
+                        "equLoggerId": cfg.get_logger_id(),
+                        "equSensorId": cfg.get_sensor_id(),
+                    }
+                    data.append(temp_entry)
+                if cfg.is_humidity_enabled() == 1 and hum_send is not None:
+                    hum_entry = {
+                        "time": time_send,
+                        "value": hum_send,
+                        "definition": "humidity",
+                        "equLoggerId": cfg.get_logger_id(),
+                        "equSensorId": cfg.get_sensor_id(),
+                    }
+                    data.append(hum_entry)
+                if cfg.is_pressure_enabled() == 1 and pressure_send is not None:
+                    pressure_entry = {
+                        "time": time_send,
+                        "value": pressure_send,
+                        "definition": "atmPressure",
+                        "equLoggerId": cfg.get_logger_id(),
+                        "equSensorId": cfg.get_sensor_id(),
+                    }
+                    data.append(pressure_entry)
+            except Exception as e:
+                send_error_log("Preparing data fail", str(e))
+                error = True
+            if cfg.is_logging_enabled() and not error and len(data) > 0:
+                try:
+                    resp = requests.get(
+                        f"{cfg.get_base_url()}{cfg.get_token_url()}",
+                        timeout=0.5,
+                    )
+                    try:
+                        token = json.loads(resp.text)["token"]
+                    finally:
+                        resp.close()
+                    resp2 = requests.post(
+                        f"{cfg.get_base_url()}{cfg.get_data_url()}",
+                        headers={"Authorization": "Bearer {}".format(token)},
+                        json=data,
+                        timeout=0.5,
+                    )
+                    try:
+                        status_code = resp2.status_code
+                        if status_code not in (200, 201):
+                            send_error_log(
+                                "Data post error",
+                                f"Status code: {status_code}, data could not be send",
+                            )
+                    finally:
+                        resp2.close()
+                        gc.collect()
+                except Exception as e:
+                    send_error_log("Wrong data format", str(e))
+            i = 0
+        i += 1
+        backlight_off_time -= 1
+        if backlight_off_time < 0:
+            backlight_off_time = 0
+        if long_press_reset:
+            long_press_reset = False
+            machine.reset()
+
+    logger_timer = Timer()
+    logger_timer.init(mode=Timer.PERIODIC, period=1000, callback=timer_callback)
+    btn_timer = Timer(-1)
+    btn_timer.init(mode=Timer.PERIODIC, period=10, callback=buttons_tick)
+
 
 if __name__ == "__main__":
     main()
+
