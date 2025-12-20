@@ -58,7 +58,16 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        [
+          "silk_edge_clearance|177100000|68440000|540a5d16-6dd4-419b-9bb7-476d28bd32c8|6a8048c0-8cc4-44e9-834d-bd3ef834c89b",
+          ""
+        ],
+        [
+          "silk_edge_clearance|186300000|68440000|540a5d16-6dd4-419b-9bb7-476d28bd32c8|de74a93e-3998-4acc-aec5-6053a03637a0",
+          ""
+        ]
+      ],
       "meta": {
         "version": 2
       },
@@ -464,7 +473,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "Regulator_Board.kicad_pro",
+    "filename": "Power_Board.kicad_pro",
     "version": 3
   },
   "net_settings": {

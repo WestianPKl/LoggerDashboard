@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "MOSFET_Board")
-		(date "2025-12-20")
-		(rev "1.1")
+		(date "2025-11-16")
+		(rev "1.0")
 		(company "PKl")
 	)
 	(lib_symbols
@@ -944,156 +944,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Diode:B230"
-			(pin_numbers
-				(hide yes)
-			)
-			(pin_names
-				(offset 1.016)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "D"
-				(at 0 2.54 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "B230"
-				(at 0 -2.54 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" "Diode_SMD:D_SMB"
-				(at 0 -4.445 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "http://www.jameco.com/Jameco/Products/ProdDS/1538777.pdf"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "30V 2A Schottky Barrier Rectifier Diode, SMB"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "diode Schottky"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "D*SMB*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "B230_0_1"
-				(polyline
-					(pts
-						(xy -1.905 0.635) (xy -1.905 1.27) (xy -1.27 1.27) (xy -1.27 -1.27) (xy -0.635 -1.27) (xy -0.635 -0.635)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 0) (xy -1.27 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "B230_1_1"
-				(pin passive line
-					(at -3.81 0 0)
-					(length 2.54)
-					(name "K"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 3.81 0 180)
-					(length 2.54)
-					(name "A"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "Diode:BZT52Bxx"
 			(pin_numbers
 				(hide yes)
@@ -1243,35 +1093,42 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Diode:SM6T6V8A"
-			(pin_numbers
-				(hide yes)
-			)
+		(symbol "Regulator_Linear:L78L12_SOT89"
 			(pin_names
-				(offset 1.016)
-				(hide yes)
+				(offset 0.254)
 			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
-			(property "Reference" "D"
-				(at 0 2.54 0)
+			(property "Reference" "U"
+				(at -3.81 3.175 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(property "Value" "SM6T6V8A"
-				(at 0 -2.54 0)
+			(property "Value" "L78L12_SOT89"
+				(at -0.635 3.175 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
+					(justify left)
 				)
 			)
-			(property "Footprint" "Diode_SMD:D_SMB"
-				(at 0 -5.08 0)
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-89-3"
+				(at 0 5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+						(italic yes)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "http://www.st.com/content/ccc/resource/technical/document/datasheet/15/55/e5/aa/23/5b/43/fd/CD00000446.pdf/files/CD00000446.pdf/jcr:content/translations/en.CD00000446.pdf"
+				(at 0 -1.27 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -1279,16 +1136,7 @@
 					(hide yes)
 				)
 			)
-			(property "Datasheet" "https://www.st.com/resource/en/datasheet/sm6t.pdf"
-				(at -1.27 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "600W unidirectional Transil Transient Voltage Suppressor, 6.8Vrwm, DO-214AA"
+			(property "Description" "Positive 100mA 30V Linear Regulator, Fixed Output 12V, SOT-89"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1297,7 +1145,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_keywords" "diode TVS voltage suppressor"
+			(property "ki_keywords" "Voltage Regulator 100mA Positive"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1306,7 +1154,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_fp_filters" "D*SMB*"
+			(property "ki_fp_filters" "SOT?89*"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1315,44 +1163,31 @@
 					(hide yes)
 				)
 			)
-			(symbol "SM6T6V8A_0_1"
-				(polyline
-					(pts
-						(xy -0.762 1.27) (xy -1.27 1.27) (xy -1.27 -1.27)
-					)
+			(symbol "L78L12_SOT89_0_1"
+				(rectangle
+					(start -5.08 1.905)
+					(end 5.08 -5.08)
 					(stroke
 						(width 0.254)
 						(type default)
 					)
 					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
+						(type background)
 					)
 				)
 			)
-			(symbol "SM6T6V8A_1_1"
-				(pin passive line
-					(at -3.81 0 0)
+			(symbol "L78L12_SOT89_1_1"
+				(pin power_in line
+					(at -7.62 0 0)
 					(length 2.54)
-					(name "A1"
+					(name "IN"
 						(effects
 							(font
 								(size 1.27 1.27)
 							)
 						)
 					)
-					(number "1"
+					(number "3"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1360,10 +1195,10 @@
 						)
 					)
 				)
-				(pin passive line
-					(at 3.81 0 180)
+				(pin power_in line
+					(at 0 -7.62 90)
 					(length 2.54)
-					(name "A2"
+					(name "GND"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1371,6 +1206,24 @@
 						)
 					)
 					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 7.62 0 180)
+					(length 2.54)
+					(name "OUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2401,10 +2254,10 @@
 		)
 	)
 	(junction
-		(at 163.83 73.66)
+		(at 151.13 54.61)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "0d593aec-381d-450e-befa-5615ccf0b795")
+		(uuid "1c4df17d-ab31-4b06-a5fa-eb091b4e8370")
 	)
 	(junction
 		(at 127 76.2)
@@ -2429,12 +2282,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "67e171cb-37df-4392-83de-b041ae7b981a")
-	)
-	(junction
-		(at 181.61 73.66)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "900738f0-672c-47a8-a40d-3371f5586668")
 	)
 	(junction
 		(at 116.84 104.14)
@@ -2466,6 +2313,12 @@
 		(color 0 0 0 0)
 		(uuid "b9c6c14d-b022-4bac-82b1-b43cf6772765")
 	)
+	(junction
+		(at 125.73 54.61)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ea9d1c1a-02f2-421e-879a-20550295250a")
+	)
 	(wire
 		(pts
 			(xy 127 77.47) (xy 127 76.2)
@@ -2485,6 +2338,16 @@
 			(type default)
 		)
 		(uuid "0c028b80-359b-41ec-a2b0-90abe883e5a7")
+	)
+	(wire
+		(pts
+			(xy 147.32 54.61) (xy 151.13 54.61)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "22f6df52-43f3-4ae8-899e-fd7fc079fbec")
 	)
 	(wire
 		(pts
@@ -2508,13 +2371,13 @@
 	)
 	(wire
 		(pts
-			(xy 181.61 67.31) (xy 181.61 73.66)
+			(xy 125.73 54.61) (xy 132.08 54.61)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "38c5d1a9-ba2d-4490-a64e-ac808cfe93ef")
+		(uuid "327628a3-f57c-4dc6-bfc0-63aa828b988d")
 	)
 	(wire
 		(pts
@@ -2668,26 +2531,6 @@
 	)
 	(wire
 		(pts
-			(xy 163.83 67.31) (xy 163.83 73.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a1cd07c7-2bd1-4177-922f-5772f7597966")
-	)
-	(wire
-		(pts
-			(xy 163.83 73.66) (xy 167.64 73.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a58ffaf5-9bbd-4da9-a159-65b19c75ff24")
-	)
-	(wire
-		(pts
 			(xy 182.88 93.98) (xy 189.23 93.98)
 		)
 		(stroke
@@ -2695,16 +2538,6 @@
 			(type default)
 		)
 		(uuid "adecc9ea-058b-4999-946d-cf9c39a1d25c")
-	)
-	(wire
-		(pts
-			(xy 175.26 73.66) (xy 181.61 73.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b1c51014-ebb5-4c35-b55c-34a086a01804")
 	)
 	(wire
 		(pts
@@ -2747,6 +2580,78 @@
 		(uuid "f72a3cde-523a-4559-8de8-16a0f62603c5")
 	)
 	(symbol
+		(lib_id "Regulator_Linear:L78L12_SOT89")
+		(at 139.7 54.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0a91e10c-f5dd-4ddd-8bcf-2b4bae391abd")
+		(property "Reference" "U1"
+			(at 139.7 48.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "L78L12ABUTR"
+			(at 139.7 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-89-3"
+			(at 139.7 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.st.com/content/ccc/resource/technical/document/datasheet/15/55/e5/aa/23/5b/43/fd/CD00000446.pdf/files/CD00000446.pdf/jcr:content/translations/en.CD00000446.pdf"
+			(at 139.7 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Positive 100mA 30V Linear Regulator, Fixed Output 12V, SOT-89"
+			(at 139.7 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "cb9cf5d9-ecde-4bc5-8b77-61050affe1ea")
+		)
+		(pin "3"
+			(uuid "7f43aca7-0e86-4728-9b54-34cd95b8e8f3")
+		)
+		(pin "2"
+			(uuid "38b96ec7-5f52-4aaf-8456-83e8eba6f311")
+		)
+		(instances
+			(project ""
+				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5"
+					(reference "U1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:+12V")
 		(at 121.92 74.93 0)
 		(unit 1)
@@ -2764,8 +2669,8 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "+12V_SEC"
-			(at 121.92 71.12 0)
+		(property "Value" "+12V_STAB"
+			(at 121.92 69.85 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3082,16 +2987,16 @@
 		)
 	)
 	(symbol
-		(lib_id "power:+12V")
-		(at 163.83 67.31 0)
+		(lib_id "power:GND")
+		(at 151.13 59.69 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3334f229-0e7e-4485-a5c1-cd3f3d521516")
-		(property "Reference" "#PWR04"
-			(at 163.83 71.12 0)
+		(uuid "2c87ad8e-b78f-4e48-a870-c892733fc95a")
+		(property "Reference" "#PWR09"
+			(at 151.13 66.04 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3099,8 +3004,8 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "+12V_SEC"
-			(at 163.83 63.5 0)
+		(property "Value" "GND"
+			(at 151.13 63.754 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3108,7 +3013,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 163.83 67.31 0)
+			(at 151.13 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3117,7 +3022,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 163.83 67.31 0)
+			(at 151.13 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3125,8 +3030,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"+12V\""
-			(at 163.83 67.31 0)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 151.13 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3135,12 +3040,12 @@
 			)
 		)
 		(pin "1"
-			(uuid "34f79eed-0172-4895-a85b-2ada5ea107f4")
+			(uuid "013a94bb-2cb6-423e-9628-8b3f22fee7e4")
 		)
 		(instances
 			(project "MOSFET_Board"
 				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5"
-					(reference "#PWR04")
+					(reference "#PWR09")
 					(unit 1)
 				)
 			)
@@ -3492,6 +3397,71 @@
 	)
 	(symbol
 		(lib_id "power:GND")
+		(at 125.73 59.69 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "5c30f0ee-dc1b-4253-8356-416478241436")
+		(property "Reference" "#PWR04"
+			(at 125.73 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 125.73 63.754 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 125.73 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 125.73 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 125.73 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "c73bb631-2957-4753-bb99-7471192acdf5")
+		)
+		(instances
+			(project "MOSFET_Board"
+				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5"
+					(reference "#PWR04")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
 		(at 184.15 119.38 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -3550,71 +3520,6 @@
 			(project "MOSFET_Board"
 				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5"
 					(reference "#PWR013")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 163.83 81.28 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "66367d51-57ff-4db6-ba7a-bb0097a696be")
-		(property "Reference" "#PWR03"
-			(at 163.83 87.63 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 163.83 85.09 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 163.83 81.28 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 163.83 81.28 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 163.83 81.28 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "47e3aa05-aae5-4e58-8918-256184ece37e")
-		)
-		(instances
-			(project "MOSFET_Board"
-				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5"
-					(reference "#PWR03")
 					(unit 1)
 				)
 			)
@@ -3780,16 +3685,16 @@
 	)
 	(symbol
 		(lib_id "power:+12V")
-		(at 181.61 67.31 0)
+		(at 125.73 54.61 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "803745c1-aaf1-4139-b051-cdaa592cddd9")
-		(property "Reference" "#PWR011"
-			(at 181.61 71.12 0)
+		(uuid "786ee551-2a64-4506-be99-a12bbbb684ef")
+		(property "Reference" "#PWR03"
+			(at 125.73 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3798,7 +3703,7 @@
 			)
 		)
 		(property "Value" "+12V"
-			(at 181.61 62.23 0)
+			(at 125.73 49.53 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3806,7 +3711,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 181.61 67.31 0)
+			(at 125.73 54.61 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3815,7 +3720,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 181.61 67.31 0)
+			(at 125.73 54.61 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3824,7 +3729,142 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+12V\""
-			(at 181.61 67.31 0)
+			(at 125.73 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "3c4bdd2b-41bb-4f8d-9213-ee836ca1fc6f")
+		)
+		(instances
+			(project "MOSFET_Board"
+				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5"
+					(reference "#PWR03")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Small")
+		(at 125.73 57.15 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "7dc18c40-f36a-4894-80e4-869217eb8b71")
+		(property "Reference" "C1"
+			(at 127.762 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "330nF"
+			(at 127.762 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 125.73 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 125.73 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor, small symbol"
+			(at 125.73 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "6719ba60-c1f1-48d1-bbf2-9b125e588bbf")
+		)
+		(pin "2"
+			(uuid "66d6c9f0-1399-489b-b71e-044eb546b380")
+		)
+		(instances
+			(project "MOSFET_Board"
+				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5"
+					(reference "C1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+12V")
+		(at 181.61 73.66 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "803745c1-aaf1-4139-b051-cdaa592cddd9")
+		(property "Reference" "#PWR011"
+			(at 181.61 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+12V"
+			(at 181.61 68.58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 181.61 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 181.61 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+12V\""
+			(at 181.61 73.66 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4116,16 +4156,16 @@
 		)
 	)
 	(symbol
-		(lib_id "Diode:SM6T6V8A")
-		(at 163.83 77.47 270)
+		(lib_id "Device:C_Small")
+		(at 151.13 57.15 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a3518971-9e64-4b6f-8eae-137f0445120c")
-		(property "Reference" "D3"
-			(at 165.608 77.978 90)
+		(uuid "c104d342-d045-4b03-87c2-c3f2fcf795ff")
+		(property "Reference" "C4"
+			(at 153.162 55.88 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4133,8 +4173,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "SMBJ18A-LF"
-			(at 164.084 80.01 90)
+		(property "Value" "100nF"
+			(at 153.162 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4142,8 +4182,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Diode_SMD:D_SMB"
-			(at 158.75 77.47 0)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 151.13 57.15 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4151,8 +4191,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://www.st.com/resource/en/datasheet/sm6t.pdf"
-			(at 163.83 76.2 0)
+		(property "Datasheet" "~"
+			(at 151.13 57.15 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4160,8 +4200,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "600W unidirectional Transil Transient Voltage Suppressor, 6.8Vrwm, DO-214AA"
-			(at 163.83 77.47 0)
+		(property "Description" "Unpolarized capacitor, small symbol"
+			(at 151.13 57.15 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4170,15 +4210,15 @@
 			)
 		)
 		(pin "1"
-			(uuid "87076dd0-4d98-4f24-9767-d5a3389b6582")
+			(uuid "1c04faef-b27e-4264-af94-2abbf080af6b")
 		)
 		(pin "2"
-			(uuid "f1ab3c2c-547d-4558-b4fb-5b1747567fee")
+			(uuid "b59be26d-379c-41b1-a142-31ac76f4c6ae")
 		)
 		(instances
 			(project "MOSFET_Board"
 				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5"
-					(reference "D3")
+					(reference "C4")
 					(unit 1)
 				)
 			)
@@ -4616,32 +4656,17 @@
 		)
 	)
 	(symbol
-		(lib_id "Diode:B230")
-		(at 171.45 73.66 0)
+		(lib_id "power:+12V")
+		(at 151.13 54.61 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "cc9f30b2-5f19-4582-86ef-fc99aebd79c1")
-		(property "Reference" "D2"
-			(at 171.45 69.85 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "SS54BF-DC"
-			(at 171.45 71.628 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Diode_SMD:D_SMB"
-			(at 171.45 78.105 0)
+		(fields_autoplaced yes)
+		(uuid "d0791066-a18d-4e1e-a898-0503462e5f1c")
+		(property "Reference" "#PWR08"
+			(at 151.13 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4649,8 +4674,16 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "http://www.jameco.com/Jameco/Products/ProdDS/1538777.pdf"
-			(at 171.45 73.66 0)
+		(property "Value" "+12V_STAB"
+			(at 151.13 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 151.13 54.61 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4658,8 +4691,17 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "30V 2A Schottky Barrier Rectifier Diode, SMB"
-			(at 171.45 73.66 0)
+		(property "Datasheet" ""
+			(at 151.13 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+12V\""
+			(at 151.13 54.61 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4668,15 +4710,77 @@
 			)
 		)
 		(pin "1"
-			(uuid "aff50c94-c822-4df6-86cc-3f28dc872717")
-		)
-		(pin "2"
-			(uuid "e744a09a-22e0-4c46-b69a-bc9a75c843c6")
+			(uuid "9c1e58ea-fee8-4a36-8af8-52be39f4e829")
 		)
 		(instances
 			(project "MOSFET_Board"
 				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5"
-					(reference "D2")
+					(reference "#PWR08")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 139.7 62.23 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "e310c8c0-b1a1-42a9-b1ba-d4a54b2a6c8d")
+		(property "Reference" "#PWR06"
+			(at 139.7 68.58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 139.7 66.294 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 139.7 62.23 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 139.7 62.23 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 139.7 62.23 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "99f62694-09cc-4380-9505-61d9898b3a40")
+		)
+		(instances
+			(project "MOSFET_Board"
+				(path "/e3206b16-e8f3-47ce-a5f5-509cef5844a5"
+					(reference "#PWR06")
 					(unit 1)
 				)
 			)
@@ -4690,6 +4794,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
+		(fields_autoplaced yes)
 		(uuid "fed508ff-a2e4-4c5d-820b-dc61591cc246")
 		(property "Reference" "#PWR012"
 			(at 181.61 82.55 0)
@@ -4701,7 +4806,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 181.61 80.01 0)
+			(at 181.61 81.28 0)
 			(effects
 				(font
 					(size 1.27 1.27)

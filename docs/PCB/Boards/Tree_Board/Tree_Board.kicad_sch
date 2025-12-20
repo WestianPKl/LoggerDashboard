@@ -7,7 +7,7 @@
 	(title_block
 		(title "Tree_Board")
 		(date "2025-11-16")
-		(rev "1.0")
+		(rev "1.1")
 		(company "PKl")
 	)
 	(lib_symbols
