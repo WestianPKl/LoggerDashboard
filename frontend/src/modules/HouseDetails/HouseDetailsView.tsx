@@ -1,5 +1,5 @@
 import { useState, Suspense, useEffect } from 'react'
-import { redirect, Await, useLoaderData, data, type LoaderFunctionArgs, useRevalidator } from 'react-router'
+import { redirect, Await, useLoaderData, data, type LoaderFunctionArgs, useRevalidator, useParams } from 'react-router'
 import { Tabs, Tab, Box, useMediaQuery, useTheme, Typography } from '@mui/material'
 import { HouseClass } from '../House/scripts/HouseClass'
 import { houseApi } from '../../store/api/houseApi'
@@ -14,29 +14,9 @@ import { store } from '../../store/store'
 import { showAlert } from '../../store/application-store'
 import { socket } from '../../socket/socket'
 
-/**
- * Renders the main view for displaying and editing house details, including its floors.
- *
- * This component fetches house data using `useLoaderData`, listens for real-time updates via a socket,
- * and displays a tabbed interface for each floor of the house. If the user has write permissions,
- * an additional tab for editing the house is shown. The component adapts its layout for mobile devices.
- *
- * @component
- * @returns {JSX.Element} The rendered HouseDetailsView component.
- *
- * @remarks
- * - Uses Material-UI for layout and tabs.
- * - Handles real-time updates by listening to the 'house' socket event.
- * - Displays a loading indicator while awaiting house data.
- * - Shows a message if no floors are present.
- *
- * @example
- * ```tsx
- * <HouseDetailsView />
- * ```
- */
 export default function HouseDetailsView() {
 	const { house } = useLoaderData() as { house: HouseClass }
+	const { houseId } = useParams<{ houseId: string }>()
 	const revalidator = useRevalidator()
 	const [value, setValue] = useState(0)
 
@@ -45,14 +25,20 @@ export default function HouseDetailsView() {
 	const isWritable = useAppSelector(state => canWrite('house', 'houseHouse')(state))
 
 	useEffect(() => {
-		function onAddHouseEvent() {
+		if (!houseId) return
+
+		const channel = `house-${houseId}`
+
+		function onHouseEvent() {
 			revalidator.revalidate()
 		}
-		socket.on('house', onAddHouseEvent)
+
+		socket.on(channel, onHouseEvent)
+
 		return () => {
-			socket.off('house', onAddHouseEvent)
+			socket.off(channel, onHouseEvent)
 		}
-	}, [revalidator])
+	}, [houseId, revalidator])
 
 	return (
 		<Box
@@ -77,7 +63,7 @@ export default function HouseDetailsView() {
 											aria-label='Horizontal tab House Details'>
 											{houseData.floors &&
 												houseData.floors.map((e, index) =>
-													e.id ? <Tab key={e.id} label={e.name} {...tabProps(index)} /> : null
+													e.id ? <Tab key={e.id} label={e.name} {...tabProps(index)} /> : null,
 												)}
 											{isWritable && <Tab label={'House'} {...tabProps(houseData.floors.length)} />}
 										</Tabs>
@@ -93,7 +79,7 @@ export default function HouseDetailsView() {
 															<HouseDetailsMobile floor={e} />
 														)}
 													</TabPanel>
-												)
+												),
 										)}
 										{isWritable && (
 											<TabPanel value={value} index={houseData.floors.length}>
@@ -118,20 +104,6 @@ export default function HouseDetailsView() {
 	)
 }
 
-/**
- * Loader function for fetching house details based on the provided route parameters.
- *
- * @param params - The route parameters containing the `houseId`.
- * @returns A promise that resolves to an object containing the house data, or a Response for redirects or errors.
- *
- * @throws Throws a response with status 400 if `houseId` is missing.
- * @throws Throws a response with status 404 if the house data is not found.
- * @throws Rethrows any other errors encountered during the fetch operation.
- *
- * @remarks
- * - If the authentication token is missing, the user is redirected to the login page.
- * - Alerts are dispatched to the store for error notifications.
- */
 export async function loader({ params }: LoaderFunctionArgs): Promise<Response | { house: HouseClass }> {
 	if (!params.houseId) {
 		throw data('No house Id', { status: 400 })
@@ -151,7 +123,7 @@ export async function loader({ params }: LoaderFunctionArgs): Promise<Response |
 			showAlert({
 				message: err?.data?.message || err?.message || 'Something went wrong!',
 				severity: 'error',
-			})
+			}),
 		)
 		throw err
 	}

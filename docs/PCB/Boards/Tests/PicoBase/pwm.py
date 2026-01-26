@@ -18,9 +18,6 @@ class PWMOutput:
         else:
             raise ValueError("Duty cycle must be between 0 and 1023")
 
-    def start(self):
-        self.pwm.init()
-
     def stop(self):
         self.pwm.deinit()
 

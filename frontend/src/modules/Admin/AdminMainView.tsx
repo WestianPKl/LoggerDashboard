@@ -3,17 +3,6 @@ import { Outlet, useNavigate, useLocation, redirect } from 'react-router'
 import { store } from '../../store/store'
 import { showAlert } from '../../store/application-store'
 
-/**
- * The `AdminMainView` component renders the main administrative interface with a horizontal tab navigation.
- *
- * - Uses React Router's `useNavigate` and `useLocation` hooks to manage navigation and determine the active tab.
- * - Defines a set of valid admin tabs and synchronizes the selected tab with the current URL path.
- * - Renders a scrollable `Tabs` component (from MUI) for navigation between different admin sections.
- * - Displays the corresponding child route content using React Router's `<Outlet />`.
- *
- * @component
- * @returns {JSX.Element} The rendered admin main view with tab navigation and routed content.
- */
 export default function AdminMainView() {
 	const navigate = useNavigate()
 	const location = useLocation()
@@ -32,12 +21,6 @@ export default function AdminMainView() {
 	let value = validTabs.indexOf(tab)
 	if (value === -1) value = 0
 
-	/**
-	 * Handles tab change events by navigating to the corresponding tab path.
-	 *
-	 * @param _ - The React synthetic event triggered by the tab change (unused).
-	 * @param newValue - The index of the newly selected tab.
-	 */
 	const handleChange = (_: React.SyntheticEvent, newValue: number) => {
 		const tabPath = validTabs[newValue]
 		navigate(tabPath)

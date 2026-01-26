@@ -1,31 +1,26 @@
-import '@babel/polyfill'
 import express from 'express'
 import {
-    getErrorLogs,
-    getErrorLog,
-    addErrorLog,
-    updateErrorLog,
-    deleteErrorLog,
+	getErrorLogs,
+	getErrorLog,
+	addErrorLog,
+	updateErrorLog,
+	deleteErrorLog,
 } from '../controller/common.controller.js'
 import {
-    errorMessage,
-    errorType,
-    errorSeverity,
+	errorMessage,
+	errorType,
+	errorSeverity,
 } from '../../middleware/body-validation.js'
 
-/**
- * Express router instance for defining API routes.
- * @type {import('express').Router}
- */
 const router = express.Router()
 
 router.post('/error-logs', getErrorLogs)
 router.get('/error-log/:errorLogId', getErrorLog)
 router.post('/error-log', [errorMessage, errorType, errorSeverity], addErrorLog)
 router.patch(
-    '/error-log/:errorLogId',
-    [errorMessage, errorType, errorSeverity],
-    updateErrorLog
+	'/error-log/:errorLogId',
+	[errorMessage, errorType, errorSeverity],
+	updateErrorLog
 )
 router.delete('/error-log/:errorLogId', deleteErrorLog)
 

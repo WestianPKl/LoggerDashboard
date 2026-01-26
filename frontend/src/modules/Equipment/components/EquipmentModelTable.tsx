@@ -29,26 +29,6 @@ import { useUpdateEquipmentModelMutation } from '../../../store/api/equipmentApi
 import { useDeleteEquipmentModelMutation } from '../../../store/api/equipmentApi'
 import { useRevalidator } from 'react-router'
 
-/**
- * EquipmentModelTable component displays a table of equipment models with CRUD (Create, Read, Update, Delete) operations.
- *
- * @param {IEquipmentModelTableProps} props - The props for the component.
- * @param {EquipmentModelClass[]} props.equipmentModel - Array of equipment model objects to display in the table.
- *
- * @returns {JSX.Element} The rendered EquipmentModelTable component.
- *
- * @remarks
- * - Allows users with appropriate permissions to add, edit, and delete equipment models.
- * - Supports selection of table rows for batch operations.
- * - Responsive design adapts to mobile and desktop layouts.
- * - Uses dialogs for add, edit, and delete confirmations.
- * - Integrates with Redux for state management and RTK Query for API mutations.
- *
- * @example
- * ```tsx
- * <EquipmentModelTable equipmentModel={equipmentModels} />
- * ```
- */
 export default function EquipmentModelTable({ equipmentModel }: IEquipmentModelTableProps) {
 	const dispatch = useAppDispatch()
 	const revalidator = useRevalidator()
@@ -85,14 +65,6 @@ export default function EquipmentModelTable({ equipmentModel }: IEquipmentModelT
 		setSelectedItems(selectedIds.map(id => equipmentModelMap.get(Number(id))).filter(Boolean))
 	}, [rowSelectionModel, equipmentModelMap])
 
-	/**
-	 * Clears the current selection by resetting the selected items array
-	 * and updating the row selection model to an empty state.
-	 *
-	 * This function sets the selected items to an empty array and
-	 * initializes the row selection model with an empty set of IDs,
-	 * effectively deselecting all items in the equipment model table.
-	 */
 	function clearObject(): void {
 		setSelectedItems([])
 		setRowSelectionModel({
@@ -101,16 +73,6 @@ export default function EquipmentModelTable({ equipmentModel }: IEquipmentModelT
 		})
 	}
 
-	/**
-	 * Handles the addition of a new equipment model or multiple models.
-	 *
-	 * Closes the add dialog, attempts to add the equipment model(s) via an API call,
-	 * shows a success alert on completion, and triggers a data revalidation.
-	 * If an error occurs, displays an error alert with the relevant message.
-	 *
-	 * @param item - The equipment data to add, either a single item or an array of items.
-	 * @returns A promise that resolves when the operation is complete.
-	 */
 	async function addItemHandler(item: IAddEquipmentData | IAddEquipmentData[]): Promise<void> {
 		try {
 			setOpenAddDialog(false)
@@ -125,16 +87,6 @@ export default function EquipmentModelTable({ equipmentModel }: IEquipmentModelT
 		}
 	}
 
-	/**
-	 * Handles editing of one or multiple equipment model items.
-	 *
-	 * Closes the edit dialog, updates the equipment model(s) via API,
-	 * shows a success alert on completion, clears the form object, and triggers a revalidation.
-	 * If an error occurs during the update, displays an error alert with the relevant message.
-	 *
-	 * @param items - A single equipment model data object or an array of such objects to be edited.
-	 * @returns A Promise that resolves when the edit operation(s) are complete.
-	 */
 	async function editItemHandler(items: IAddEquipmentData | IAddEquipmentData[]): Promise<void> {
 		try {
 			setOpenEditDialog(false)
@@ -142,7 +94,7 @@ export default function EquipmentModelTable({ equipmentModel }: IEquipmentModelT
 				await Promise.all(
 					items.map(async item => {
 						await updateEquipmentModel(item).unwrap()
-					})
+					}),
 				)
 				dispatch(showAlert({ message: 'Equipment model edited', severity: 'success' }))
 				clearObject()
@@ -154,16 +106,6 @@ export default function EquipmentModelTable({ equipmentModel }: IEquipmentModelT
 		}
 	}
 
-	/**
-	 * Handles the deletion of selected equipment models.
-	 *
-	 * Closes the delete confirmation dialog, then attempts to delete all selected equipment models
-	 * by calling the `deleteEquipmentModel` API for each selected item. If all deletions succeed,
-	 * shows a success alert and triggers a revalidation of the data. If any error occurs during
-	 * the deletion process, displays an error alert with the appropriate message.
-	 *
-	 * @returns {Promise<void>} A promise that resolves when the deletion process is complete.
-	 */
 	async function deleteItemHandler(): Promise<void> {
 		try {
 			setOpenDeleteDialog(false)
@@ -171,7 +113,7 @@ export default function EquipmentModelTable({ equipmentModel }: IEquipmentModelT
 				await Promise.all(
 					selectedItems.map(async item => {
 						await deleteEquipmentModel({ id: item.id }).unwrap()
-					})
+					}),
 				)
 				dispatch(showAlert({ message: 'Equipment model deleted', severity: 'success' }))
 				revalidator.revalidate()
@@ -182,56 +124,26 @@ export default function EquipmentModelTable({ equipmentModel }: IEquipmentModelT
 		}
 	}
 
-	/**
-	 * Opens the dialog for adding a new equipment model by setting the `openAddDialog` state to true.
-	 *
-	 * @remarks
-	 * This function is typically used as an event handler for UI elements that trigger the add dialog.
-	 */
 	function handleClickAddOpen(): void {
 		setOpenAddDialog(true)
 	}
 
-	/**
-	 * Opens the edit dialog by setting the `openEditDialog` state to `true`.
-	 * Typically used as an event handler for edit actions in the equipment model table.
-	 */
 	function handleClickEditOpen(): void {
 		setOpenEditDialog(true)
 	}
 
-	/**
-	 * Opens the delete confirmation dialog by setting the `openDeleteDialog` state to `true`.
-	 * Typically used as an event handler for delete actions in the equipment model table.
-	 */
 	function handleClickDeleteOpen(): void {
 		setOpenDeleteDialog(true)
 	}
 
-	/**
-	 * Closes the delete confirmation dialog by setting its open state to false.
-	 *
-	 * This function is typically used as an event handler for dialog close actions.
-	 */
 	function handleCloseDelete(): void {
 		setOpenDeleteDialog(false)
 	}
 
-	/**
-	 * Closes the "Add Equipment" dialog by setting its open state to false.
-	 *
-	 * This function is typically used as an event handler for dialog close actions.
-	 */
 	function handleCloseAdd(): void {
 		setOpenAddDialog(false)
 	}
 
-	/**
-	 * Closes the edit dialog by setting its open state to false.
-	 *
-	 * This function is typically used as an event handler to close
-	 * the edit dialog in the equipment model table component.
-	 */
 	function handleCloseEdit(): void {
 		setOpenEditDialog(false)
 	}
@@ -356,7 +268,7 @@ export default function EquipmentModelTable({ equipmentModel }: IEquipmentModelT
 							{ field: 'id', headerName: 'ID', width: 100 },
 							{ field: 'name', headerName: 'Name', width: 360 },
 						],
-						[]
+						[],
 					)}
 					initialState={{ pagination: { paginationModel: { page: 0, pageSize: 15 } } }}
 					pageSizeOptions={[15, 30, 45]}

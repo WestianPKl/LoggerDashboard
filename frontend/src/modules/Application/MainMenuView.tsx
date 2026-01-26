@@ -11,14 +11,6 @@ import { getUserProfile } from '../../store/account-actions'
 import { fetchAccessLevels, fetchPermission } from '../../store/auth-actions'
 import type { UserClass } from '../User/scripts/UserClass'
 
-/**
- * MainMenuView is a React functional component that renders the main menu view of the application.
- * It utilizes data loaded via `useLoaderData`, specifically a promise resolving to an array of `HouseClass` objects.
- * The component adapts its layout responsively based on the current theme's breakpoint, displaying a loading indicator
- * while awaiting the house data. Once loaded, it renders the `DashboardView` component with the fetched houses.
- *
- * @returns {JSX.Element} The rendered main menu view.
- */
 export default function MainMenuView() {
 	const { houses } = useLoaderData() as { houses: Promise<HouseClass[]> }
 	const theme = useTheme()
@@ -41,17 +33,6 @@ export default function MainMenuView() {
 	)
 }
 
-/**
- * Loader function for the MainMenuView route.
- *
- * This function checks for authentication tokens in local storage and redirects to the login page if not found.
- * If authenticated, it dispatches actions to fetch the user profile, permissions, and access levels.
- * Then, it retrieves the list of houses from the API.
- *
- * @returns {Promise<Response | { houses: HouseClass[] }>}
- * Returns a redirect response if not authenticated, or an object containing the list of houses.
- * Throws an error and dispatches an alert if any operation fails.
- */
 export async function loader(): Promise<Response | { houses: HouseClass[] }> {
 	if (!localStorage.getItem('token')) {
 		return redirect('/login')
@@ -82,7 +63,7 @@ export async function loader(): Promise<Response | { houses: HouseClass[] }> {
 			showAlert({
 				message: err?.data?.message || err?.message || 'Something went wrong!',
 				severity: 'error',
-			})
+			}),
 		)
 		throw err
 	}

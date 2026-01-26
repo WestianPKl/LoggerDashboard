@@ -19,23 +19,6 @@ import { canDelete } from '../../../store/auth-actions'
 import { useAppSelector } from '../../../store/hooks'
 import { useNavigate } from 'react-router'
 
-/**
- * Displays a dialog with detailed information about a logger node in a house.
- *
- * This component shows logger details, connected sensors, and the latest sensor values.
- * It provides options to delete the node (if permitted), navigate to the logger's data page,
- * and close the dialog. The UI adapts for mobile screens.
- *
- * @param loggerData - The logger node data to display.
- * @param lastValueData - Array of the latest value data for the logger's sensors.
- * @param connectedSensors - List of sensors connected to the logger.
- * @param detailsDialog - Boolean indicating if the dialog is open.
- * @param onCloseDialog - Callback to close the dialog.
- * @param handleClickDeleteNode - Callback to delete the logger node.
- * @param editModeProps - If present, enables edit/delete actions.
- *
- * @returns A dialog component displaying logger node details and actions.
- */
 export default function HouseDetailsLoggerNodeDialog({
 	loggerData,
 	lastValueData,
@@ -49,10 +32,6 @@ export default function HouseDetailsLoggerNodeDialog({
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 	const navigate = useNavigate()
 
-	/**
-	 * Handles the click event for navigating to the data logger details page.
-	 * Navigates to the route `/data/data-logger/{loggerData.id}` using the `navigate` function.
-	 */
 	function onDataClick(): void {
 		navigate(`/data/data-logger/${loggerData.id}`)
 	}

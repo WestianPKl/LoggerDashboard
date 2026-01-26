@@ -8,22 +8,6 @@ import type { FunctionalityDefinitionClass } from '../scripts/FunctionalityDefin
 import type { ObjectDefinitionClass } from '../scripts/ObjectDefinitionClass'
 import type { AccessLevelDefinitionClass } from '../scripts/AccessLevelDefinitionClass'
 
-/**
- * A dialog component for adding a new user permission in the admin panel.
- *
- * This dialog allows the selection of a functionality, object, and access level to assign to a user or role.
- * It manages its own local state for the selected definitions and handles form submission and dialog closure.
- *
- * @component
- * @param {Object} props - The component props.
- * @param {string | number} props.userId - The ID of the user to whom the permission will be added.
- * @param {string | number} props.roleId - The ID of the role associated with the permission.
- * @param {boolean} props.openAddDialog - Controls whether the dialog is open.
- * @param {() => void} props.handleCloseAdd - Callback to close the dialog.
- * @param {(data: any) => void} props.addItemHandler - Callback to handle adding the new permission.
- *
- * @returns {JSX.Element} The rendered dialog component for adding user permissions.
- */
 export default function AddUserPermissionDialog({
 	userId,
 	roleId,
@@ -38,15 +22,6 @@ export default function AddUserPermissionDialog({
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	/**
-	 * Handles the form submission event for adding an admin user permission.
-	 *
-	 * Prevents the default form submission behavior, validates required definitions,
-	 * constructs the data object for the new permission, closes the dialog, and
-	 * invokes the handler to add the item.
-	 *
-	 * @param e - The form submission event.
-	 */
 	function onSubmitHandler(e: React.FormEvent): void {
 		e.preventDefault()
 		if (!functionalityDefinition || !accessLevelDefinition) return
@@ -61,12 +36,6 @@ export default function AddUserPermissionDialog({
 		addItemHandler(data)
 	}
 
-	/**
-	 * Closes the Add Admin User Permission dialog and resets related state.
-	 *
-	 * This function clears the current selections for functionality, object, and access level definitions,
-	 * then invokes the handler to close the dialog.
-	 */
 	function closeDialog(): void {
 		setFunctionalityDefinition(null)
 		setObjectDefinition(null)

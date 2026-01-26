@@ -8,16 +8,6 @@ import LoadingCircle from '../../components/UI/LoadingCircle'
 import { store } from '../../store/store'
 import { data, useLoaderData, Await } from 'react-router'
 
-/**
- * Renders the admin users view, displaying a table of users.
- *
- * This component loads user data asynchronously using `useLoaderData` and displays it
- * within an `AdminUserTable` component. It adapts its container width based on the current
- * screen size using Material-UI's theme and media query hooks. While user data is loading,
- * a loading spinner (`LoadingCircle`) is shown.
- *
- * @returns {JSX.Element} The rendered admin users view.
- */
 export default function AdminUsersView() {
 	const { users } = useLoaderData() as { users: UserClass[] }
 
@@ -33,16 +23,6 @@ export default function AdminUsersView() {
 	)
 }
 
-/**
- * Asynchronously loads the list of users from the API and returns them.
- *
- * Dispatches the `getUsers` endpoint from the `userApi` to fetch users.
- * If no users are found, throws a 404 error.
- * On error, dispatches an alert with the error message and rethrows the error.
- *
- * @returns {Promise<{ users: UserClass[] }>} A promise that resolves to an object containing the array of users.
- * @throws Will throw an error if the users cannot be fetched or if the response is empty.
- */
 export async function loader(): Promise<{ users: UserClass[] }> {
 	try {
 		if (!(await store.dispatch(userApi.endpoints.getUsers.initiate({})).unwrap())) {
@@ -54,7 +34,7 @@ export async function loader(): Promise<{ users: UserClass[] }> {
 			showAlert({
 				message: err?.data?.message || err?.message || 'Something went wrong!',
 				severity: 'error',
-			})
+			}),
 		)
 		throw err
 	}

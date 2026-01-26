@@ -1,16 +1,6 @@
 import { Button, Stack, useMediaQuery, useTheme } from '@mui/material'
 import type { IDataChartRangeButtonsProps } from '../scripts/IData'
 
-/**
- * Renders a set of range selection buttons for a data chart, allowing users to select a time range
- * (e.g., last hour, day, week, month, or all data) and reset the selection.
- *
- * @param range - The currently selected range label (e.g., '1h', '1d', '1w', '1m', 'all').
- * @param handleRangeChange - Callback function invoked when a range button is clicked, receiving the selected range label.
- * @param handleReset - Callback function invoked when the "Reset" button is clicked.
- *
- * The component is responsive and adjusts its layout for mobile devices.
- */
 export default function DataChartRangeButtons({ range, handleRangeChange, handleReset }: IDataChartRangeButtonsProps) {
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))

@@ -9,31 +9,6 @@ const initialState: IAuthState = {
 	accessLevels: [],
 }
 
-/**
- * Creates the authentication slice for the application's Redux store.
- *
- * @remarks
- * This slice manages authentication-related state, including user permissions and access levels.
- * It provides reducers for updating permissions and access levels, as well as clearing the authentication state.
- * Selectors are included for accessing permissions and access levels from the state.
- *
- * @example
- * // Dispatch an action to update permissions
- * dispatch(authenticateSlice.actions.getPermissions(newPermissions));
- *
- * // Select permissions from the state
- * const permissions = useSelector(authenticateSlice.selectors.selectPermissions);
- *
- * @property name - The name of the slice ('authenticate').
- * @property initialState - The initial state for authentication.
- * @property reducers
- *   - getPermissions: Updates the permissions array in the state.
- *   - getAccessLevels: Updates the access levels array in the state.
- *   - clearAuthState: Clears both permissions and access levels in the state.
- * @property selectors
- *   - selectPermissions: Selector for retrieving permissions from the state.
- *   - selectAccessLevels: Selector for retrieving access levels from the state.
- */
 export const authenticateSlice = createAppSlice({
 	name: 'authenticate',
 	initialState,

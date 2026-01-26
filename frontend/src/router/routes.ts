@@ -42,28 +42,6 @@ import NotFoundView from '../modules/Application/NotFoundView'
 import ErrorView from '../modules/Application/ErrorView'
 import LoadingCircle from '../components/UI/LoadingCircle'
 
-/**
- * The main application router configuration using `createBrowserRouter`.
- *
- * This router defines all top-level and nested routes for the application, including:
- * - Root route with error boundary and loading fallback.
- * - Authentication routes: login, logout, register, password reset (with and without token).
- * - Main application sections: house management, equipment, data visualization, admin panel, and user profile.
- * - Nested routes for each section, supporting index routes and parameterized paths.
- * - A catch-all route for handling 404 Not Found pages.
- *
- * Each route can specify:
- * - `path`: The URL path for the route.
- * - `Component`: The React component to render.
- * - `loader`: Data loader function for pre-fetching data.
- * - `action`: Action handler for form submissions or mutations.
- * - `children`: Nested routes for hierarchical navigation.
- * - `id`: Unique identifier for the route.
- * - `ErrorBoundary`: Error handling component for the route.
- * - `HydrateFallback`: Fallback component for hydration/loading states.
- *
- * This router enables modular, nested, and data-driven navigation throughout the application.
- */
 export const router = createBrowserRouter([
 	{
 		id: 'root',

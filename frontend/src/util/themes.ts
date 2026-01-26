@@ -1,27 +1,5 @@
 import { createTheme } from '@mui/material'
 
-/**
- * The application's Material-UI theme configuration.
- *
- * This theme defines the color palette for the UI, including primary, secondary, background, text, divider,
- * and semantic colors (error, warning, info, success). Each color group specifies main, light, dark, and
- * contrastText variants where applicable.
- *
- * @remarks
- * - The `mode` is set to `'light'`.
- * - The palette is customized for branding and accessibility.
- * - Use this theme with Material-UI's `ThemeProvider` to ensure consistent styling across the application.
- *
- * @example
- * ```tsx
- * import { ThemeProvider } from '@mui/material/styles';
- * import { theme } from './util/themes';
- *
- * <ThemeProvider theme={theme}>
- *   <App />
- * </ThemeProvider>
- * ```
- */
 export const theme = createTheme({
 	palette: {
 		mode: 'light',

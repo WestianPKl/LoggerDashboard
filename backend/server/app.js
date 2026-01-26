@@ -14,35 +14,32 @@ import userRouter from './api/routes/users.js'
 import admRouter from './api/routes/adm.js'
 import processRouter from './api/routes/process.js'
 import commonRouter from './api/routes/common.js'
+import mqttRouter from './api/routes/mqtt.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-/**
- * The Express application instance used to define middleware, routes, and server configuration.
- * @type {import('express').Express}
- */
 const app = express()
 
 app.use(
-    cors({
-        origin: process.env.FRONTEND_ORIGIN?.split(',') || [
-            'http://localhost:5173',
-            'http://192.168.18.75:8080/',
-            'http://192.168.18.6:3000/',
-        ],
-        credentials: true,
-    })
+	cors({
+		origin: process.env.FRONTEND_ORIGIN?.split(',') || [
+			'http://localhost:5173',
+			'http://192.168.18.75:8080/',
+			'http://192.168.18.6:3000/',
+		],
+		credentials: true,
+	})
 )
 
 app.use(compression())
 
 const accessLogStream = fs.createWriteStream(
-    path.join(__dirname, 'access.log'),
-    { flags: 'a' }
+	path.join(__dirname, 'access.log'),
+	{ flags: 'a' }
 )
 if (process.env.NODE_ENV !== 'production') {
-    app.use(morgan('dev'))
+	app.use(morgan('dev'))
 }
 app.use(morgan('combined', { stream: accessLogStream }))
 
@@ -59,21 +56,22 @@ app.use('/api/equipment', equRouter)
 app.use('/api/process', processRouter)
 app.use('/api/house', houseRouter)
 app.use('/api/common', commonRouter)
+app.use('/api/mqtt', mqttRouter)
 app.use('/api/adm', admRouter)
 
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../dist-frontend')))
-    app.get(/(.*)/, (req, res) => {
-        res.sendFile(path.join(__dirname, '../dist-frontend', 'index.html'))
-    })
+	app.use(express.static(path.join(__dirname, '../dist-frontend')))
+	app.get(/(.*)/, (req, res) => {
+		res.sendFile(path.join(__dirname, '../dist-frontend', 'index.html'))
+	})
 }
 
-app.use((req, res, next) => {
-    return notFound(res, 'Not found')
+app.use((req, res) => {
+	return notFound(res, 'Not found')
 })
 
-app.use((err, req, res, next) => {
-    return internalServerError(res, 'Error has occured.', err)
+app.use((err, req, res) => {
+	return internalServerError(res, 'Error has occured.', err)
 })
 
 export default app

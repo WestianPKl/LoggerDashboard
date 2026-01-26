@@ -2,15 +2,6 @@ import { useState } from 'react'
 import { Button, Box, TextField, useMediaQuery, useTheme } from '@mui/material'
 import type { IRegisterFormProps } from '../scripts/UserInterface'
 
-/**
- * Represents the possible validation errors for the user registration form fields.
- * Each property is optional and, if present, contains an error message related to the corresponding field.
- *
- * @property {string} [username] - Error message for the username field.
- * @property {string} [email] - Error message for the email field.
- * @property {string} [password] - Error message for the password field.
- * @property {string} [confirmPassword] - Error message for the confirm password field.
- */
 type FormErrors = {
 	username?: string
 	email?: string
@@ -18,20 +9,6 @@ type FormErrors = {
 	confirmPassword?: string
 }
 
-/**
- * RegisterForm is a React functional component that renders a user registration form.
- * It manages form state for username, email, password, and password confirmation,
- * and performs client-side validation for required fields, email format, and password match.
- *
- * @param createNewAccount - A callback function invoked with the form data when the form is valid and submitted.
- *
- * @remarks
- * - Displays validation errors inline using Material-UI's TextField `error` and `helperText` props.
- * - Uses Material-UI's theming and responsive utilities to adjust button size for mobile devices.
- * - Prevents form submission if validation fails and highlights the relevant fields.
- *
- * @returns A Material-UI styled registration form component.
- */
 export default function RegisterForm({ createNewAccount }: IRegisterFormProps) {
 	const [username, setUsername] = useState('')
 	const [email, setEmail] = useState('')
@@ -42,18 +19,6 @@ export default function RegisterForm({ createNewAccount }: IRegisterFormProps) {
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	/**
-	 * Validates the user registration form fields and returns an object containing any validation errors.
-	 *
-	 * @returns {FormErrors} An object mapping field names to error messages for any invalid or missing fields.
-	 *
-	 * The following validations are performed:
-	 * - Checks if the username is provided.
-	 * - Checks if the email is provided and matches a valid email format.
-	 * - Checks if the password is provided.
-	 * - Checks if the confirm password field is provided.
-	 * - Ensures that the password and confirm password fields match.
-	 */
 	function validate(): FormErrors {
 		const newErrors: FormErrors = {}
 		if (!username) newErrors.username = 'Username is required'
@@ -67,14 +32,6 @@ export default function RegisterForm({ createNewAccount }: IRegisterFormProps) {
 		return newErrors
 	}
 
-	/**
-	 * Handles the form submission event for the user registration form.
-	 *
-	 * Prevents the default form submission behavior, validates the form fields,
-	 * sets any validation errors, and if there are no errors, triggers the account creation process.
-	 *
-	 * @param e - The form submission event.
-	 */
 	function onSubmitHandler(e: React.FormEvent): void {
 		e.preventDefault()
 		const validationErrors = validate()

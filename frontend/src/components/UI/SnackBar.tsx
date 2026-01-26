@@ -1,17 +1,6 @@
 import { Alert, Box } from '@mui/material'
 import type { ISnackBarProps } from '../scripts/ComponentsInterface'
 
-/**
- * SnackBar component displays a notification alert at the bottom of the screen.
- * It supports rendering a single message (string) or multiple messages (array of strings)
- * with a specified severity level.
- *
- * @param {ISnackBarProps} props - The properties for the SnackBar component.
- * @param {string | string[]} props.message - The message(s) to display in the alert.
- * @param {'error' | 'warning' | 'info' | 'success'} props.severity - The severity level of the alert.
- *
- * @returns {JSX.Element} The rendered SnackBar component.
- */
 export default function SnackBar({ message, severity }: ISnackBarProps) {
 	let alertElement
 

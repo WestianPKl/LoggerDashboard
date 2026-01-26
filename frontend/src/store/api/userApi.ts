@@ -1,27 +1,3 @@
-/**
- * @file userApi.ts
- *
- * This file defines API endpoints for user authentication and user management using Redux Toolkit Query.
- * It provides endpoints for login, registration, fetching users, updating user data, and password reset operations.
- *
- * @param {UserLoginClass} UserLoginClass - The class representing the user login response.
- * @param {ILoginData} ILoginData - The interface for login credentials.
- * @param {IRegisterData} IRegisterData - The interface for registration data.
- * @param {UserClass} UserClass - The class representing a user entity.
- *
- * Endpoints:
- * - login: Authenticates a user and returns login data.
- * - register: Registers a new user.
- * - getUsers: Retrieves a list of users.
- * - getUser: Fetches a single user by ID.
- * - updateUser: Updates user data for a given user ID.
- * - passwordResetToken: Requests a password reset token for a user.
- * - passwordReset: Resets a user's password using a token.
- * - getErrorProne: Example endpoint for error handling demonstration.
- *
- * Exports:
- * - React hooks for each endpoint for use in components.
- */
 import { api } from './api'
 import type { UserLoginClass } from '../../modules/User/scripts/UserLoginClass'
 import type { ILoginData, IRegisterData } from '../../modules/User/scripts/UserInterface'

@@ -34,7 +34,9 @@ export default memo(
 			refetch: refetchLastValue,
 			isUninitialized: lastValueUninitialized,
 		} = useGetDataLastValuesViewQuery(
-			data.houseLoggerId && data.floorId ? { houseLoggerId: data.houseLoggerId, houseFloorId: data.floorId } : skipToken
+			data.houseLoggerId && data.floorId
+				? { houseLoggerId: data.houseLoggerId, houseFloorId: data.floorId }
+				: skipToken,
 		)
 
 		const {
@@ -44,7 +46,9 @@ export default memo(
 			refetch: refetchConnectedSensors,
 			isUninitialized: connectedSensorsUninitialized,
 		} = useGetDataConnectedSensorViewQuery(
-			data.houseLoggerId && data.floorId ? { houseLoggerId: data.houseLoggerId, houseFloorId: data.floorId } : skipToken
+			data.houseLoggerId && data.floorId
+				? { houseLoggerId: data.houseLoggerId, houseFloorId: data.floorId }
+				: skipToken,
 		)
 
 		const [detailsDialog, setDetailsDialog] = useState(false)
@@ -53,7 +57,6 @@ export default memo(
 		const [loggerData, setLoggerData] = useState<IHouseLoggerData>({ floorId: undefined, id: undefined })
 		const [editMode, setEditMode] = useState<boolean>(data.editMode)
 		const [equLoggerId, setEquLoggerId] = useState<number>(data.equLoggerId)
-		const [socketEvents, setSocketEvents] = useState<string>('')
 		const revalidator = useRevalidator()
 
 		const [addHouseLogger] = useAddHouseLoggerMutation()
@@ -90,8 +93,7 @@ export default memo(
 		}, [lastValueData])
 
 		useEffect(() => {
-			function onRefreshDataEvent(value: any) {
-				setSocketEvents(socketEvents.concat(value))
+			function onRefreshDataEvent() {
 				if (!lastValueUninitialized) refetchLastValue()
 				if (!connectedSensorsUninitialized) refetchConnectedSensors()
 			}
@@ -100,7 +102,6 @@ export default memo(
 				socket.off(`loggerData_${data.equLoggerId}`, onRefreshDataEvent)
 			}
 		}, [
-			socketEvents,
 			data.equLoggerId,
 			refetchLastValue,
 			refetchConnectedSensors,
@@ -118,11 +119,11 @@ export default memo(
 							equVendor: data.equVendor,
 							equModel: data.equModel,
 							houseLoggerId: data.houseLoggerId,
-					  }
+						}
 					: {
 							floorId: data.floorId,
 							id: equLoggerId,
-					  }
+						},
 			)
 		}, [editMode, data, equLoggerId])
 
@@ -134,16 +135,6 @@ export default memo(
 			}
 		}, [lastValueError, connectedSensorsError, dispatch])
 
-		/**
-		 * Handles the addition of a new house logger item or an array of items.
-		 *
-		 * This function manages the dialog state, determines the logger's position,
-		 * sends a request to add the logger, updates local state with the new logger data,
-		 * and triggers UI updates and alerts. It also handles error reporting.
-		 *
-		 * @param item - The house logger data or an array of such data to be added.
-		 * @returns A Promise that resolves when the operation is complete.
-		 */
 		async function addItemHandler(item: IAddHouseLoggerData | IAddHouseLoggerData[]): Promise<void> {
 			try {
 				setDetailsDialog(false)
@@ -180,29 +171,10 @@ export default memo(
 			}
 		}
 
-		/**
-		 * Handles the double-click event on a component.
-		 *
-		 * If the event's detail property is greater than 1 (indicating a double-click or more),
-		 * it triggers the display of the details dialog by setting `setDetailsDialog` to true.
-		 *
-		 * @param e - The event object associated with the click event.
-		 */
 		function onDoubleClickHandler(e: any): void {
 			if (e.detail > 1) setDetailsDialog(true)
 		}
 
-		/**
-		 * Handles the deletion of a logger node.
-		 *
-		 * If the provided data contains a `houseLoggerId`, it attempts to delete the logger node from the backend.
-		 * Upon successful deletion, it updates the local state to remove the node, shows a success alert, and triggers a revalidation.
-		 * If `houseLoggerId` is not present, it only updates the local state to remove the node.
-		 * In case of an error during deletion, it dispatches an error alert with the relevant message.
-		 *
-		 * @param data - The data object containing information about the node to be deleted. Should include `houseLoggerId` if the node exists in the backend.
-		 * @returns A Promise that resolves when the deletion process is complete.
-		 */
 		async function handleClickDeleteNode(data: any): Promise<void> {
 			try {
 				if (data.houseLoggerId) {
@@ -261,5 +233,5 @@ export default memo(
 				)}
 			</Card>
 		)
-	}
+	},
 )

@@ -13,23 +13,6 @@ import {
 import type { IAddHouseProps } from '../scripts/IHouse'
 import classes from './AddHouseDialog.module.css'
 
-/**
- * A dialog component for adding or editing house entries.
- *
- * This component renders a modal dialog that allows users to input or edit house details,
- * including name, postal code, city, street, house number, and an optional image.
- * It supports both single and multiple selection edit modes.
- *
- * @component
- * @param {Object} props - The component props.
- * @param {boolean} props.edit - Indicates if the dialog is in edit mode.
- * @param {Array<IHouseItem>} [props.selectedItems] - The currently selected house items for editing.
- * @param {boolean} props.openAddDialog - Controls whether the dialog is open.
- * @param {() => void} props.handleCloseAdd - Callback to close the dialog.
- * @param {(data: IAddHouseData | IAddHouseData[]) => void} props.addItemHandler - Handler to add or update house data.
- *
- * @returns {JSX.Element} The rendered AddHouseDialog component.
- */
 export default function AddHouseDialog({
 	edit,
 	selectedItems,
@@ -100,48 +83,19 @@ export default function AddHouseDialog({
 		}
 	}, [enteredImg])
 
-	/**
-	 * Triggers the file input dialog by programmatically clicking the image picker input element.
-	 * Utilizes the `imgPickerRef` reference to access the input element and invoke its `click` method,
-	 * allowing users to select an image file.
-	 */
 	function pickImg(): void {
 		imgPickerRef.current?.click()
 	}
 
-	/**
-	 * Handles the image file input change event.
-	 *
-	 * Extracts the first selected file from the input event and updates the state
-	 * with the selected image file if one is present.
-	 *
-	 * @param e - The change event from the image file input element.
-	 */
 	function imgHandler(e: React.ChangeEvent<HTMLInputElement>): void {
 		const file = e.target.files?.[0]
 		if (file) setEnteredImg(file)
 	}
 
-	/**
-	 * Closes the Add House dialog by invoking the provided close handler.
-	 *
-	 * Calls the `handleCloseAdd` function to perform any necessary cleanup
-	 * and close the dialog UI.
-	 */
 	function closeDialog(): void {
 		handleCloseAdd()
 	}
 
-	/**
-	 * Handles the form submission for adding or editing house data.
-	 *
-	 * - If not in edit mode, constructs a single house data object and passes it to `addItemHandler`.
-	 * - If in edit mode with multiple selection, maps selected items to house data objects and passes them to `addItemHandler`.
-	 * - If in edit mode with a single item, constructs a house data object with the current form values and passes it as an array to `addItemHandler`.
-	 * - Closes the dialog after handling the submission.
-	 *
-	 * @param e - The form submission event.
-	 */
 	function onSubmitHandler(e: React.FormEvent): void {
 		e.preventDefault()
 		if (!edit) {
@@ -163,7 +117,7 @@ export default function AddHouseDialog({
 					street: item.street,
 					houseNumber: item.houseNumber,
 					pictureLink: item.pictureLink,
-				})) || []
+				})) || [],
 			)
 		} else if (edit && !multiple) {
 			addItemHandler([

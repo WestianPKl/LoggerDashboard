@@ -3,21 +3,6 @@ import { DataGrid, type GridColDef } from '@mui/x-data-grid'
 import GroupIcon from '@mui/icons-material/Group'
 import type { IUserRolesProps } from '../scripts/IUser'
 
-/**
- * Displays a table of user roles using Material-UI's DataGrid component.
- *
- * @component
- * @param {IUserRolesProps} props - The props for the UserRolesTable component.
- * @param {Array} props.rolesData - An array of role objects to display in the table.
- *
- * @remarks
- * - Shows role name and description in a paginated, compact table.
- * - Disables row selection, column resizing, and column selector.
- * - Includes a header with an icon and description.
- *
- * @example
- * <UserRolesTable rolesData={roles} />
- */
 export default function UserRolesTable({ rolesData }: IUserRolesProps) {
 	const columns: GridColDef[] = [
 		{

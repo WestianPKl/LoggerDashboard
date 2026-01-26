@@ -7,33 +7,11 @@ import { showAlert } from '../../store/application-store'
 import { useAppDispatch } from '../../store/hooks'
 import { useLoginMutation } from '../../store/api/userApi'
 
-/**
- * Renders the user login page view.
- *
- * This component displays a login form and handles the login process.
- * On successful login, it stores authentication tokens in local storage,
- * updates the application state, shows a success alert, and navigates to the home page.
- * On failure, it displays an error alert with the appropriate message.
- *
- * @component
- * @returns {JSX.Element} The rendered login page view.
- */
 export default function LoginPageView() {
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
 	const [login] = useLoginMutation()
 
-	/**
-	 * Attempts to log in a user with the provided login data.
-	 *
-	 * Sends the login data to the authentication API, handles the response,
-	 * stores authentication tokens in local storage, updates the application state,
-	 * and displays success or error alerts accordingly.
-	 *
-	 * @param loginData - The user's login credentials.
-	 * @returns A Promise that resolves when the login process is complete.
-	 * @throws Dispatches an error alert if the login fails.
-	 */
 	async function logIn(loginData: ILoginData): Promise<void> {
 		try {
 			const response = await login(loginData).unwrap()
@@ -65,14 +43,6 @@ export default function LoginPageView() {
 	)
 }
 
-/**
- * Loader function for the user login page.
- *
- * Checks if a 'token' exists in localStorage. If present, redirects the user to the home page.
- * Returns a redirect response if the user is already authenticated, otherwise returns undefined.
- *
- * @returns {Response | undefined} A redirect response if authenticated, otherwise undefined.
- */
 export function loader(): Response | undefined {
 	if (localStorage.getItem('token')) {
 		return redirect('/')

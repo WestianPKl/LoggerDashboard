@@ -2,20 +2,6 @@ import { useState, useEffect } from 'react'
 import { Button, Box, TextField, useMediaQuery, useTheme } from '@mui/material'
 import type { IUserFormProps } from '../scripts/IUser'
 
-/**
- * UserForm component for creating or editing a user.
- *
- * Renders a form with fields for username, email, and password, including validation and error handling.
- * On submit, validates the input and calls the `onSave` callback with the form data if valid.
- *
- * @param user - The user object containing initial values for the form fields.
- * @param onSave - Callback function invoked with the form data ({ username, email, password }) when the form is submitted and valid.
- *
- * @remarks
- * - The password field can be left blank to keep the current password.
- * - Displays validation errors for each field.
- * - Responsive design: adjusts button size for mobile screens.
- */
 export default function UserForm({ user, onSave }: IUserFormProps) {
 	const [username, setUsername] = useState(user.username ?? '')
 	const [email, setEmail] = useState(user.email ?? '')
@@ -30,14 +16,6 @@ export default function UserForm({ user, onSave }: IUserFormProps) {
 		setEmail(user.email ?? '')
 	}, [user.username, user.email])
 
-	/**
-	 * Validates the user form fields for username, email, and password.
-	 *
-	 * @returns An object containing validation error messages for each field, if any.
-	 * - `username`: Error message if the username is missing.
-	 * - `email`: Error message if the email is missing or invalid.
-	 * - `password`: Error message if the password is present but too short (less than 3 characters).
-	 */
 	function validate(): { username?: string; email?: string; password?: string } {
 		const newErrors: typeof errors = {}
 		if (!username) newErrors.username = 'Username is required'
@@ -47,15 +25,6 @@ export default function UserForm({ user, onSave }: IUserFormProps) {
 		return newErrors
 	}
 
-	/**
-	 * Handles the form submission event.
-	 *
-	 * Prevents the default form submission behavior, validates the form fields,
-	 * sets any validation errors, and if there are no errors, calls the `onSave`
-	 * callback with the user's input data. Resets the password field after a successful save.
-	 *
-	 * @param e - The form submission event.
-	 */
 	function onSubmitHandler(e: React.FormEvent): void {
 		e.preventDefault()
 		const validation = validate()

@@ -1,31 +1,3 @@
-/**
- * Integration tests for the Equipment API.
- *
- * This file covers the following scenarios:
- * - Creating, editing, fetching and deleting equipment, models, vendors, types, and sensor functions
- * - Validation and authorization for all endpoints
- * - Filtering and listing equipment-related entities
- *
- * @param {string} tokenFullAccess JWT token for a user with full permissions (used for most authorized requests)
- * @param {string} tokenNoPermissions JWT token for a user with no permissions (used to test authorization failures)
- * @param {number} modelId Stores the ID of the created model
- * @param {number} vendorId Stores the ID of the created vendor
- * @param {number} typeId Stores the ID of the created type
- * @param {number} equipmentId Stores the ID of the created equipment
- * @param {number} sensorId Stores the ID of the created sensor
- * @param {number} sensorTypeId Stores the ID of the sensor type
- * @param {number} sensorVendorId Stores the ID of the sensor vendor
- * @param {number} sensorModelId Stores the ID of the sensor model
- * @param {number} temperatureDefinitionId Stores the ID of the temperature data definition
- * @param {number} humidityDefinitionId Stores the ID of the humidity data definition
- *
- * Structure:
- * - beforeAll: Logs in users and stores their tokens for use in tests
- * - Each 'it' block tests a specific API endpoint or scenario, including both positive and negative cases
- * - Uses supertest for HTTP requests
- *
- * The tests ensure that the Equipment API endpoints behave correctly, handle errors, and enforce validation and authorization rules.
- */
 import request from 'supertest'
 import app from '../app.js'
 

@@ -1,30 +1,3 @@
-/**
- * Integration tests for the House API.
- *
- * This file covers the following scenarios:
- * - Creating, editing, fetching and deleting houses, house floors, house loggers, and related equipment
- * - Validation and authorization for all endpoints
- * - Filtering and listing house-related entities
- *
- * @param {object} app The Express app instance used for testing
- * @param {string} tokenFullAccess JWT token for a user with full permissions (used for most authorized requests)
- * @param {string} tokenNoPermissions JWT token for a user with no permissions (used to test authorization failures)
- * @param {number} houseId Stores the ID of the created house
- * @param {number} houseFloorId Stores the ID of the created house floor
- * @param {number} houseLoggerId Stores the ID of the created house logger
- * @param {number} equipmentId Stores the ID of the created equipment
- * @param {number} loggerTypeId Stores the ID of the logger type
- * @param {number} loggerModelId Stores the ID of the logger model
- * @param {number} loggerVendorId Stores the ID of the logger vendor
- * @param {number} secondHouseFloorId Stores the ID of the second created house floor
- *
- * Structure:
- * - beforeAll: Sets up mocks, imports app, logs in users and stores tokens
- * - Each 'it' block tests a specific API endpoint or scenario, including both positive and negative cases
- * - Uses supertest for HTTP requests
- *
- * The tests ensure that the House API endpoints behave correctly, handle errors, and enforce validation and authorization rules.
- */
 import request from 'supertest'
 import { jest } from '@jest/globals'
 let app

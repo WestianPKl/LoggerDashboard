@@ -3,27 +3,6 @@ import type { IDataChartExportButtonsProps } from '../scripts/IData'
 import { saveAs } from 'file-saver'
 import * as XLSX from 'xlsx'
 
-/**
- * Renders a set of export and control buttons for a data chart, including:
- * - Export to PNG
- * - Export data to Excel
- * - Refresh data (with loading indicator)
- * - Toggle auto-refresh
- *
- * @component
- * @param exportChartImage - Callback to export the chart as an image (PNG).
- * @param chartData - Array of chart data objects to be exported.
- * @param refreshData - Callback to refresh the chart data.
- * @param loading - Boolean indicating if data is currently loading.
- * @param autoRefreshEnabled - Boolean indicating if auto-refresh is enabled.
- * @param range - The current data range (used in exported file names).
- * @param setAutoRefreshEnabled - Callback to toggle auto-refresh state.
- *
- * @remarks
- * - Uses Material UI components for layout and controls.
- * - Exports Excel files using the `xlsx` and `file-saver` libraries.
- * - Responsive layout adapts to mobile screens.
- */
 export default function DataChartExportButtons({
 	exportChartImage,
 	chartData,
@@ -36,19 +15,6 @@ export default function DataChartExportButtons({
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	/**
-	 * Exports the current chart data to an Excel (.xlsx) file.
-	 *
-	 * The exported file includes columns for Datetime, Temperature, Humidity, Pressure, Altitude,
-	 * LoggerId, SensorId, and Events. The data is formatted as a worksheet and saved using the
-	 * specified date range in the filename.
-	 *
-	 * @remarks
-	 * - Uses the XLSX library to generate the Excel file.
-	 * - Uses the saveAs function to trigger the file download.
-	 *
-	 * @throws May throw errors if the XLSX or saveAs libraries are not available or if file generation fails.
-	 */
 	function exportToExcel(): void {
 		const wsData = [
 			[
@@ -82,13 +48,6 @@ export default function DataChartExportButtons({
 		saveAs(blob, `data_${range}.xlsx`)
 	}
 
-	/**
-	 * Toggles the auto-refresh feature for the data chart.
-	 *
-	 * This function inverts the current state of `autoRefreshEnabled`,
-	 * updates the state accordingly, and persists the new value in
-	 * localStorage under the key 'auto_refresh'.
-	 */
 	function handleAutoRefreshToggle(): void {
 		const newValue = !autoRefreshEnabled
 		setAutoRefreshEnabled(newValue)

@@ -4,24 +4,12 @@ import { lazy, Suspense, useMemo } from 'react'
 const DataMainList = lazy(() => import('./DataMainList'))
 import { Card, CardContent, CardActionArea, Typography, Box, Badge, List, ListItem } from '@mui/material'
 
-/**
- * Renders a card component displaying the main information for a specific equipment data logger.
- * Shows the equipment's ID, vendor, and model, along with a status badge indicating if the logger is active
- * (based on the recency of its last value). Displays a list of the latest parameter values or a "No data" message
- * if none are available. Navigates to the detailed data logger page on click.
- *
- * @param {IDataMainProps} props - The props for the DataMain component.
- * @param {Equipment} props.equipment - The equipment object containing logger details.
- * @param {LastValue[]} props.lastValues - An array of last value objects associated with equipment loggers.
- *
- * @returns {JSX.Element} The rendered DataMain card component.
- */
 export default function DataMain({ equipment, lastValues }: IDataMainProps) {
 	const navigate = useNavigate()
 
 	const lastValueData = useMemo(
 		() => lastValues.filter(lv => lv.equLoggerId === equipment.id),
-		[lastValues, equipment.id]
+		[lastValues, equipment.id],
 	)
 
 	const isActive = useMemo(() => {
@@ -36,16 +24,6 @@ export default function DataMain({ equipment, lastValues }: IDataMainProps) {
 		})
 	}, [lastValueData])
 
-	/**
-	 * Handles the click event for a data item.
-	 * Navigates to the data logger page for the selected equipment.
-	 *
-	 * @remarks
-	 * This function uses the `navigate` function to redirect the user
-	 * to the route corresponding to the selected equipment's data logger.
-	 *
-	 * @returns {void}
-	 */
 	function dataClickHandler(): void {
 		navigate(`/data/data-logger/${equipment.id}`)
 	}

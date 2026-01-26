@@ -16,7 +16,7 @@ export default tseslint.config([
 			reactRefresh.configs.vite,
 		],
 		rules: {
-			'@typescript-eslint/no-explicit-any': false,
+			'@typescript-eslint/no-explicit-any': 'off',
 			'@typescript-eslint/no-empty-object-type': 'error',
 			'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
 		},

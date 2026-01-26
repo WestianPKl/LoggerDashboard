@@ -1,15 +1,5 @@
 import { Link } from 'react-router'
 
-/**
- * Renders a simple 404 "Not Found" page with a message and a link to return to the home page.
- *
- * @returns {JSX.Element} The rendered 404 not found view.
- *
- * @example
- * ```tsx
- * <NotFoundView />
- * ```
- */
 export default function NotFoundView() {
 	return (
 		<div

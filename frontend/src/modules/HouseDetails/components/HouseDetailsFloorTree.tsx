@@ -22,30 +22,6 @@ import { useRevalidator } from 'react-router'
 
 const getNodeId = () => `randomnode_${+new Date()}`
 
-/**
- * Renders an interactive floor layout tree for a house, displaying the floor and its associated loggers.
- *
- * This component uses React Flow to visualize and manage the floor plan, allowing users to view, add, move,
- * and save the positions of loggers on a floor. It supports both view and edit modes, enabling features such as
- * node dragging, zooming, and restoring previous layouts from local storage.
- *
- * @component
- * @param {IHouseDetailsFloorTreeProps} props - The props for the component.
- * @param {string | number} props.floorId - The unique identifier for the floor.
- * @param {any} props.floor - The floor data, including layout and loggers.
- * @param {Viewport} props.floorViewport - The initial viewport settings for the floor plan.
- * @param {boolean} props.editMode - Whether the component is in edit mode, enabling editing features.
- *
- * @returns {JSX.Element} The rendered floor tree with interactive controls and loggers.
- *
- * @example
- * <HouseDetailsFloorTree
- *   floorId={1}
- *   floor={floorData}
- *   floorViewport={{ x: 0, y: 0, zoom: 1 }}
- *   editMode={true}
- * />
- */
 export default function HouseDetailsFloorTree({
 	floorId,
 	floor,
@@ -98,7 +74,7 @@ export default function HouseDetailsFloorTree({
 
 	const onNodesChange = useCallback(
 		(changes: any) => setNodes((nds: any) => applyNodeChanges(changes, nds)),
-		[setNodes]
+		[setNodes],
 	)
 
 	const onAdd = useCallback(() => {

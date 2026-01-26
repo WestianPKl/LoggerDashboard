@@ -1,12 +1,3 @@
-/**
- * @file equipmentApi.ts
- *
- * This file is intended for defining API endpoints related to equipment management using Redux Toolkit Query.
- * Currently, it is empty and does not contain any endpoints or logic.
- *
- * @remarks
- * Add equipment-related endpoints here as needed for your application.
- */
 import { api } from './api'
 import type { EquipmentClass } from '../../modules/Equipment/scripts/EquipmentClass'
 import type { EquipmentModelClass } from '../../modules/Equipment/scripts/EquipmentModelClass'

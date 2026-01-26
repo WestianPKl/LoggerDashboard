@@ -7,21 +7,6 @@ import type { IUserTableProps } from '../scripts/IAdmin'
 import type { UserClass } from '../../User/scripts/UserClass'
 import AdminUserPermissionDialog from './AdminUserPermissionDialog'
 
-/**
- * Renders a table displaying a list of users with selection and permission assignment capabilities.
- *
- * @component
- * @param {IUserTableProps} props - The props for the AdminUserTable component.
- * @param {UserClass[]} props.users - An array of user objects to display in the table.
- *
- * @returns {JSX.Element} The rendered AdminUserTable component.
- *
- * @remarks
- * - Allows selection of users via checkboxes.
- * - Provides a button to assign permissions to selected users.
- * - Adapts UI for mobile and desktop views.
- * - Integrates with Material UI's DataGrid for table rendering.
- */
 export default function AdminUserTable({ users }: IUserTableProps) {
 	const [selectedItems, setSelectedItems] = useState<UserClass[]>([])
 	const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({
@@ -46,18 +31,9 @@ export default function AdminUserTable({ users }: IUserTableProps) {
 		setSelectedItems(selectedIds.map(id => usersMap.get(Number(id))).filter(Boolean))
 	}, [rowSelectionModel, usersMap])
 
-	/**
-	 * Opens the permission dialog by setting the `openPermissionDialog` state to `true`.
-	 * Typically used as an event handler for UI elements that trigger permission-related actions.
-	 */
 	function handleClickPermissionOpen(): void {
 		setOpenPermissionDialog(true)
 	}
-	/**
-	 * Closes the permission dialog by setting its open state to false.
-	 *
-	 * @returns {void}
-	 */
 	function handleClosePermission(): void {
 		setOpenPermissionDialog(false)
 	}
@@ -128,7 +104,7 @@ export default function AdminUserTable({ users }: IUserTableProps) {
 							},
 							{ field: 'avatar', headerName: 'Avatar', width: 360 },
 						],
-						[]
+						[],
 					)}
 					initialState={{ pagination: { paginationModel: { page: 0, pageSize: 15 } } }}
 					pageSizeOptions={[15, 30, 45]}

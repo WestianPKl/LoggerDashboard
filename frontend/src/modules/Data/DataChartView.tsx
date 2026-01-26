@@ -12,20 +12,6 @@ import { store } from '../../store/store'
 import { dataApi } from '../../store/api/dataApi'
 import { equipmentApi } from '../../store/api/equipmentApi'
 
-/**
- * Displays a chart view for data collected from connected sensors of a specific logger.
- *
- * This component fetches equipment and sensor data using `useLoaderData`, and listens for real-time updates
- * via a socket event specific to the logger ID. It renders a tabbed interface, where each tab corresponds to
- * a connected sensor, and displays a `DataChart` for each sensor. If no sensors are connected, a message is shown.
- *
- * @returns {JSX.Element} The rendered chart view with tabs for each connected sensor, or a message if no sensors are connected.
- *
- * @remarks
- * - Uses React Suspense and Await for asynchronous data loading.
- * - Listens for `loggerData_{equLoggerId}` socket events to trigger data revalidation.
- * - Expects `equipments`, `connectedSensors`, and `equLoggerId` from the loader data.
- */
 export default function DataChartView() {
 	const { equipments, connectedSensors, equLoggerId } = useLoaderData() as {
 		equipments: EquipmentClass[]
@@ -77,7 +63,7 @@ export default function DataChartView() {
 														{...tabProps(0 + index)}
 														key={sensor.equSensorId}
 													/>
-												)
+												),
 										)}
 									</Tabs>
 								</Box>
@@ -89,7 +75,7 @@ export default function DataChartView() {
 												<TabPanel value={value} index={0 + index} key={sensor.equSensorId}>
 													<DataChart equLoggerId={equLoggerId} equSensorId={sensor.equSensorId} />
 												</TabPanel>
-											)
+											),
 									)}
 								</Box>
 							</>
@@ -106,15 +92,6 @@ export default function DataChartView() {
 	)
 }
 
-/**
- * Asynchronously loads equipment and connected sensor data for a given logger ID.
- *
- * @param {LoaderFunctionArgs} args - The loader function arguments containing route parameters.
- * @param {Record<string, string>} args.params - The route parameters, expected to include `equLoggerId`.
- * @returns {Promise<{ equipments: EquipmentClass[]; connectedSensors: DataConnectedSensorViewClass[]; equLoggerId: number }>}
- *          A promise that resolves to an object containing the list of equipments, connected sensors, and the logger ID.
- * @throws Will throw an error if `equLoggerId` is missing, if data is not found, or if an unexpected error occurs during data fetching.
- */
 export async function loader({ params }: LoaderFunctionArgs): Promise<{
 	equipments: EquipmentClass[]
 	connectedSensors: DataConnectedSensorViewClass[]
@@ -143,7 +120,7 @@ export async function loader({ params }: LoaderFunctionArgs): Promise<{
 			showAlert({
 				message: err?.data?.message || err?.message || 'Something went wrong!',
 				severity: 'error',
-			})
+			}),
 		)
 		throw err
 	}

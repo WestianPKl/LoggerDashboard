@@ -1,12 +1,3 @@
-/**
- * @file adminApi.ts
- *
- * This file is intended for defining API endpoints related to admin functionalities using Redux Toolkit Query.
- * Currently, it is empty and does not contain any endpoints or logic.
- *
- * @remarks
- * Add admin-related endpoints here as needed for your application.
- */
 import { api } from './api'
 import type { PermissionClass } from '../../modules/Admin/scripts/PermissionClass'
 import type { FunctionalityDefinitionClass } from '../../modules/Admin/scripts/FunctionalityDefinitionClass'
