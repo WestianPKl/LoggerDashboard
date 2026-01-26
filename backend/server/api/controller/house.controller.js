@@ -131,7 +131,10 @@ export async function addHouse(req, res) {
 		} catch {
 			io = null
 		}
-		if (io) io.sockets.emit(`house-${data.id}`, 'add')
+		if (io) {
+			io.sockets.emit('house', 'add')
+			io.sockets.emit(`house-${data.id}`, 'add')
+		}
 		return success(res, 'Data added successfully', data)
 	} catch (err) {
 		console.log(err)
@@ -207,7 +210,10 @@ export async function updateHouse(req, res) {
 		} catch {
 			io = null
 		}
-		if (io) io.sockets.emit(`house-${houseId}`, 'update')
+		if (io) {
+			io.sockets.emit('house', 'update')
+			io.sockets.emit(`house-${houseId}`, 'update')
+		}
 		return success(res, 'Data updated successfully', data)
 	} catch (err) {
 		console.log(err)
@@ -260,7 +266,10 @@ export async function deleteHouse(req, res) {
 		} catch {
 			io = null
 		}
-		if (io) io.sockets.emit(`house-${req.body.id}`, 'delete')
+		if (io) {
+			io.sockets.emit('house', 'delete')
+			io.sockets.emit(`house-${req.body.id}`, 'delete')
+		}
 		return success(res, 'Data deleted successfully', data)
 	} catch (err) {
 		console.log(err)

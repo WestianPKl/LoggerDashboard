@@ -25,8 +25,9 @@ app.use(
 	cors({
 		origin: process.env.FRONTEND_ORIGIN?.split(',') || [
 			'http://localhost:5173',
+			'http://192.168.18.6:5173',
+			'http://192.168.18.6:3000',
 			'http://192.168.18.75:8080/',
-			'http://192.168.18.6:3000/',
 		],
 		credentials: true,
 	})

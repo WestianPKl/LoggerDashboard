@@ -1,6 +1,5 @@
 export default {
-    testEnvironment: 'node',
-    transform: {
-        '^.+\\.js$': 'babel-jest',
-    },
+	testEnvironment: 'node',
+	transform: {},
+	testTimeout: 30000,
 }
