@@ -14,8 +14,7 @@ let dataDefinitionId,
 	dataLogIdOne,
 	dataLogIdTwo,
 	dataLastValueId,
-	temperatureDataDefinitionId,
-	humidityDataDefinitionId
+	temperatureDataDefinitionId
 
 describe('Data API', () => {
 	beforeAll(async () => {
@@ -37,6 +36,9 @@ describe('Data API', () => {
 	})
 
 	it('should create a data definition', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/data/data-definition')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -51,6 +53,9 @@ describe('Data API', () => {
 	})
 
 	it('should return validation error for empty data definition body', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/data/data-definition')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -67,6 +72,9 @@ describe('Data API', () => {
 	})
 
 	it('should not allow user without permissions to create data definition', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/data/data-definition')
 			.set('Authorization', `Bearer ${tokenNoPermissions}`)
@@ -79,6 +87,9 @@ describe('Data API', () => {
 	})
 
 	it('should edit the data definition', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.patch(`/api/data/data-definition/${dataDefinitionId}`)
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -94,6 +105,9 @@ describe('Data API', () => {
 	})
 
 	it('should get data definition by id', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.get(`/api/data/data-definition/${dataDefinitionId}`)
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -102,6 +116,9 @@ describe('Data API', () => {
 	})
 
 	it('should get all data definitions', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/data/data-definitions')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -111,6 +128,9 @@ describe('Data API', () => {
 	})
 
 	it('should get data definitions filtered by id', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/data/data-definitions')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -120,6 +140,9 @@ describe('Data API', () => {
 	})
 
 	it('should delete data definition', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.delete(`/api/data/data-definition/${dataDefinitionId}`)
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -192,7 +215,7 @@ describe('Data API', () => {
 			.send({ name: 'humidity' })
 		expect(res.statusCode).toBe(200)
 		expect(res.body.data[0].name).toBe('humidity')
-		humidityDataDefinitionId = res.body.data[0].id
+		// humidityDataDefinitionId = res.body.data[0].id
 	})
 
 	it('should get logger token', async () => {

@@ -6,59 +6,80 @@
 #include "lwip/ip_addr.h"
 
 static mqtt_client_t *g_client;
-static char g_pub_topic[32];
+static mqtt_msg_cb_t  g_on_msg;
+static char           g_rx_topic[64];
+static volatile bool  g_pub_pending = false;
 
-static void incoming_publish_cb(void *arg, const char *topic, u32_t tot_len) {
-    printf("MQTT RX topic=%s len=%lu\n", topic, (unsigned long)tot_len);
+static void on_pub(void *arg, const char *topic, u32_t len) {
+    strncpy(g_rx_topic, topic, sizeof(g_rx_topic) - 1);
 }
 
-static void incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t flags) {
-    // tu parsujesz komendy
-    printf("MQTT RX data len=%u last=%d\n", len, (flags & MQTT_DATA_FLAG_LAST) != 0);
-}
-
-static void sub_cb(void *arg, err_t result) {
-    printf("MQTT SUB result=%d\n", result);
-}
-
-static void conn_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status) {
-    printf("MQTT conn status=%d\n", status);
-    if (status == MQTT_CONNECT_ACCEPTED) {
-        mqtt_set_inpub_callback(client, incoming_publish_cb, incoming_data_cb, NULL);
-        mqtt_subscribe(client, MQTT_TOPIC_SUB, 0, sub_cb, NULL);
+static void on_data(void *arg, const u8_t *data, u16_t len, u8_t flags) {
+    if (g_on_msg && (flags & MQTT_DATA_FLAG_LAST)) {
+        g_on_msg(g_rx_topic, data, len);
     }
 }
 
-void mqtt_app_start(const settings_t *cfg) {
-    strncpy(g_pub_topic, cfg->pub_topic, sizeof(g_pub_topic)-1);
+static void on_sub(void *arg, err_t err) { (void)arg; (void)err; }
+
+static void on_conn(mqtt_client_t *c, void *arg, mqtt_connection_status_t st) {
+    printf("MQTT status=%d\n", st);
+    if (st == MQTT_CONNECT_ACCEPTED) {
+        printf("MQTT connected!\n");
+        mqtt_set_inpub_callback(c, on_pub, on_data, NULL);
+        mqtt_subscribe(c, MQTT_TOPIC_SUB, 0, on_sub, NULL);
+    }
+}
+
+void mqtt_init(mqtt_msg_cb_t on_message) {
+    g_on_msg = on_message;
 
     ip_addr_t addr;
     if (!ipaddr_aton(MQTT_SERVER, &addr)) {
-        printf("Bad MQTT_SERVER ip\n");
+        printf("MQTT: bad IP\n");
         return;
     }
 
+    printf("MQTT connecting to %s:%d...\n", MQTT_SERVER, MQTT_PORT);
     g_client = mqtt_client_new();
-
     struct mqtt_connect_client_info_t ci = {0};
-    ci.client_id = "pico2w-logger";
+    ci.client_id   = "pico2w";
     ci.client_user = MQTT_USER;
     ci.client_pass = MQTT_PASSWORD;
     ci.keep_alive  = MQTT_KEEPALIVE;
 
-    printf("MQTT connect %s:%d ...\n", MQTT_SERVER, MQTT_PORT);
-    mqtt_client_connect(g_client, &addr, MQTT_PORT, conn_cb, NULL, &ci);
+    mqtt_client_connect(g_client, &addr, MQTT_PORT, on_conn, NULL, &ci);
 }
 
-void mqtt_publish_telemetry(const char *topic, const datetime_t *dt, float t, float h) {
-    if (!g_client || !mqtt_client_is_connected(g_client)) return;
+static void on_pub_complete(void *arg, err_t err) {
+    (void)arg;
+    g_pub_pending = false;
+    if (err != ERR_OK) {
+        printf("MQTT pub err=%d\n", err);
+    }
+}
 
-    char payload[128];
-    int n = snprintf(payload, sizeof(payload),
-        "{\"ts\":\"%04u-%02u-%02uT%02u:%02u:%02uZ\",\"t\":%.2f,\"h\":%.2f}",
-        dt->year, dt->month, dt->day, dt->hour, dt->min, dt->sec, t, h
-    );
+bool mqtt_connected(void) {
+    return g_client && mqtt_client_is_connected(g_client);
+}
 
-    err_t e = mqtt_publish(g_client, topic, payload, (u16_t)n, 0, 0, NULL, NULL);
-    if (e != ERR_OK) printf("MQTT publish err=%d\n", e);
+bool mqtt_ready(void) {
+    return mqtt_connected() && !g_pub_pending;
+}
+
+void mqtt_send(const char *topic, const uint8_t *data, uint16_t len) {
+    if (!mqtt_ready()) {
+        printf("MQTT busy\n");
+        return;
+    }
+    g_pub_pending = true;
+    err_t err = mqtt_publish(g_client, topic, data, len, 0, 0, on_pub_complete, NULL);
+    if (err != ERR_OK) {
+        printf("MQTT publish fail=%d\n", err);
+        g_pub_pending = false;
+    }
+}
+
+void mqtt_poll(void) {
+    /* lwIP background mode handles this automatically */
 }

@@ -57,7 +57,8 @@ export async function loader(): Promise<Response | { houses: HouseClass[] }> {
 		if (!(await store.dispatch(houseApi.endpoints.getHouses.initiate({})).unwrap())) {
 			throw data('Data not Found', { status: 404 })
 		}
-		return { houses: await store.dispatch(houseApi.endpoints.getHouses.initiate({})).unwrap() }
+		const houses = await store.dispatch(houseApi.endpoints.getHouses.initiate({}, { forceRefetch: true })).unwrap()
+		return { houses }
 	} catch (err: any) {
 		store.dispatch(
 			showAlert({

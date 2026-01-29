@@ -11,7 +11,6 @@ export function initSocket(server) {
 				'http://192.168.18.6:3000',
 				'http://192.168.18.75:8080',
 			],
-			credentials: true,
 		},
 	})
 	return io

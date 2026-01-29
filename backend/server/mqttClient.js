@@ -30,6 +30,11 @@ mqttClient.on('message', async (topic, payload) => {
 	try {
 		const obj = JSON.parse(s)
 		console.log('[JSON]', obj)
+		console.log(
+			new Date(obj.ts).toLocaleString('pl-PL', {
+				timeZone: 'Europe/Warsaw',
+			})
+		)
 	} catch (err) {
 		console.error('[NOT JSON]', err)
 	}

@@ -9,7 +9,6 @@ import { showAlert } from '../../../store/application-store'
 import { useAppDispatch } from '../../../store/hooks'
 
 export default function HouseDetailsMobileCard({ logger, floorId, houseLoggerId }: IHouseDetailsMobileCardProps) {
-	const [socketTrigger, setSocketTrigger] = useState(0)
 	const dispatch = useAppDispatch()
 
 	const {
@@ -28,35 +27,26 @@ export default function HouseDetailsMobileCard({ logger, floorId, houseLoggerId 
 	const [isActive, setIsActive] = useState(true)
 
 	useEffect(() => {
-		function onRefreshDataEvent() {
-			setSocketTrigger(t => t + 1)
+		const onRefreshDataEvent = () => {
+			refetchLastValue()
+			refetchConnectedSensors()
 		}
+
 		socket.on(`loggerData_${logger.id}`, onRefreshDataEvent)
 		return () => {
 			socket.off(`loggerData_${logger.id}`, onRefreshDataEvent)
 		}
-	}, [logger.id])
+	}, [logger.id, refetchLastValue, refetchConnectedSensors])
 
 	useEffect(() => {
-		refetchLastValue()
-		refetchConnectedSensors()
-	}, [socketTrigger, refetchLastValue, refetchConnectedSensors])
-
-	useEffect(() => {
-		if (!dataLastValue) return
-		let statuses: boolean[] = []
-		dataLastValue.forEach(e => {
-			if (e.time) {
-				const lastValueDate = new Date(e.time)
-				const currentDate = new Date()
-				const duration = lastValueDate.getTime() - currentDate.getTime()
-				if (duration > -1800000) statuses.push(true)
-				else statuses.push(false)
-			}
+		const now = Date.now()
+		const isAnyFresh = dataLastValue.some(e => {
+			if (!e.time) return false
+			const t = new Date(e.time).getTime()
+			const ageMs = now - t
+			return ageMs <= 30 * 60 * 1000
 		})
-		if (dataLastValue.length === 0) statuses.push(false)
-		let checker = (arr: boolean[]) => arr.includes(true)
-		setIsActive(checker(statuses))
+		setIsActive(isAnyFresh)
 	}, [dataLastValue])
 
 	useEffect(() => {

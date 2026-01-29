@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, Typography } from '@mui/material'
 import { useReactFlow } from '@xyflow/react'
 import { useGetDataLastValuesViewQuery, useGetDataConnectedSensorViewQuery } from '../../../store/api/dataApi'
@@ -15,223 +15,222 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { useRevalidator } from 'react-router'
 import type { DataLastValueViewClass } from '../../Data/scripts/DataLastValueViewClass'
 
-export default memo(
-	({
-		id,
-		data,
-		positionAbsoluteX,
-		positionAbsoluteY,
-	}: {
-		id: string
-		data: IHouseLoggerNode
-		positionAbsoluteX: number
-		positionAbsoluteY: number
-	}) => {
-		const {
-			data: lastValueData = [],
-			isLoading: lastValueLoading,
-			error: lastValueError,
-			refetch: refetchLastValue,
-			isUninitialized: lastValueUninitialized,
-		} = useGetDataLastValuesViewQuery(
-			data.houseLoggerId && data.floorId
-				? { houseLoggerId: data.houseLoggerId, houseFloorId: data.floorId }
-				: skipToken,
-		)
+type Props = {
+	id: string
+	data: IHouseLoggerNode
+	positionAbsoluteX: number
+	positionAbsoluteY: number
+}
 
-		const {
-			data: connectedSensors = [],
-			isLoading: connectedSensorsLoading,
-			error: connectedSensorsError,
-			refetch: refetchConnectedSensors,
-			isUninitialized: connectedSensorsUninitialized,
-		} = useGetDataConnectedSensorViewQuery(
-			data.houseLoggerId && data.floorId
-				? { houseLoggerId: data.houseLoggerId, houseFloorId: data.floorId }
-				: skipToken,
-		)
+export const HouseDetailsLoggerNode = ({ id, data, positionAbsoluteX, positionAbsoluteY }: Props) => {
+	const [detailsDialog, setDetailsDialog] = useState(false)
+	const [lastValue, setLastValue] = useState<DataLastValueViewClass[]>([])
+	const [statusColors, setStatusColors] = useState<'success.main' | 'error.main'>('success.main')
 
-		const [detailsDialog, setDetailsDialog] = useState(false)
-		const [lastValue, setLastValue] = useState<DataLastValueViewClass[]>([])
-		const [statusColors, setStatusColors] = useState('success.main')
-		const [loggerData, setLoggerData] = useState<IHouseLoggerData>({ floorId: undefined, id: undefined })
-		const [editMode, setEditMode] = useState<boolean>(data.editMode)
-		const [equLoggerId, setEquLoggerId] = useState<number>(data.equLoggerId)
-		const revalidator = useRevalidator()
+	const [editMode, setEditMode] = useState<boolean>(data.editMode)
+	const [equLoggerId, setEquLoggerId] = useState<number>(data.equLoggerId)
 
-		const [addHouseLogger] = useAddHouseLoggerMutation()
-		const [deleteHouseLogger] = useDeleteHouseLoggerMutation()
-		const dispatch = useAppDispatch()
-		const { setNodes, getNode } = useReactFlow()
-
-		useEffect(() => {
-			let statuses: boolean[] = []
-			if (lastValueData.length > 0) {
-				lastValueData.forEach(e => {
-					if (e.time) {
-						const lastValueDate = new Date(e.time)
-						const currentDate = new Date()
-						const timeAgo = currentDate.getTime() - lastValueDate.getTime()
-						if (timeAgo < 1800000) {
-							statuses.push(true)
-						} else {
-							statuses.push(false)
-						}
-					}
-				})
-				let checker = (arr: boolean[]) => arr.every(v => v === true)
-				if (!checker(statuses)) {
-					setStatusColors('error.main')
-				} else {
-					setStatusColors('success.main')
+	const [loggerData, setLoggerData] = useState<IHouseLoggerData>(() =>
+		data.editMode
+			? {
+					floorId: data.floorId,
+					id: data.equLoggerId,
+					serialNumber: data.label,
+					equVendor: data.equVendor,
+					equModel: data.equModel,
+					houseLoggerId: data.houseLoggerId,
 				}
-				setLastValue(lastValueData)
-			} else {
-				statuses.push(false)
-				setStatusColors('error.main')
-			}
-		}, [lastValueData])
+			: {
+					floorId: data.floorId,
+					id: data.equLoggerId,
+				},
+	)
 
-		useEffect(() => {
-			function onRefreshDataEvent() {
-				if (!lastValueUninitialized) refetchLastValue()
-				if (!connectedSensorsUninitialized) refetchConnectedSensors()
-			}
-			socket.on(`loggerData_${data.equLoggerId}`, onRefreshDataEvent)
-			return () => {
-				socket.off(`loggerData_${data.equLoggerId}`, onRefreshDataEvent)
-			}
-		}, [
-			data.equLoggerId,
-			refetchLastValue,
-			refetchConnectedSensors,
-			lastValueUninitialized,
-			connectedSensorsUninitialized,
-		])
+	const queryArgs = useMemo(() => {
+		const houseLoggerId = loggerData.houseLoggerId ?? data.houseLoggerId
+		const houseFloorId = loggerData.floorId ?? data.floorId
+		if (!houseLoggerId || !houseFloorId) return skipToken
+		return { houseLoggerId, houseFloorId }
+	}, [loggerData.houseLoggerId, loggerData.floorId, data.houseLoggerId, data.floorId])
 
-		useEffect(() => {
-			setLoggerData(
-				editMode
-					? {
-							floorId: data.floorId,
-							id: equLoggerId,
-							serialNumber: data.label,
-							equVendor: data.equVendor,
-							equModel: data.equModel,
-							houseLoggerId: data.houseLoggerId,
-						}
-					: {
-							floorId: data.floorId,
-							id: equLoggerId,
-						},
-			)
-		}, [editMode, data, equLoggerId])
+	const {
+		data: lastValueData = [],
+		isLoading: lastValueLoading,
+		error: lastValueError,
+		refetch: refetchLastValue,
+		isUninitialized: lastValueUninitialized,
+	} = useGetDataLastValuesViewQuery(queryArgs)
 
-		useEffect(() => {
-			const err = lastValueError || connectedSensorsError
-			if (err) {
-				const message = (err as any)?.data?.message || (err as any)?.message || 'Something went wrong'
-				dispatch(showAlert({ message, severity: 'error' }))
-			}
-		}, [lastValueError, connectedSensorsError, dispatch])
+	const {
+		data: connectedSensors = [],
+		isLoading: connectedSensorsLoading,
+		error: connectedSensorsError,
+		refetch: refetchConnectedSensors,
+		isUninitialized: connectedSensorsUninitialized,
+	} = useGetDataConnectedSensorViewQuery(queryArgs)
 
-		async function addItemHandler(item: IAddHouseLoggerData | IAddHouseLoggerData[]): Promise<void> {
-			try {
-				setDetailsDialog(false)
-				if (!Array.isArray(item)) {
-					let x = positionAbsoluteX
-					let y = positionAbsoluteY
-					if (data.id) {
-						const node = getNode(data.id)
-						if (node?.position?.x) x = node.position.x
-						if (node?.position?.y) y = node.position.y
+	const [addHouseLogger] = useAddHouseLoggerMutation()
+	const [deleteHouseLogger] = useDeleteHouseLoggerMutation()
+
+	const dispatch = useAppDispatch()
+	const revalidator = useRevalidator()
+	const { setNodes, getNode } = useReactFlow()
+
+	useEffect(() => {
+		setLastValue(lastValueData)
+
+		const statuses = lastValueData.map(e => {
+			if (!e.time) return false
+			const ageMs = Date.now() - new Date(e.time).getTime()
+			return ageMs < 30 * 60 * 1000
+		})
+
+		const ok = statuses.length > 0 && statuses.every(Boolean)
+		setStatusColors(ok ? 'success.main' : 'error.main')
+	}, [lastValueData])
+
+	useEffect(() => {
+		if (!equLoggerId) return
+
+		const event = `loggerData_${equLoggerId}`
+		const onRefreshDataEvent = () => {
+			if (!lastValueUninitialized) refetchLastValue()
+			if (!connectedSensorsUninitialized) refetchConnectedSensors()
+		}
+
+		socket.on(event, onRefreshDataEvent)
+		return () => {
+			socket.off(event, onRefreshDataEvent)
+		}
+	}, [equLoggerId, refetchLastValue, refetchConnectedSensors, lastValueUninitialized, connectedSensorsUninitialized])
+
+	useEffect(() => {
+		setLoggerData(prev =>
+			editMode
+				? {
+						floorId: data.floorId,
+						id: equLoggerId,
+						serialNumber: prev.serialNumber ?? data.label,
+						equVendor: prev.equVendor ?? data.equVendor,
+						equModel: prev.equModel ?? data.equModel,
+						houseLoggerId: prev.houseLoggerId ?? data.houseLoggerId,
 					}
-					item['posX'] = x
-					item['posY'] = y
-					const logger = await addHouseLogger(item).unwrap()
-					setLoggerData({
-						floorId: logger.houseFloorId,
-						id: logger.equLoggerId,
-						houseLoggerId: logger.id,
-						serialNumber: logger.logger?.serialNumber,
-						equModel: logger.logger?.model?.name,
-						equVendor: logger.logger?.vendor?.name,
-					})
-					if (logger.equLoggerId) setEquLoggerId(logger.equLoggerId)
-					data.editMode = true
-					setEditMode(true)
-					if (!lastValueUninitialized) refetchLastValue()
-					if (!connectedSensorsUninitialized) refetchConnectedSensors()
-				}
-				dispatch(showAlert({ message: 'New house logger added', severity: 'success' }))
+				: { floorId: data.floorId, id: equLoggerId },
+		)
+	}, [editMode, data.floorId, data.label, data.equVendor, data.equModel, data.houseLoggerId, equLoggerId])
+
+	useEffect(() => {
+		const err = lastValueError || connectedSensorsError
+		if (err) {
+			const message = (err as any)?.data?.message || (err as any)?.message || 'Something went wrong'
+			dispatch(showAlert({ message, severity: 'error' }))
+		}
+	}, [lastValueError, connectedSensorsError, dispatch])
+
+	async function addItemHandler(item: IAddHouseLoggerData | IAddHouseLoggerData[]): Promise<void> {
+		try {
+			setDetailsDialog(false)
+
+			if (Array.isArray(item)) return
+
+			let x = positionAbsoluteX
+			let y = positionAbsoluteY
+
+			if (data.id) {
+				const node = getNode(data.id)
+				if (node?.position?.x != null) x = node.position.x
+				if (node?.position?.y != null) y = node.position.y
+			}
+
+			item.posX = x
+			item.posY = y
+
+			const logger = await addHouseLogger(item).unwrap()
+
+			setLoggerData({
+				floorId: logger.houseFloorId,
+				id: logger.equLoggerId,
+				houseLoggerId: logger.id,
+				serialNumber: logger.logger?.serialNumber,
+				equModel: logger.logger?.model?.name,
+				equVendor: logger.logger?.vendor?.name,
+			})
+
+			if (logger.equLoggerId) setEquLoggerId(logger.equLoggerId)
+			setEditMode(true)
+
+			if (!lastValueUninitialized) refetchLastValue()
+			if (!connectedSensorsUninitialized) refetchConnectedSensors()
+
+			dispatch(showAlert({ message: 'New house logger added', severity: 'success' }))
+
+			revalidator.revalidate()
+		} catch (err: any) {
+			const message = err?.data?.message || err?.message || 'Something went wrong'
+			dispatch(showAlert({ message, severity: 'error' }))
+		}
+	}
+
+	function onDoubleClickHandler(e: any): void {
+		if (e.detail > 1) setDetailsDialog(true)
+	}
+
+	async function handleClickDeleteNode(nodeData: any): Promise<void> {
+		try {
+			if (nodeData.houseLoggerId) {
+				await deleteHouseLogger({ id: nodeData.houseLoggerId }).unwrap()
+				setNodes(nodes => nodes.filter(n => n.id !== id))
+				dispatch(showAlert({ message: 'Logger node deleted', severity: 'success' }))
 				revalidator.revalidate()
-			} catch (err: any) {
-				const message = err?.data?.message || err?.message || 'Something went wrong'
-				dispatch(showAlert({ message, severity: 'error' }))
+			} else {
+				setNodes(nodes => nodes.filter(n => n.id !== id))
 			}
+		} catch (err: any) {
+			const message = err?.data?.message || err?.message || 'Something went wrong'
+			dispatch(showAlert({ message, severity: 'error' }))
 		}
+	}
 
-		function onDoubleClickHandler(e: any): void {
-			if (e.detail > 1) setDetailsDialog(true)
-		}
+	if (lastValueLoading || connectedSensorsLoading) return <LoadingCircle />
 
-		async function handleClickDeleteNode(data: any): Promise<void> {
-			try {
-				if (data.houseLoggerId) {
-					await deleteHouseLogger({ id: data.houseLoggerId }).unwrap()
-					setNodes(nodes => nodes.filter(node => node.id !== id))
-					dispatch(showAlert({ message: 'Logger node deleted', severity: 'success' }))
-					revalidator.revalidate()
-				} else {
-					setNodes(nodes => nodes.filter(node => node.id !== id))
-				}
-			} catch (err: any) {
-				const message = err?.data?.message || err?.message || 'Something went wrong'
-				dispatch(showAlert({ message, severity: 'error' }))
-			}
-		}
+	return (
+		<Card
+			sx={{
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+				width: 60,
+				height: 60,
+				backgroundColor: statusColors,
+			}}
+			onClick={onDoubleClickHandler}>
+			<Typography variant='body2'>
+				{editMode
+					? `ID${equLoggerId}`.length > 7
+						? `ID${equLoggerId}`.substring(0, 6) + '...'
+						: `ID${equLoggerId}`
+					: `ID-N`}
+			</Typography>
 
-		if (lastValueLoading || connectedSensorsLoading) return <LoadingCircle />
-
-		return (
-			<Card
-				sx={{
-					display: 'flex',
-					justifyContent: 'center',
-					alignItems: 'center',
-					width: 60,
-					height: 60,
-					backgroundColor: statusColors,
-				}}
-				onClick={onDoubleClickHandler}>
-				<Typography variant='body2'>
-					{editMode
-						? `ID${equLoggerId}`.length > 7
-							? `ID${equLoggerId}`.substring(0, 6) + '...'
-							: `ID${equLoggerId}`
-						: `ID-N`}
-				</Typography>
-				{editMode && (
-					<HouseDetailsLoggerNodeDialog
-						editModeProps={data.editModeProps}
-						loggerData={loggerData}
-						connectedSensors={connectedSensors}
-						lastValueData={lastValue}
-						onCloseDialog={() => setDetailsDialog(false)}
-						detailsDialog={detailsDialog}
-						handleClickDeleteNode={handleClickDeleteNode}
-					/>
-				)}
-				{!editMode && (
-					<HouseDetailsLoggerNewNodeDialog
-						loggerData={loggerData}
-						addItemHandler={addItemHandler}
-						onCloseDialog={() => setDetailsDialog(false)}
-						detailsDialog={detailsDialog}
-						handleClickDeleteNode={handleClickDeleteNode}
-					/>
-				)}
-			</Card>
-		)
-	},
-)
+			{editMode ? (
+				<HouseDetailsLoggerNodeDialog
+					editModeProps={data.editModeProps}
+					loggerData={loggerData}
+					connectedSensors={connectedSensors}
+					lastValueData={lastValue}
+					onCloseDialog={() => setDetailsDialog(false)}
+					detailsDialog={detailsDialog}
+					handleClickDeleteNode={handleClickDeleteNode}
+				/>
+			) : (
+				<HouseDetailsLoggerNewNodeDialog
+					loggerData={loggerData}
+					addItemHandler={addItemHandler}
+					onCloseDialog={() => setDetailsDialog(false)}
+					detailsDialog={detailsDialog}
+					handleClickDeleteNode={handleClickDeleteNode}
+				/>
+			)}
+		</Card>
+	)
+}

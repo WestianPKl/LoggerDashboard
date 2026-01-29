@@ -14,6 +14,9 @@ describe('Common API', () => {
 	})
 
 	it('should create a error log message', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/common/error-log')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -25,6 +28,9 @@ describe('Common API', () => {
 	})
 
 	it('should return validation error for empty error log message', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/common/error-log')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -37,6 +43,9 @@ describe('Common API', () => {
 	})
 
 	it('should edit the error log message', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.patch(`/api/common/error-log/${errorLogId}`)
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -51,6 +60,9 @@ describe('Common API', () => {
 	})
 
 	it('should get error log by id', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.get(`/api/common/error-log/${errorLogId}`)
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -59,6 +71,9 @@ describe('Common API', () => {
 	})
 
 	it('should get all error log messages', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/common/error-logs')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -68,6 +83,9 @@ describe('Common API', () => {
 	})
 
 	it('should get error log messages filtered by id', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/common/error-logs')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -77,6 +95,9 @@ describe('Common API', () => {
 	})
 
 	it('should delete error log message', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.delete(`/api/common/error-log/${errorLogId}`)
 			.set('Authorization', `Bearer ${tokenFullAccess}`)

@@ -105,19 +105,21 @@ export default function HouseDetailsView() {
 }
 
 export async function loader({ params }: LoaderFunctionArgs): Promise<Response | { house: HouseClass }> {
-	if (!params.houseId) {
-		throw data('No house Id', { status: 400 })
-	}
+	if (!params.houseId) throw data('No house Id', { status: 400 })
+
 	if (!localStorage.getItem('token')) {
 		store.dispatch(showAlert({ message: 'Unknown user - token not found', severity: 'error' }))
 		return redirect('/login')
 	}
+
 	try {
-		const promise = await store.dispatch(houseApi.endpoints.getHouse.initiate(parseInt(params.houseId))).unwrap()
-		if (!promise) {
-			throw data('Data not Found', { status: 404 })
-		}
-		return { house: promise }
+		const house = await store
+			.dispatch(houseApi.endpoints.getHouse.initiate(parseInt(params.houseId), { forceRefetch: true }))
+			.unwrap()
+
+		if (!house) throw data('Data not Found', { status: 404 })
+
+		return { house }
 	} catch (err: any) {
 		store.dispatch(
 			showAlert({

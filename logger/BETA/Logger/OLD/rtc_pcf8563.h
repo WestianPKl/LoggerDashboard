@@ -4,12 +4,12 @@
 #include "hardware/i2c.h"
 
 typedef struct {
-    uint16_t year;  // 2000..2099
-    uint8_t month;  // 1..12
-    uint8_t day;    // 1..31
-    uint8_t hour;   // 0..23
-    uint8_t min;    // 0..59
-    uint8_t sec;    // 0..59
+    uint16_t year;
+    uint8_t month;
+    uint8_t day;
+    uint8_t hour;
+    uint8_t min;
+    uint8_t sec;
 } datetime_t;
 
 bool rtc_pcf8563_get_datetime(i2c_inst_t *i2c, uint8_t addr, datetime_t *out);

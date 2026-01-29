@@ -1,6 +1,6 @@
 import request from 'supertest'
 import app from '../app.js'
-import {describe, it, expect, beforeAll} from '@jest/globals'
+import { describe, it, expect, beforeAll } from '@jest/globals'
 
 let tokenFullAccess, tokenNoPermissions
 let processTypeId, processDefinitionId
@@ -19,6 +19,9 @@ describe('Process API', () => {
 	})
 
 	it('should create a process type', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/process/process-type')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)

@@ -25,7 +25,7 @@ bool rtc_pcf8563_get_datetime(i2c_inst_t *i2c, uint8_t addr, datetime_t *out) {
     uint8_t r[7];
     if (!i2c_read_regs(i2c, addr, REG_SECONDS, r, sizeof(r))) return false;
 
-    bool vl = (r[0] & 0x80) != 0;  // Voltage Low flag
+    bool vl = (r[0] & 0x80) != 0;
 
     out->sec   = bcd2bin(r[0] & 0x7F);
     out->min   = bcd2bin(r[1] & 0x7F);
@@ -43,7 +43,7 @@ bool rtc_pcf8563_set_datetime(i2c_inst_t *i2c, uint8_t addr, const datetime_t *d
     r[1] = bin2bcd(dt->min)  & 0x7F;
     r[2] = bin2bcd(dt->hour) & 0x3F;
     r[3] = bin2bcd(dt->day)  & 0x3F;
-    r[4] = 0; // weekday (opcjonalnie)
+    r[4] = 0;
     r[5] = bin2bcd(dt->month) & 0x1F;
     r[6] = bin2bcd((uint8_t)(dt->year - 2000));
 

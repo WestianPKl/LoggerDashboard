@@ -1,8 +1,14 @@
 #pragma once
 #include <stdint.h>
-#include <stdbool.h>
-#include "hardware/i2c.h"
 
-// Synchronizuje czas systemowy z NTP (Windows NTP w LAN) i ustawia RTC PCF8563.
-// timeout_ms: maks. czas czekania na SNTP
-bool ntp_correct_rtc_blocking(i2c_inst_t *i2c, uint8_t rtc_addr, uint32_t timeout_ms);
+typedef struct {
+    uint8_t year;
+    uint8_t month;
+    uint8_t day;
+    uint8_t hour;
+    uint8_t min;
+    uint8_t sec;
+} ntp_time_t;
+
+uint8_t ntp_sync(uint32_t timeout_ms);
+uint8_t ntp_get_time(ntp_time_t *t);

@@ -19,6 +19,9 @@ describe('Admin API', () => {
 			.send({ username: 'Bob', password: 'bob' })
 		tokenFullAccess = res1.body.data.token
 		const decoded = jwt.decode(tokenFullAccess)
+		if (!decoded || typeof decoded === 'string' || !decoded.user?.id) {
+			throw new Error('Invalid token payload')
+		}
 		userId = decoded.user.id
 
 		const res2 = await request(app)
@@ -28,6 +31,9 @@ describe('Admin API', () => {
 	})
 
 	it('should create a admin functionality definition', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-functionality-definition')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -41,6 +47,9 @@ describe('Admin API', () => {
 	})
 
 	it('should create a admin object definition', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-object-definition')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -54,6 +63,9 @@ describe('Admin API', () => {
 	})
 
 	it('should create a admin access level definition', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-access-level-definition')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -67,6 +79,9 @@ describe('Admin API', () => {
 	})
 
 	it('should create a admin role', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-role')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -80,6 +95,9 @@ describe('Admin API', () => {
 	})
 
 	it('should create a admin role user', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-role-user')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -93,6 +111,9 @@ describe('Admin API', () => {
 	})
 
 	it('should get all admin role users', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-role-users')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -102,6 +123,9 @@ describe('Admin API', () => {
 	})
 
 	it('should delete admin role user', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.delete(`/api/adm/adm-role-user/${adminRoleId}`)
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -126,6 +150,9 @@ describe('Admin API', () => {
 	})
 
 	it('should create a admin permission user', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-permission')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -150,6 +177,9 @@ describe('Admin API', () => {
 	})
 
 	it('should create a admin permission role', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-permission')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -174,6 +204,9 @@ describe('Admin API', () => {
 	})
 
 	it('should return validation error for empty admin permission body', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-permission')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -201,6 +234,9 @@ describe('Admin API', () => {
 	})
 
 	it('should get admin permissions', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-permissions')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -209,6 +245,9 @@ describe('Admin API', () => {
 	})
 
 	it('should get admin permissions filtered by userId', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-permissions')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -218,6 +257,9 @@ describe('Admin API', () => {
 	})
 
 	it('should get admin permissions filtered by roleId', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-permissions')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -227,6 +269,9 @@ describe('Admin API', () => {
 	})
 
 	it('should delete admin permission', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.delete(`/api/adm/adm-permission/${adminPermissionIdOne}`)
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -243,6 +288,9 @@ describe('Admin API', () => {
 	})
 
 	it('should delete admin permission', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.delete(`/api/adm/adm-permission/${adminPermissionIdTwo}`)
 			.set('Authorization', `Bearer ${tokenFullAccess}`)
@@ -259,6 +307,9 @@ describe('Admin API', () => {
 	})
 
 	it('should return validation error for empty admin functionality definition body', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app)
 			.post('/api/adm/adm-functionality-definition')
 			.set('Authorization', `Bearer ${tokenFullAccess}`)

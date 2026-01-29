@@ -3,8 +3,9 @@ import app from '../app.js'
 import jwt from 'jsonwebtoken'
 import { describe, it, expect, beforeAll } from '@jest/globals'
 
-let tokenFullAccess, tokenNoPermissions, newUserToken
-let userId, username, email, passwordResetToken
+// let tokenNoPermissions, username
+let tokenFullAccess, newUserToken
+let userId, email, passwordResetToken
 
 describe('User API', () => {
 	beforeAll(async () => {
@@ -13,13 +14,16 @@ describe('User API', () => {
 			.send({ username: 'Bob', password: 'bob' })
 		tokenFullAccess = res1.body.data.token
 
-		const res2 = await request(app)
-			.post('/api/user/user-login')
-			.send({ username: 'Test', password: 'test' })
-		tokenNoPermissions = res2.body.data.token
+		// const res2 = await request(app)
+		// 	.post('/api/user/user-login')
+		// 	.send({ username: 'Test', password: 'test' })
+		// tokenNoPermissions = res2.body.data.token
 	})
 
 	it('should register new user', async () => {
+		if (tokenFullAccess == null) {
+			throw new Error('tokenFullAccess is null')
+		}
 		const res = await request(app).post('/api/user/user-register').send({
 			username: 'Test-001',
 			email: 'test001@test.pl',
@@ -123,7 +127,7 @@ describe('User API', () => {
 		const decoded = jwt.decode(newUserToken)
 		expect(decoded.user.username).toBe('Test-001')
 		expect(decoded.user.email).toBe('test001@test.pl')
-		username = decoded.user.username
+		// username = decoded.user.username
 		email = decoded.user.email
 	})
 

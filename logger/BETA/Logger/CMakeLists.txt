@@ -37,12 +37,10 @@ pico_sdk_init()
 
 add_executable(Logger
     src/main.c
-    src/i2c_bus.c
-    src/rtc_pcf8563.c
-    src/eeprom_m24c32.c
-    src/settings.c
     src/net_time.c
     src/mqtt_app.c
+    src/uart_bus.c
+    src/support.c
 )
 
 pico_set_program_name(Logger "Logger")
@@ -67,8 +65,7 @@ target_link_libraries(Logger
         pico_cyw43_arch_threadsafe_background
         pico_lwip_mqtt
         pico_lwip_sntp
-        hardware_spi
-        hardware_i2c
+        hardware_uart
         hardware_timer
         hardware_watchdog
         hardware_clocks

@@ -30,12 +30,12 @@ export default function DataChartView() {
 			revalidator.revalidate()
 		}
 
-		socket.on(`loggerData_${equLoggerId}}`, onRefreshDataEvent)
+		socket.on(`loggerData_${equLoggerId}`, onRefreshDataEvent)
 
 		return () => {
-			socket.off(`loggerData_${equLoggerId}}`, onRefreshDataEvent)
+			socket.off(`loggerData_${equLoggerId}`, onRefreshDataEvent)
 		}
-	}, [])
+	}, [revalidator, equLoggerId])
 
 	return (
 		<Suspense fallback={<LoadingCircle />}>
@@ -101,18 +101,24 @@ export async function loader({ params }: LoaderFunctionArgs): Promise<{
 		throw data('No logger Id', { status: 400 })
 	}
 	try {
-		const promiseConnectedSensors = await store
-			.dispatch(dataApi.endpoints.getDataConnectedSensorView.initiate({ equLoggerId: params.equLoggerId }))
+		const connectedSensors = await store
+			.dispatch(
+				dataApi.endpoints.getDataConnectedSensorView.initiate(
+					{ equLoggerId: params.equLoggerId },
+					{ forceRefetch: true },
+				),
+			)
 			.unwrap()
-		const promiseEquipments = await store
-			.dispatch(equipmentApi.endpoints.getEquipments.initiate({ id: params.equLoggerId }))
+
+		const equipments = await store
+			.dispatch(equipmentApi.endpoints.getEquipments.initiate({ id: params.equLoggerId }, { forceRefetch: true }))
 			.unwrap()
-		if (!promiseEquipments || !promiseConnectedSensors) {
+		if (!equipments || !connectedSensors) {
 			throw data('Data not Found', { status: 404 })
 		}
 		return {
-			equipments: promiseEquipments,
-			connectedSensors: promiseConnectedSensors,
+			equipments: equipments,
+			connectedSensors: connectedSensors,
 			equLoggerId: parseInt(params.equLoggerId),
 		}
 	} catch (err: any) {

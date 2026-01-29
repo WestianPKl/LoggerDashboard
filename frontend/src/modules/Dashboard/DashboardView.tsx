@@ -12,11 +12,12 @@ export default function DashboardView({ houses }: { houses: HouseClass[] }) {
 		function onAddHouseEvent(): void {
 			revalidator.revalidate()
 		}
+
 		socket.on('house', onAddHouseEvent)
 		return () => {
 			socket.off('house', onAddHouseEvent)
 		}
-	}, [])
+	}, [revalidator])
 
 	return (
 		<>

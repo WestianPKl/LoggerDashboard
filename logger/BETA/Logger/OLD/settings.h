@@ -4,9 +4,9 @@
 #include "hardware/i2c.h"
 
 typedef struct __attribute__((packed)) {
-    uint32_t magic;              // 'LGR1'
-    uint16_t version;            // 1
-    uint16_t sample_period_ms;   // np. 5000
+    uint32_t magic;
+    uint16_t version;
+    uint16_t sample_period_ms;
     char pub_topic[32];
     char sub_topic[32];
     uint32_t crc;
