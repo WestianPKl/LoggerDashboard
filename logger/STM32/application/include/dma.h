@@ -15,6 +15,10 @@ void dma1_uart2_rx_config(uint32_t rx_dst, uint32_t rx_len);
 void dma1_uart2_tx_init(void);
 void dma1_uart2_tx_start(uint32_t tx_src, uint32_t tx_len);
 
+void dma1_uart1_rx_config(uint32_t rx_dst, uint32_t rx_len);
+void dma1_uart1_tx_init(void);
+void dma1_uart1_tx_start(uint32_t tx_src, uint32_t tx_len);
+
 void dma1_spi_rx_init(void);
 void dma1_spi_tx_init(void);
 void dma_spi1_receive(uint32_t rx_buf, uint32_t rx_len);

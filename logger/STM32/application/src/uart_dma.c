@@ -2,6 +2,8 @@
 
 #define PA2 2U
 #define PA3 3U
+#define PA9 9U
+#define PA10 10U
 #define UART_BAUDRATE 115200U
 
 static uint32_t get_pclk1_hz(void)
@@ -14,6 +16,18 @@ static uint32_t get_pclk1_hz(void)
     }
     return hclk / div;
 }
+
+static uint32_t get_pclk2_hz(void)
+{
+    uint32_t hclk = SystemCoreClock;
+    uint32_t ppre2 = (RCC->CFGR >> 11) & 0x7;
+    uint32_t div = 1;
+    if (ppre2 >= 4) {
+        div = 1U << (ppre2 - 3U);
+    }
+    return hclk / div;
+}
+
 
 static uint32_t compute_uart_div(uint32_t clk, uint32_t baud)
 {
@@ -58,4 +72,39 @@ void uart2_rxtx_init(void)
     USART2->CR1 |= USART_CR1_UE;
 
     NVIC_EnableIRQ(USART2_IRQn);
+}
+
+void uart1_rxtx_init(void)
+{
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
+    (void)RCC->AHB2ENR;
+
+    RCC->CCIPR &= ~(3U << 0);
+
+    GPIOA->MODER &= ~((3U << (PA9 * 2U)) | (3U << (PA10 * 2U)));
+    GPIOA->MODER |=  (2U << (PA9 * 2U)) | (2U << (PA10 * 2U));
+
+    GPIOA->PUPDR &= ~((3U << (PA9 * 2U)) | (3U << (PA10 * 2U)));
+    GPIOA->OSPEEDR |= (2U << (PA9 * 2U)) | (2U << (PA10 * 2U));
+    
+    GPIOA->AFR[1] &= ~((0xFU << ((9U-8U)*4U)) | (0xFU << ((10U-8U)*4U)));
+    GPIOA->AFR[1] |=  ((7U   << ((9U-8U)*4U)) | (7U   << ((10U-8U)*4U)));
+
+    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
+    (void)RCC->APB2ENR;
+
+    uint32_t pclk2 = get_pclk2_hz();
+    uart_set_baudrate(USART1, pclk2, UART_BAUDRATE);
+
+    USART1->CR3 |= USART_CR3_DMAR | USART_CR3_DMAT;
+
+    USART1->CR1 = 0;
+    USART1->CR1 |= USART_CR1_TE | USART_CR1_RE;
+    USART1->CR1 |= USART_CR1_IDLEIE;
+
+    USART1->ICR = USART_ICR_IDLECF | USART_ICR_TCCF;
+
+    USART1->CR1 |= USART_CR1_UE;
+
+    NVIC_EnableIRQ(USART1_IRQn);
 }

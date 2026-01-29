@@ -15,8 +15,8 @@
 
 static const char FW_BUILD_DATE[] = __DATE__ " " __TIME__;
 
-#define INFO_ADDR  0x080FF800u
-#define INFO_MAGIC 0x494E464Fu
+#define INFO_ADDR  0x080FF800U
+#define INFO_MAGIC 0x494E464FU
 
 typedef struct __attribute__((packed)) {
     uint32_t magic;

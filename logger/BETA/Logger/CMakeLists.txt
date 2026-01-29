@@ -72,5 +72,6 @@ target_link_libraries(Logger
         pico_cyw43_arch_lwip_threadsafe_background
         )
 
+pico_embed_pt_in_binary(Logger ${CMAKE_CURRENT_LIST_DIR}/pt.json)
 pico_add_extra_outputs(Logger)
 

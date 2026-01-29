@@ -3,6 +3,7 @@
 static inline void dma1_clear_flags_ch1(void){ DMA1->IFCR = DMA_IFCR_CGIF1 | DMA_IFCR_CTCIF1 | DMA_IFCR_CTEIF1; }
 static inline void dma1_clear_flags_ch2(void){ DMA1->IFCR = DMA_IFCR_CGIF2 | DMA_IFCR_CTCIF2 | DMA_IFCR_CTEIF2; }
 static inline void dma1_clear_flags_ch3(void){ DMA1->IFCR = DMA_IFCR_CGIF3 | DMA_IFCR_CTCIF3 | DMA_IFCR_CTEIF3; }
+static inline void dma1_clear_flags_ch4(void){ DMA1->IFCR = DMA_IFCR_CGIF4 | DMA_IFCR_CTCIF4 | DMA_IFCR_CTEIF4; }
 static inline void dma1_clear_flags_ch5(void){ DMA1->IFCR = DMA_IFCR_CGIF5 | DMA_IFCR_CTCIF5 | DMA_IFCR_CTEIF5; }
 static inline void dma1_clear_flags_ch6(void){ DMA1->IFCR = DMA_IFCR_CGIF6 | DMA_IFCR_CTCIF6 | DMA_IFCR_CTEIF6; }
 static inline void dma1_clear_flags_ch7(void){ DMA1->IFCR = DMA_IFCR_CGIF7 | DMA_IFCR_CTCIF7 | DMA_IFCR_CTEIF7; }
@@ -392,4 +393,72 @@ void dma_pwm_tim2_ch1_start(uint32_t src, uint16_t len)
     DMA1_Channel2->CNDTR = len;
 
     DMA1_Channel2->CCR |= DMA_CCR_EN;
+}
+
+void dma1_uart1_rx_config(uint32_t rx_dst, uint32_t rx_len)
+{
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+    (void)RCC->AHB1ENR;
+
+    DMA1_Channel5->CCR = 0;
+    while (DMA1_Channel5->CCR & DMA_CCR_EN) {}
+
+    dma1_clear_flags_ch5();
+
+    DMA1_CSELR->CSELR &= ~DMA_CSELR_C5S_Msk;
+    DMA1_CSELR->CSELR |=  (2U << DMA_CSELR_C5S_Pos);
+
+    DMA1_Channel5->CCR &= ~DMA_CCR_MSIZE_Msk;
+    DMA1_Channel5->CCR &= ~DMA_CCR_PSIZE_Msk;
+
+    DMA1_Channel5->CPAR  = (uint32_t)&USART1->RDR;
+    DMA1_Channel5->CMAR  = rx_dst;
+    DMA1_Channel5->CNDTR = rx_len;
+
+    DMA1_Channel5->CCR &= ~DMA_CCR_DIR;
+    DMA1_Channel5->CCR &= ~DMA_CCR_MEM2MEM;
+    DMA1_Channel5->CCR |=  DMA_CCR_MINC | DMA_CCR_CIRC | DMA_CCR_TEIE;
+
+    NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+
+    DMA1_Channel5->CCR |= DMA_CCR_EN;
+}
+
+void dma1_uart1_tx_init(void)
+{
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+    (void)RCC->AHB1ENR;
+
+    DMA1_Channel4->CCR = 0;
+    while (DMA1_Channel4->CCR & DMA_CCR_EN) {}
+
+    dma1_clear_flags_ch4();
+
+    DMA1_CSELR->CSELR &= ~DMA_CSELR_C4S_Msk;
+    DMA1_CSELR->CSELR |=  (2U << DMA_CSELR_C4S_Pos);
+
+    DMA1_Channel4->CCR &= ~DMA_CCR_MSIZE_Msk;
+    DMA1_Channel4->CCR &= ~DMA_CCR_PSIZE_Msk;
+
+    DMA1_Channel4->CPAR  = (uint32_t)&USART1->TDR;
+
+    DMA1_Channel4->CCR |=  DMA_CCR_MINC | DMA_CCR_DIR | DMA_CCR_TCIE | DMA_CCR_TEIE;
+    DMA1_Channel4->CCR &= ~DMA_CCR_MEM2MEM;
+
+    NVIC_EnableIRQ(DMA1_Channel4_IRQn);
+}
+
+void dma1_uart1_tx_start(uint32_t tx_src, uint32_t tx_len)
+{
+    if (tx_len == 0U) return;
+
+    DMA1_Channel4->CCR &= ~DMA_CCR_EN;
+    while (DMA1_Channel4->CCR & DMA_CCR_EN) {}
+
+    dma1_clear_flags_ch4();
+
+    DMA1_Channel4->CMAR  = tx_src;
+    DMA1_Channel4->CNDTR = (uint16_t)tx_len;
+
+    DMA1_Channel4->CCR |= DMA_CCR_EN;
 }
