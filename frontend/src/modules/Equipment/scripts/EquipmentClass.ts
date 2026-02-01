@@ -4,6 +4,9 @@ import { EquipmentTypeClass } from './EquipmentTypeClass'
 import { EquipmentVendorClass } from './EquipmentVendorClass'
 import { DataLastValueClass } from '../../Data/scripts/DataLastValueClass'
 import type { DataDefinitionClass } from '../../Data/scripts/DataDefinitionClass'
+import { EquipmentStatsClass } from './EquipmentStats'
+import type { EquipmentLogClass } from './EquipmentLogs'
+import type { ErrorLogClass } from './ErrorLog'
 
 export interface EquipmentInput {
 	id?: number | undefined
@@ -18,6 +21,9 @@ export interface EquipmentInput {
 	vendor?: EquipmentVendorClass | undefined
 	model?: EquipmentModelClass | undefined
 	type?: EquipmentTypeClass | undefined
+	stats?: EquipmentStatsClass | undefined
+	logs?: EquipmentLogClass[] | undefined
+	errors?: ErrorLogClass[] | undefined
 	dataDefinitions?: DataDefinitionClass[]
 	lastValue?: DataLastValueClass | undefined
 	createdBy?: UserClass | undefined
@@ -38,6 +44,9 @@ export class EquipmentClass implements EquipmentInput {
 	model: EquipmentModelClass | undefined
 	type: EquipmentTypeClass | undefined
 	dataDefinitions: DataDefinitionClass[] = []
+	stats: EquipmentStatsClass | undefined
+	logs: EquipmentLogClass[] = []
+	errors: ErrorLogClass[] = []
 	lastValue: DataLastValueClass | undefined
 	createdBy: UserClass | undefined
 	updatedBy: UserClass | undefined
@@ -53,6 +62,9 @@ export class EquipmentClass implements EquipmentInput {
 			}
 			if (model.type) {
 				this.type = new EquipmentTypeClass(model.type)
+			}
+			if (model.stats) {
+				this.stats = new EquipmentStatsClass(model.stats)
 			}
 			if (model.lastValue) {
 				this.lastValue = new DataLastValueClass(model.lastValue)

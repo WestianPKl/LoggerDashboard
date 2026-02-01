@@ -105,3 +105,7 @@ export interface IAddEquipmentTypeProps {
 	openAddDialog: boolean
 	addItemHandler: (item: IAddEquipmentData[] | IAddEquipmentData) => void
 }
+
+export interface IEquipmentLogTableProps {
+	equipment: EquipmentClass
+}

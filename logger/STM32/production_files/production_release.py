@@ -5,8 +5,8 @@ INFO_MAGIC = 0x494E464F
 
 serial = 0x12345678
 hw_major = 1
-hw_minor = 2
-prod_date = b"20260129"  # 8B
+hw_minor = 0
+prod_date = b"2026-01-29"  # 8B
 
 blob = bytearray([0xFF] * 2048)
 

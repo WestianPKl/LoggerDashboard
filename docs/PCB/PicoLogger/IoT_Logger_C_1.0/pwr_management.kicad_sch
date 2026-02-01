@@ -5,7 +5,7 @@
 	(uuid "b8eb6347-e145-4b93-b189-2a25d32f954a")
 	(paper "A4")
 	(title_block
-		(title "IoT Logger A - Power Management")
+		(title "IoT Logger C - Power Management")
 		(date "2026-01-24")
 		(rev "1.0")
 		(company "Piotr Kłyś")
@@ -1193,7 +1193,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "02d2b21e-1398-402e-a2f4-0c6f2f96bb08")
-		(property "Reference" "#PWR040"
+		(property "Reference" "#PWR030"
 			(at 139.7 100.33 0)
 			(effects
 				(font
@@ -1243,7 +1243,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "#PWR040")
+					(reference "#PWR030")
 					(unit 1)
 				)
 			)
@@ -1258,7 +1258,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "1e9df88c-dae6-406a-8502-f7623b57fe9c")
-		(property "Reference" "TP2"
+		(property "Reference" "TP4"
 			(at 122.682 86.614 0)
 			(effects
 				(font
@@ -1309,7 +1309,7 @@
 		(instances
 			(project "IoT_Logger_A_1.0"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "TP2")
+					(reference "TP4")
 					(unit 1)
 				)
 			)
@@ -1324,7 +1324,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "200e6bd2-9925-4e1e-a9c7-08be7a697c90")
-		(property "Reference" "L1"
+		(property "Reference" "L2"
 			(at 159.766 76.962 90)
 			(effects
 				(font
@@ -1376,7 +1376,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "L1")
+					(reference "L2")
 					(unit 1)
 				)
 			)
@@ -1391,7 +1391,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "5e594766-709e-4548-bd93-48f9432226e7")
-		(property "Reference" "C23"
+		(property "Reference" "C16"
 			(at 181.356 90.17 90)
 			(effects
 				(font
@@ -1452,7 +1452,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "C23")
+					(reference "C16")
 					(unit 1)
 				)
 			)
@@ -1467,7 +1467,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "709da33f-dfbf-46c1-906e-85e4d3ce365a")
-		(property "Reference" "#PWR038"
+		(property "Reference" "#PWR027"
 			(at 116.84 87.63 0)
 			(effects
 				(font
@@ -1517,7 +1517,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "#PWR038")
+					(reference "#PWR027")
 					(unit 1)
 				)
 			)
@@ -1532,7 +1532,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "7bdc707d-8b3b-4f22-ba98-658e0db7234c")
-		(property "Reference" "R15"
+		(property "Reference" "R10"
 			(at 172.974 88.9 0)
 			(effects
 				(font
@@ -1586,7 +1586,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "R15")
+					(reference "R10")
 					(unit 1)
 				)
 			)
@@ -1601,7 +1601,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "7d5cd0c0-9351-450a-9e9f-cd73776287fe")
-		(property "Reference" "TP4"
+		(property "Reference" "TP6"
 			(at 193.802 86.614 0)
 			(effects
 				(font
@@ -1652,7 +1652,7 @@
 		(instances
 			(project "IoT_Logger_A_1.0"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "TP4")
+					(reference "TP6")
 					(unit 1)
 				)
 			)
@@ -1667,7 +1667,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "91bbdaf5-a4dd-47dc-b96e-2540c2af3b05")
-		(property "Reference" "#PWR091"
+		(property "Reference" "#PWR034"
 			(at 193.04 96.52 0)
 			(effects
 				(font
@@ -1717,7 +1717,7 @@
 		(instances
 			(project "IoT_Logger_A_1.0"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "#PWR091")
+					(reference "#PWR034")
 					(unit 1)
 				)
 			)
@@ -1732,7 +1732,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "93727778-42e6-4c81-8092-362a47381497")
-		(property "Reference" "#PWR090"
+		(property "Reference" "#PWR029"
 			(at 121.92 96.52 0)
 			(effects
 				(font
@@ -1782,7 +1782,7 @@
 		(instances
 			(project "IoT_Logger_A_1.0"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "#PWR090")
+					(reference "#PWR029")
 					(unit 1)
 				)
 			)
@@ -1797,7 +1797,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "97deaffc-e445-4063-9218-fab4f6b63bba")
-		(property "Reference" "C24"
+		(property "Reference" "C17"
 			(at 181.356 97.79 90)
 			(effects
 				(font
@@ -1858,7 +1858,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "C24")
+					(reference "C17")
 					(unit 1)
 				)
 			)
@@ -1873,7 +1873,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "9ea5d1cf-ec35-492c-a088-438863561290")
-		(property "Reference" "TP1"
+		(property "Reference" "TP3"
 			(at 122.682 80.264 0)
 			(effects
 				(font
@@ -1924,7 +1924,7 @@
 		(instances
 			(project ""
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "TP1")
+					(reference "TP3")
 					(unit 1)
 				)
 			)
@@ -1939,7 +1939,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "9f4604a2-a37a-47de-bb17-2f0d2c48ae59")
-		(property "Reference" "TP3"
+		(property "Reference" "TP5"
 			(at 177.292 82.804 0)
 			(effects
 				(font
@@ -1990,7 +1990,7 @@
 		(instances
 			(project "IoT_Logger_A_1.0"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "TP3")
+					(reference "TP5")
 					(unit 1)
 				)
 			)
@@ -2005,7 +2005,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a0d042ad-a4b9-4039-b1d4-dee754594101")
-		(property "Reference" "C21"
+		(property "Reference" "C14"
 			(at 150.876 82.55 90)
 			(effects
 				(font
@@ -2066,7 +2066,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "C21")
+					(reference "C14")
 					(unit 1)
 				)
 			)
@@ -2081,7 +2081,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a35a9a1d-1802-4e49-b07c-9d4ad477dd91")
-		(property "Reference" "#PWR042"
+		(property "Reference" "#PWR032"
 			(at 186.69 90.17 0)
 			(effects
 				(font
@@ -2131,7 +2131,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "#PWR042")
+					(reference "#PWR032")
 					(unit 1)
 				)
 			)
@@ -2226,7 +2226,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "bd94bde3-685e-49c6-9327-0935762d16eb")
-		(property "Reference" "C20"
+		(property "Reference" "C13"
 			(at 112.014 87.63 90)
 			(effects
 				(font
@@ -2287,7 +2287,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "C20")
+					(reference "C13")
 					(unit 1)
 				)
 			)
@@ -2302,7 +2302,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "ccff0907-d22f-4e00-93bd-404af76fdb69")
-		(property "Reference" "R16"
+		(property "Reference" "R11"
 			(at 173.482 96.52 0)
 			(effects
 				(font
@@ -2356,7 +2356,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "R16")
+					(reference "R11")
 					(unit 1)
 				)
 			)
@@ -2371,7 +2371,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "ce807956-9caf-4e9d-83e7-cd556164bd53")
-		(property "Reference" "#PWR043"
+		(property "Reference" "#PWR033"
 			(at 186.69 107.95 0)
 			(effects
 				(font
@@ -2421,7 +2421,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "#PWR043")
+					(reference "#PWR033")
 					(unit 1)
 				)
 			)
@@ -2436,7 +2436,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "d28048f0-2fbb-4325-b502-ddbbee1ade79")
-		(property "Reference" "#PWR041"
+		(property "Reference" "#PWR031"
 			(at 171.45 107.95 0)
 			(effects
 				(font
@@ -2486,7 +2486,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "#PWR041")
+					(reference "#PWR031")
 					(unit 1)
 				)
 			)
@@ -2501,7 +2501,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "dfaeabeb-9818-4c48-9ac2-869c5013d018")
-		(property "Reference" "C22"
+		(property "Reference" "C15"
 			(at 162.306 90.17 90)
 			(effects
 				(font
@@ -2562,7 +2562,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "C22")
+					(reference "C15")
 					(unit 1)
 				)
 			)
@@ -2577,7 +2577,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f1f0a59b-b9ea-43ab-bf77-96eee4198f26")
-		(property "Reference" "#PWR039"
+		(property "Reference" "#PWR028"
 			(at 116.84 97.79 0)
 			(effects
 				(font
@@ -2627,7 +2627,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/8f2aecdf-3fb8-476b-9b06-dcd68d3e68d4"
-					(reference "#PWR039")
+					(reference "#PWR028")
 					(unit 1)
 				)
 			)

@@ -5,7 +5,7 @@
 	(uuid "16751574-4a73-4663-a0e6-923ec2bc57d0")
 	(paper "A4")
 	(title_block
-		(title "IoT Logger A - ESP32 C6")
+		(title "IoT Logger C - ESP32 C6")
 		(date "2026-01-24")
 		(rev "1.0")
 		(company "Piotr Kłyś")
@@ -1558,304 +1558,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Transistor_FET:AO3401A"
-			(pin_names
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "Q"
-				(at 5.08 1.905 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Value" "AO3401A"
-				(at 5.08 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-				(at 5.08 -1.905 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-						(italic yes)
-					)
-					(justify left)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "http://www.aosmd.com/pdfs/datasheet/AO3401A.pdf"
-				(at 5.08 -3.81 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-					(hide yes)
-				)
-			)
-			(property "Description" "-4.0A Id, -30V Vds, P-Channel MOSFET, SOT-23"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "P-Channel MOSFET"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "SOT?23*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "AO3401A_0_1"
-				(polyline
-					(pts
-						(xy 0.254 1.905) (xy 0.254 -1.905)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.254 0) (xy -2.54 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.762 2.286) (xy 0.762 1.27)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.762 1.778) (xy 3.302 1.778) (xy 3.302 -1.778) (xy 0.762 -1.778)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.762 0.508) (xy 0.762 -0.508)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.762 -1.27) (xy 0.762 -2.286)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 1.651 0)
-					(radius 2.794)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.286 0) (xy 1.27 0.381) (xy 1.27 -0.381) (xy 2.286 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.54 2.54) (xy 2.54 1.778)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 2.54 1.778)
-					(radius 0.254)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(circle
-					(center 2.54 -1.778)
-					(radius 0.254)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.54 -2.54) (xy 2.54 0) (xy 0.762 0)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.794 -0.508) (xy 2.921 -0.381) (xy 3.683 -0.381) (xy 3.81 -0.254)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.302 -0.381) (xy 2.921 0.254) (xy 3.683 0.254) (xy 3.302 -0.381)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "AO3401A_1_1"
-				(pin input line
-					(at -5.08 0 0)
-					(length 2.54)
-					(name "G"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 2.54 5.08 270)
-					(length 2.54)
-					(name "D"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 2.54 -5.08 90)
-					(length 2.54)
-					(name "S"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "Transistor_FET:BSS138"
 			(pin_names
 				(offset 0)
@@ -2419,12 +2121,6 @@
 		(uuid "9dbd7f97-d407-46cf-b917-2e63b84c8462")
 	)
 	(junction
-		(at 80.01 96.52)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "ace02ddd-6d29-4692-a4b8-8cad3b4d68dd")
-	)
-	(junction
 		(at 125.73 78.74)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2435,12 +2131,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "d1517081-7823-4166-a350-2b4b51f46694")
-	)
-	(junction
-		(at 72.39 88.9)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "e32e4970-73ef-41a4-89a2-5e5fad202bf7")
 	)
 	(junction
 		(at 149.86 54.61)
@@ -2503,16 +2193,6 @@
 			(type default)
 		)
 		(uuid "207e8860-2e0b-4de6-83b8-f44a5c7f5be8")
-	)
-	(wire
-		(pts
-			(xy 80.01 96.52) (xy 83.82 96.52)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "21cd7763-54c9-4f90-8dbe-5f433c3741dc")
 	)
 	(wire
 		(pts
@@ -2653,16 +2333,6 @@
 			(type default)
 		)
 		(uuid "8da402eb-4c31-4522-8936-3713bb18f62e")
-	)
-	(wire
-		(pts
-			(xy 80.01 93.98) (xy 80.01 96.52)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "96866dbc-c546-4af0-b12f-e6a67b93c798")
 	)
 	(wire
 		(pts
@@ -2856,16 +2526,6 @@
 	)
 	(wire
 		(pts
-			(xy 72.39 96.52) (xy 80.01 96.52)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f617fea6-e711-4924-86b0-cebebe421a04")
-	)
-	(wire
-		(pts
 			(xy 110.49 80.01) (xy 111.76 80.01)
 		)
 		(stroke
@@ -2874,7 +2534,7 @@
 		)
 		(uuid "fba0063f-5385-4ce2-ad0f-e6e1a145c440")
 	)
-	(global_label "STM32_RST_OD"
+	(global_label "ATMega_RST_OD"
 		(shape input)
 		(at 128.27 83.82 180)
 		(fields_autoplaced yes)
@@ -2886,7 +2546,7 @@
 		)
 		(uuid "03f1018b-2d04-44e2-bc03-3a780cb13b9a")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 111.2545 83.82 0)
+			(at 110.4078 83.82 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3006,28 +2666,6 @@
 			)
 		)
 	)
-	(global_label "STM32_BOOT0_EN_N"
-		(shape output)
-		(at 64.77 88.9 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "1add7e26-d9cb-46e0-a185-dfa0138e2a5d")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 42.9164 88.9 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
 	(global_label "GPIO22"
 		(shape output)
 		(at 184.15 116.84 0)
@@ -3072,7 +2710,7 @@
 			)
 		)
 	)
-	(global_label "NRST"
+	(global_label "RESET_CON"
 		(shape input)
 		(at 80.01 64.77 0)
 		(fields_autoplaced yes)
@@ -3084,7 +2722,7 @@
 		)
 		(uuid "417a767b-4120-4e52-9926-eb19f4a56bd1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 87.7728 64.77 0)
+			(at 93.6389 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3248,7 +2886,7 @@
 			)
 		)
 	)
-	(global_label "STM32_RST_OD"
+	(global_label "ATMega_RST_OD"
 		(shape output)
 		(at 64.77 69.85 180)
 		(fields_autoplaced yes)
@@ -3260,7 +2898,7 @@
 		)
 		(uuid "70b95986-6013-41b9-a97d-597a32e64b28")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 47.7545 69.85 0)
+			(at 46.9078 69.85 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3288,28 +2926,6 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "BOOT0"
-		(shape input)
-		(at 80.01 83.82 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "79380475-dba1-4188-9fd2-1de3b96e80cb")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 89.1033 83.82 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
 				(hide yes)
 			)
 		)
@@ -3358,7 +2974,7 @@
 			)
 		)
 	)
-	(global_label "USART2_RX"
+	(global_label "RXD0"
 		(shape input)
 		(at 184.15 111.76 0)
 		(fields_autoplaced yes)
@@ -3370,7 +2986,7 @@
 		)
 		(uuid "c10a9e3e-817f-4fd7-bb4b-b8cf6ef7ee36")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 197.658 111.76 0)
+			(at 192.0942 111.76 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3468,7 +3084,7 @@
 			)
 		)
 	)
-	(global_label "USART2_TX"
+	(global_label "TXD0"
 		(shape input)
 		(at 184.15 114.3 0)
 		(fields_autoplaced yes)
@@ -3480,7 +3096,7 @@
 		)
 		(uuid "e1920e2b-c2e5-458b-8b89-d207a58d6f7a")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 197.3556 114.3 0)
+			(at 191.7918 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3503,28 +3119,6 @@
 		(uuid "f0fd0210-1800-44f5-8a7e-3ddfbf9da3be")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 120.991 96.52 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "STM32_BOOT0_EN_N"
-		(shape input)
-		(at 128.27 86.36 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "f28f9106-72df-4b5f-b692-87be7933facf")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 106.4164 86.36 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3587,7 +3181,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "0926ffb6-6e8a-4a92-999b-8d6be05efe58")
-		(property "Reference" "R5"
+		(property "Reference" "R2"
 			(at 68.58 67.818 90)
 			(effects
 				(font
@@ -3648,7 +3242,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "R5")
+					(reference "R2")
 					(unit 1)
 				)
 			)
@@ -3663,7 +3257,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "0db2b273-7fb9-415d-9474-51a5d2673328")
-		(property "Reference" "#PWR027"
+		(property "Reference" "#PWR017"
 			(at 80.01 83.82 0)
 			(effects
 				(font
@@ -3713,7 +3307,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR027")
+					(reference "#PWR017")
 					(unit 1)
 				)
 			)
@@ -3728,7 +3322,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "152b5a35-3f90-4288-8a62-7b416d02ccf4")
-		(property "Reference" "C19"
+		(property "Reference" "C12"
 			(at 146.812 57.15 0)
 			(effects
 				(font
@@ -3789,7 +3383,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "C19")
+					(reference "C12")
 					(unit 1)
 				)
 			)
@@ -3804,7 +3398,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "18c5c78d-8564-420f-bc8f-bf9cb27ac146")
-		(property "Reference" "#PWR028"
+		(property "Reference" "#PWR018"
 			(at 82.55 118.11 0)
 			(effects
 				(font
@@ -3854,7 +3448,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR028")
+					(reference "#PWR018")
 					(unit 1)
 				)
 			)
@@ -3869,7 +3463,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "32f5f41a-190a-435a-a248-c438c6cefa24")
-		(property "Reference" "#PWR035"
+		(property "Reference" "#PWR024"
 			(at 200.66 113.03 0)
 			(effects
 				(font
@@ -3919,7 +3513,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR035")
+					(reference "#PWR024")
 					(unit 1)
 				)
 			)
@@ -3934,7 +3528,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "33847642-2131-43a4-9ac2-65a14a935e1b")
-		(property "Reference" "#PWR033"
+		(property "Reference" "#PWR022"
 			(at 144.78 71.12 0)
 			(effects
 				(font
@@ -3984,7 +3578,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR033")
+					(reference "#PWR022")
 					(unit 1)
 				)
 			)
@@ -3999,7 +3593,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "340422eb-c9e1-4820-a69b-72837f43dcc1")
-		(property "Reference" "#PWR031"
+		(property "Reference" "#PWR020"
 			(at 114.3 77.47 0)
 			(effects
 				(font
@@ -4049,7 +3643,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR031")
+					(reference "#PWR020")
 					(unit 1)
 				)
 			)
@@ -4064,7 +3658,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "422987ee-40dd-49bb-b51d-4cd0a9aa68e9")
-		(property "Reference" "SW2"
+		(property "Reference" "SW3"
 			(at 77.47 120.142 0)
 			(effects
 				(font
@@ -4117,7 +3711,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "SW2")
+					(reference "SW3")
 					(unit 1)
 				)
 			)
@@ -4132,7 +3726,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "4ec0275b-7c2c-4fb5-b71d-8e98db487a18")
-		(property "Reference" "R7"
+		(property "Reference" "R3"
 			(at 74.422 73.66 90)
 			(effects
 				(font
@@ -4193,7 +3787,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "R7")
+					(reference "R3")
 					(unit 1)
 				)
 			)
@@ -4208,7 +3802,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "5021adb5-d6db-47fc-ba99-3c23ed614b2f")
-		(property "Reference" "SW1"
+		(property "Reference" "SW2"
 			(at 77.47 99.822 0)
 			(effects
 				(font
@@ -4261,7 +3855,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "SW1")
+					(reference "SW2")
 					(unit 1)
 				)
 			)
@@ -4293,7 +3887,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_IDC:IDC-Header_2x03_P2.54mm_Vertical"
+		(property "Footprint" "Connector_PinHeader_1.27mm:PinHeader_2x03_P1.27mm_Vertical"
 			(at 233.68 69.85 0)
 			(effects
 				(font
@@ -4356,7 +3950,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "59145deb-bbad-4992-8f44-4b113a471a88")
-		(property "Reference" "C16"
+		(property "Reference" "C9"
 			(at 76.2 107.95 90)
 			(effects
 				(font
@@ -4417,7 +4011,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "C16")
+					(reference "C9")
 					(unit 1)
 				)
 			)
@@ -4433,7 +4027,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "59d2a069-19b0-4baa-9c0a-cdb3df11127e")
-		(property "Reference" "JP2"
+		(property "Reference" "JP1"
 			(at 203.2 101.5999 90)
 			(effects
 				(font
@@ -4505,7 +4099,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "JP2")
+					(reference "JP1")
 					(unit 1)
 				)
 			)
@@ -4520,7 +4114,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6642656e-8488-4e6a-9e74-5b6bf562c2ef")
-		(property "Reference" "R14"
+		(property "Reference" "R9"
 			(at 196.85 75.438 90)
 			(effects
 				(font
@@ -4581,7 +4175,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "R14")
+					(reference "R9")
 					(unit 1)
 				)
 			)
@@ -4596,7 +4190,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "6eef8dc6-df3b-4a04-84a7-a53d411279f9")
-		(property "Reference" "#PWR034"
+		(property "Reference" "#PWR023"
 			(at 156.21 140.97 0)
 			(effects
 				(font
@@ -4646,7 +4240,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR034")
+					(reference "#PWR023")
 					(unit 1)
 				)
 			)
@@ -4661,7 +4255,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "86b07c02-41d6-49a7-9178-d73821476809")
-		(property "Reference" "R9"
+		(property "Reference" "R4"
 			(at 120.65 69.088 90)
 			(effects
 				(font
@@ -4722,7 +4316,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "R9")
+					(reference "R4")
 					(unit 1)
 				)
 			)
@@ -4737,7 +4331,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "8e7f1162-b85e-429b-b4e3-2933576229fd")
-		(property "Reference" "#PWR025"
+		(property "Reference" "#PWR015"
 			(at 72.39 110.49 0)
 			(effects
 				(font
@@ -4787,159 +4381,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR025")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 72.39 92.71 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "9d308c9c-dfe5-4069-93b1-5057035d1356")
-		(property "Reference" "R8"
-			(at 74.422 92.71 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100k"
-			(at 72.39 92.71 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 74.168 92.71 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 72.39 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 72.39 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Library" ""
-			(at 72.39 92.71 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "94332e03-9934-4563-9f69-b81701b47366")
-		)
-		(pin "2"
-			(uuid "b16ad536-92d7-46d7-a7b0-066bfe39bfa3")
-		)
-		(instances
-			(project "PicoLogger_Small"
-				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "R8")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Transistor_FET:AO3401A")
-		(at 77.47 88.9 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "9df94f73-0433-479a-a1a7-dcd97947b350")
-		(property "Reference" "Q2"
-			(at 83.82 87.6299 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "AO3407"
-			(at 83.82 90.1699 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 82.55 90.805 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-					(italic yes)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "http://www.aosmd.com/pdfs/datasheet/AO3401A.pdf"
-			(at 82.55 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-		(property "Description" "-4.0A Id, -30V Vds, P-Channel MOSFET, SOT-23"
-			(at 77.47 88.9 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "2bc198e5-26d3-4474-a9c5-8dafe731a378")
-		)
-		(pin "3"
-			(uuid "360050a9-2cbf-4cc9-9f10-cbb27f3f9952")
-		)
-		(pin "2"
-			(uuid "cc6cb781-9123-450c-a14d-3c6212d79d3c")
-		)
-		(instances
-			(project ""
-				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "Q2")
+					(reference "#PWR015")
 					(unit 1)
 				)
 			)
@@ -4954,7 +4396,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a1effc89-40e6-4bfc-a9c9-7951b263faac")
-		(property "Reference" "TP6"
+		(property "Reference" "TP1"
 			(at 112.522 76.454 0)
 			(effects
 				(font
@@ -5005,7 +4447,7 @@
 		(instances
 			(project "IoT_Logger_A_1.0"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "TP6")
+					(reference "TP1")
 					(unit 1)
 				)
 			)
@@ -5020,7 +4462,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "ae10c93b-2996-4493-b85c-23d7f848d849")
-		(property "Reference" "R10"
+		(property "Reference" "R5"
 			(at 120.65 74.168 90)
 			(effects
 				(font
@@ -5081,7 +4523,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "R10")
+					(reference "R5")
 					(unit 1)
 				)
 			)
@@ -5172,7 +4614,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "b5921026-8b34-4cd1-aac1-4573c1f4015b")
-		(property "Reference" "R12"
+		(property "Reference" "R7"
 			(at 189.23 83.058 90)
 			(effects
 				(font
@@ -5233,83 +4675,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "R12")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 68.58 88.9 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "b8345c5b-fd17-4d08-b10d-8e39847f4367")
-		(property "Reference" "R6"
-			(at 68.58 86.868 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1k"
-			(at 68.58 88.9 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 68.58 87.122 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 68.58 88.9 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 68.58 88.9 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Sim.Library" ""
-			(at 68.58 88.9 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "a8adb9a0-fc35-4a62-b68a-3f5b18f37193")
-		)
-		(pin "2"
-			(uuid "007fb85f-8b7a-41b4-8d39-3edb372222f0")
-		)
-		(instances
-			(project "PicoLogger_Small"
-				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "R6")
+					(reference "R7")
 					(unit 1)
 				)
 			)
@@ -5324,7 +4690,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "bd26c459-b900-4a6a-89e1-0fc9fafe4f54")
-		(property "Reference" "#PWR032"
+		(property "Reference" "#PWR021"
 			(at 139.7 58.42 0)
 			(effects
 				(font
@@ -5374,7 +4740,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR032")
+					(reference "#PWR021")
 					(unit 1)
 				)
 			)
@@ -5540,7 +4906,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c1bad85b-c65c-470b-94f3-d31d0e92fbcc")
-		(property "Reference" "TP5"
+		(property "Reference" "TP2"
 			(at 123.952 62.484 0)
 			(effects
 				(font
@@ -5591,7 +4957,7 @@
 		(instances
 			(project "IoT_Logger_A_1.0"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "TP5")
+					(reference "TP2")
 					(unit 1)
 				)
 			)
@@ -5606,7 +4972,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "c2380978-8c92-4bff-abd4-2ebbebb5e4f9")
-		(property "Reference" "R13"
+		(property "Reference" "R8"
 			(at 196.85 67.818 90)
 			(effects
 				(font
@@ -5667,72 +5033,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "R13")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+3.3V")
-		(at 83.82 96.52 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "cb29c90e-bdec-4309-994e-d4ceb7a94742")
-		(property "Reference" "#PWR030"
-			(at 83.82 100.33 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "+3.3V"
-			(at 83.82 93.218 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 83.82 96.52 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 83.82 96.52 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
-			(at 83.82 96.52 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "a0457934-c59e-48ec-b440-a0a08223de9f")
-		)
-		(instances
-			(project "PicoLogger_Small"
-				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR030")
+					(reference "R8")
 					(unit 1)
 				)
 			)
@@ -5747,7 +5048,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "cb9571f1-f452-4349-9bc7-59c525b918b4")
-		(property "Reference" "C18"
+		(property "Reference" "C11"
 			(at 136.652 57.15 0)
 			(effects
 				(font
@@ -5808,7 +5109,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "C18")
+					(reference "C11")
 					(unit 1)
 				)
 			)
@@ -5823,7 +5124,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "cc02536e-2602-414f-8c60-e9d880740042")
-		(property "Reference" "R11"
+		(property "Reference" "R6"
 			(at 189.23 77.978 90)
 			(effects
 				(font
@@ -5884,7 +5185,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "R11")
+					(reference "R6")
 					(unit 1)
 				)
 			)
@@ -5899,7 +5200,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "cf59b457-123e-473c-bf53-7a1ce697e48a")
-		(property "Reference" "#PWR037"
+		(property "Reference" "#PWR026"
 			(at 243.84 71.12 0)
 			(effects
 				(font
@@ -5949,7 +5250,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR037")
+					(reference "#PWR026")
 					(unit 1)
 				)
 			)
@@ -5964,7 +5265,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "d4fa5381-dc32-46b2-bf0c-3734a311cce9")
-		(property "Reference" "#PWR026"
+		(property "Reference" "#PWR016"
 			(at 72.39 130.81 0)
 			(effects
 				(font
@@ -6014,7 +5315,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR026")
+					(reference "#PWR016")
 					(unit 1)
 				)
 			)
@@ -6029,7 +5330,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "dac3c95e-5156-4d4c-a8fa-daaf4fa4cc81")
-		(property "Reference" "C17"
+		(property "Reference" "C10"
 			(at 76.2 128.27 90)
 			(effects
 				(font
@@ -6090,7 +5391,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "C17")
+					(reference "C10")
 					(unit 1)
 				)
 			)
@@ -6105,7 +5406,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "e5f82167-df23-42e1-88f8-6cc5a2325647")
-		(property "Reference" "#PWR036"
+		(property "Reference" "#PWR025"
 			(at 217.17 73.66 0)
 			(effects
 				(font
@@ -6155,7 +5456,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR036")
+					(reference "#PWR025")
 					(unit 1)
 				)
 			)
@@ -6170,7 +5471,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f19a59c7-34ce-4bd1-b234-321a853eabd1")
-		(property "Reference" "#PWR029"
+		(property "Reference" "#PWR019"
 			(at 82.55 138.43 0)
 			(effects
 				(font
@@ -6220,7 +5521,7 @@
 		(instances
 			(project "PicoLogger_Small"
 				(path "/2910198d-e123-424f-9561-5234a772fa41/d28d85ca-a413-4c6d-9e28-f603f18bf4e9"
-					(reference "#PWR029")
+					(reference "#PWR019")
 					(unit 1)
 				)
 			)

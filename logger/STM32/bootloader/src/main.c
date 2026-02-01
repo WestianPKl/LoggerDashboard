@@ -186,9 +186,22 @@ static void bootloader_loop(void)
     }
 }
 
+static void blink_start(uint8_t times, uint16_t delay_ms)
+{
+    for (uint8_t i = 0; i < times; i++)
+    {
+        GPIOA->ODR |= (1U << 5U);
+        systick_delay_ms(delay_ms);
+        GPIOA->ODR &= ~(1U << 5U);
+        systick_delay_ms(delay_ms);
+    }
+}
+
+
 int main(void)
 {
     bootloader_init();
+    blink_start(10, 50);
 
     if (should_jump_to_app())
         jump_to_app();

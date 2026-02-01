@@ -4456,6 +4456,28 @@
 			)
 		)
 	)
+	(global_label "GPIOB12"
+		(shape output)
+		(at 171.45 146.05 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "3c1abf26-9008-41c4-ad45-078d3b9f2ea2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 182.5995 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "TIM3_CH3"
 		(shape output)
 		(at 130.81 118.11 180)
@@ -4676,7 +4698,7 @@
 			)
 		)
 	)
-	(global_label "I2C2_SCL"
+	(global_label "TIM2_CH3"
 		(shape output)
 		(at 171.45 143.51 0)
 		(fields_autoplaced yes)
@@ -4688,7 +4710,7 @@
 		)
 		(uuid "5c000dd4-b0df-4e3f-9c36-0b6da6f90592")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 183.2042 143.51 0)
+			(at 183.4461 143.51 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4896,6 +4918,28 @@
 			)
 		)
 	)
+	(global_label "GPIOB13"
+		(shape output)
+		(at 171.45 148.59 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "80187fbd-44aa-46a1-8989-a815174310f6")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 182.5995 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "USART3_TX"
 		(shape output)
 		(at 130.81 123.19 180)
@@ -5028,7 +5072,7 @@
 			)
 		)
 	)
-	(global_label "I2C2_SDA"
+	(global_label "TIM4_CH4"
 		(shape output)
 		(at 171.45 140.97 0)
 		(fields_autoplaced yes)
@@ -5040,7 +5084,7 @@
 		)
 		(uuid "9d65e346-7346-416c-9e5d-4593409e5b82")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 183.2647 140.97 0)
+			(at 183.4461 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5292,28 +5336,6 @@
 			)
 		)
 	)
-	(global_label "CAN2_TX"
-		(shape output)
-		(at 171.45 148.59 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "d6c5c029-c775-4ebd-a161-b52fdb1db128")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 182.4785 148.59 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
 	(global_label "USART2_RX"
 		(shape output)
 		(at 194.31 82.55 0)
@@ -5464,28 +5486,6 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "CAN2_RX"
-		(shape output)
-		(at 171.45 146.05 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "f7b67b85-11e3-44b0-917a-0be2f1a75137")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 182.7809 146.05 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
 				(hide yes)
 			)
 		)

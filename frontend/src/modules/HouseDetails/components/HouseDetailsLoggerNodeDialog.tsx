@@ -36,6 +36,10 @@ export default function HouseDetailsLoggerNodeDialog({
 		navigate(`/data/data-logger/${loggerData.id}`)
 	}
 
+	function onLogClick(): void {
+		navigate(`/logs/${loggerData.id}`)
+	}
+
 	const isDeletable = useAppSelector(state => canDelete('house', 'houseFloor')(state))
 
 	return (
@@ -95,6 +99,9 @@ export default function HouseDetailsLoggerNodeDialog({
 								Data
 							</Button>
 						)}
+						<Button sx={{ mr: 1 }} variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={onLogClick}>
+							Log
+						</Button>
 						<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={onCloseDialog}>
 							Close
 						</Button>

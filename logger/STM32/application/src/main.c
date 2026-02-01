@@ -112,30 +112,6 @@ static void uart1_dma_send(const uint8_t *data, uint16_t len)
 static void handle_response(uint8_t status, uint8_t cmd, uint8_t param,
                             const uint8_t *payload, uint32_t payload_len, uint8_t use_uart1)
 {
-        // Process the received data as needed
-    /*
-            Adress - out[0] - B2
-            Flags - out[1]
-            Command - out[2..3]:
-            01 00 - Read serial number
-            02 00 - Read ADC value
-            03 00 - Read Temperature and Humidity SHT40
-            04 01 - Write LED state ON
-            04 00 - Write LED state OFF
-            03 00 - Read Temperature and Humidity BME280
-            06 00 - Write PWM duty cycle duty 0
-            06 64 - Write PWM duty cycle duty 100
-            Data    - out[4..15]
-            22 34 56 78 - example serial number
-            MESSAGE recieved from computer:
-            B2 00 00 01 00 00 00 00
-            RESPONSE to computer STATUS OK:
-            B2 40 00 01 22 34 56 78
-            ERROR response:
-            B2 7F 00 01 00 00 00 00
-            00 00 00 00 00 00 00 00
-    */
-
     static uint8_t resp[16];
     memset(resp, 0, sizeof(resp));
 
@@ -222,22 +198,22 @@ static void handle_request(const uint8_t *req, uint8_t use_uart1)
             handle_response(STATUS_OK, cmd, param_addr, payload, sizeof(payload), use_uart1);
             break;
         }
-        case 0x0102: /* Read firmware build date (ASCII, first 8 chars) */
+        case 0x0102: /* Read firmware build date (ASCII, first 10 chars) */
         {
-            uint8_t payload[8] = {0};
+            uint8_t payload[10] = {0};
             memcpy(payload, FW_BUILD_DATE, sizeof(payload));
             handle_response(STATUS_OK, cmd, param_addr, payload, sizeof(payload), use_uart1);
             break;
         }
-        case 0x0103: /* Read production date (8 ASCII) */
+        case 0x0103: /* Read production date (10 ASCII) */
         {
             const device_info_t *info = device_info_get();
-            uint8_t payload[8] = {0};
+            uint8_t payload[10] = {0};
 
             if (info->magic == INFO_MAGIC) {
-                memcpy(payload, info->prod_date, 8);
+                memcpy(payload, info->prod_date, 10);
             }
-            handle_response(STATUS_OK, cmd, param_addr, payload, 8, use_uart1);
+            handle_response(STATUS_OK, cmd, param_addr, payload, 10, use_uart1);
             break;
         }
         case 0x0200: /* Read ADC value */

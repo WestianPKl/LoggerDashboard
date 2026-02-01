@@ -22,12 +22,15 @@ void lwip_sntp_set_system_time_us(unsigned long sec, unsigned long us);
 #endif
 #define MEM_ALIGNMENT               4
 #ifndef MEM_SIZE
-#define MEM_SIZE                    4000
+#define MEM_SIZE                    16000
 #endif
 #define MEMP_NUM_TCP_SEG            32
 #define MEMP_NUM_ARP_QUEUE          10
 #define MEMP_NUM_SYS_TIMEOUT        32
 #define MEMP_NUM_TCP_PCB            10
+
+// MQTT settings
+#define MQTT_OUTPUT_RINGBUF_SIZE    512
 
 #define PBUF_POOL_SIZE              32
 #define LWIP_ARP                    1

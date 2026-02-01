@@ -44,9 +44,9 @@ export default function DataChartView() {
 					<>
 						{connectedSensorsData.length > 0 && (
 							<>
-								<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+								<Box sx={{ marginLeft: 1, borderBottom: 1, borderColor: 'divider' }}>
 									<Typography variant='body1' sx={{ m: 0, p: 0 }}>
-										Logger ID{equLoggerId} S/N: {equipmentsData[0]?.serialNumber} {equipmentsData[0]?.vendor?.name}
+										Logger ID{equLoggerId} S/N: {equipmentsData[0]?.serialNumber} {equipmentsData[0]?.vendor?.name}{' '}
 										{equipmentsData[0]?.model?.name}
 									</Typography>
 									<Tabs

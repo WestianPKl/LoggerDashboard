@@ -16,6 +16,8 @@ import EquModel from '../model/equipment/equModel.model.js'
 import Equipment from '../model/equipment/equipment.model.js'
 import EquUnusedLoggerView from '../model/equipment/equUnusedLogger.model.js'
 import EquSensorFunctions from '../model/equipment/equSensorsFunctions.model.js'
+import EquStats from '../model/equipment/equStats.model.js'
+import EquLogs from '../model/equipment/equLogs.model.js'
 
 export async function getEquTypes(req, res) {
 	try {
@@ -501,6 +503,9 @@ export async function getEquipment(req, res) {
 				'createdBy',
 				'updatedBy',
 				'dataDefinitions',
+				'logs',
+				'stats',
+				'errors',
 			],
 		})
 		if (!data) return serviceUnavailable(res, 'Retrieving data failed.')
@@ -814,6 +819,279 @@ export async function deleteEquSensorFunction(req, res) {
 				equSensorId: req.body.equSensorId,
 				dataDefinitionId: req.body.dataDefinitionId,
 			},
+			transaction: t,
+		})
+		if (!data) {
+			await t.rollback()
+			return serviceUnavailable(res, 'Retrieving data failed.')
+		}
+		await t.commit()
+		return success(res, 'Data deleted successfully', data)
+	} catch (err) {
+		console.log(err)
+		if (t) await t.rollback()
+		return internalServerError(res, 'Error has occured.', err)
+	}
+}
+
+export async function getEquStats(req, res) {
+	try {
+		const permissionGranted = await checkPermission(
+			req,
+			'equ',
+			null,
+			'READ'
+		)
+		if (!permissionGranted) return unauthorized(res)
+		const queryObject = decodeSequelizeQuery(req.body)
+		const data = await EquStats.findAll({ where: queryObject })
+		if (!data) return serviceUnavailable(res, 'Retrieving data failed.')
+		return success(res, 'Data retrieved successfully', data)
+	} catch (err) {
+		console.log(err)
+		return internalServerError(res, 'Error has occured.', err)
+	}
+}
+
+export async function getEquStat(req, res) {
+	try {
+		const permissionGranted = await checkPermission(
+			req,
+			'equ',
+			null,
+			'READ'
+		)
+		if (!permissionGranted) return unauthorized(res)
+		const equStatId = req.params.equStatId
+		const data = await EquStats.findByPk(equStatId)
+		if (!data) return serviceUnavailable(res, 'Retrieving data failed.')
+		return success(res, 'Data retrieved successfully', data)
+	} catch (err) {
+		console.log(err)
+		return internalServerError(res, 'Error has occured.', err)
+	}
+}
+
+export async function addEquStat(req, res) {
+	const t = await sequelize.transaction()
+	try {
+		const permissionGranted = await checkPermission(
+			req,
+			'equ',
+			'equ',
+			'WRITE'
+		)
+		if (!permissionGranted) return unauthorized(res)
+		const errors = validationResult(req)
+		if (!errors.isEmpty())
+			return wrongValidation(res, 'Validation failed.', errors.array())
+		const data = await EquStats.create(req.body, { transaction: t })
+		if (!data) {
+			await t.rollback()
+			return serviceUnavailable(res, 'Retrieving data failed.')
+		}
+		await t.commit()
+		return success(res, 'Data added successfully', data)
+	} catch (err) {
+		console.log(err)
+		if (t) await t.rollback()
+		return internalServerError(res, 'Error has occured.', err)
+	}
+}
+
+export async function updateEquStat(req, res) {
+	const t = await sequelize.transaction()
+	try {
+		const permissionGranted = await checkPermission(
+			req,
+			'equ',
+			'equ',
+			'WRITE'
+		)
+		if (!permissionGranted) return unauthorized(res)
+		const errors = validationResult(req)
+		if (!errors.isEmpty())
+			return wrongValidation(res, 'Validation failed.', errors.array())
+		const equStatId = req.params.equStatId
+		const equStat = await EquStats.findByPk(equStatId)
+		if (!equStat) {
+			await t.rollback()
+			return serviceUnavailable(res, 'No such item.')
+		}
+		equStat.lastSeen = req.body.lastSeen ?? equStat.lastSeen
+		equStat.snContr = req.body.snContr ?? equStat.snContr
+		equStat.fwContr = req.body.fwContr ?? equStat.fwContr
+		equStat.hwContr = req.body.hwContr ?? equStat.hwContr
+		equStat.buildContr = req.body.buildContr ?? equStat.buildContr
+		equStat.prodContr = req.body.prodContr ?? equStat.prodContr
+		equStat.snCom = req.body.snCom ?? equStat.snCom
+		equStat.fwCom = req.body.fwCom ?? equStat.fwCom
+		equStat.hwCom = req.body.hwCom ?? equStat.hwCom
+		equStat.buildCom = req.body.buildCom ?? equStat.buildCom
+		equStat.prodCom = req.body.prodCom ?? equStat.prodCom
+		equStat.ipAddress = req.body.ipAddress ?? equStat.ipAddress
+		const data = await equStat.save({ transaction: t })
+		if (!data) {
+			await t.rollback()
+			return serviceUnavailable(res, 'Retrieving data failed.')
+		}
+		await t.commit()
+		return success(res, 'Data updated successfully', data)
+	} catch (err) {
+		console.log(err)
+		if (t) await t.rollback()
+		return internalServerError(res, 'Error has occured.', err)
+	}
+}
+
+export async function deleteEquStat(req, res) {
+	const t = await sequelize.transaction()
+	try {
+		const permissionGranted = await checkPermission(
+			req,
+			'equ',
+			'equ',
+			'DELETE'
+		)
+		if (!permissionGranted) return unauthorized(res)
+		if (!req.body.id) {
+			await t.rollback()
+			return serviceUnavailable(res, 'Deleting data failed - no ID.')
+		}
+		let data = await EquStats.destroy({
+			where: { id: req.body.id },
+			transaction: t,
+		})
+		if (!data) {
+			await t.rollback()
+			return serviceUnavailable(res, 'Retrieving data failed.')
+		}
+		await t.commit()
+		return success(res, 'Data deleted successfully', data)
+	} catch (err) {
+		console.log(err)
+		if (t) await t.rollback()
+		return internalServerError(res, 'Error has occured.', err)
+	}
+}
+
+export async function getEquLogs(req, res) {
+	try {
+		const permissionGranted = await checkPermission(
+			req,
+			'equ',
+			null,
+			'READ'
+		)
+		if (!permissionGranted) return unauthorized(res)
+		const queryObject = decodeSequelizeQuery(req.body)
+		const data = await EquLogs.findAll({ where: queryObject })
+		if (!data) return serviceUnavailable(res, 'Retrieving data failed.')
+		return success(res, 'Data retrieved successfully', data)
+	} catch (err) {
+		console.log(err)
+		return internalServerError(res, 'Error has occured.', err)
+	}
+}
+
+export async function getEquLog(req, res) {
+	try {
+		const permissionGranted = await checkPermission(
+			req,
+			'equ',
+			null,
+			'READ'
+		)
+		if (!permissionGranted) return unauthorized(res)
+		const equLogId = req.params.equLogId
+		const data = await EquLogs.findByPk(equLogId)
+		if (!data) return serviceUnavailable(res, 'Retrieving data failed.')
+		return success(res, 'Data retrieved successfully', data)
+	} catch (err) {
+		console.log(err)
+		return internalServerError(res, 'Error has occured.', err)
+	}
+}
+
+export async function addEquLog(req, res) {
+	const t = await sequelize.transaction()
+	try {
+		const permissionGranted = await checkPermission(
+			req,
+			'equ',
+			'equ',
+			'WRITE'
+		)
+		if (!permissionGranted) return unauthorized(res)
+		const errors = validationResult(req)
+		if (!errors.isEmpty())
+			return wrongValidation(res, 'Validation failed.', errors.array())
+		const data = await EquLogs.create(req.body, { transaction: t })
+		if (!data) {
+			await t.rollback()
+			return serviceUnavailable(res, 'Retrieving data failed.')
+		}
+		await t.commit()
+		return success(res, 'Data added successfully', data)
+	} catch (err) {
+		console.log(err)
+		if (t) await t.rollback()
+		return internalServerError(res, 'Error has occured.', err)
+	}
+}
+
+export async function updateEquLog(req, res) {
+	const t = await sequelize.transaction()
+	try {
+		const permissionGranted = await checkPermission(
+			req,
+			'equ',
+			'equ',
+			'WRITE'
+		)
+		if (!permissionGranted) return unauthorized(res)
+		const errors = validationResult(req)
+		if (!errors.isEmpty())
+			return wrongValidation(res, 'Validation failed.', errors.array())
+		const equLogId = req.params.equLogId
+		const equLog = await EquLogs.findByPk(equLogId)
+		if (!equLog) {
+			await t.rollback()
+			return serviceUnavailable(res, 'No such item.')
+		}
+		equLog.equipmentId = req.body.equipmentId ?? equLog.equipmentId
+		equLog.message = req.body.message ?? equLog.message
+		equLog.type = req.body.type ?? equLog.type
+		const data = await equLog.save({ transaction: t })
+		if (!data) {
+			await t.rollback()
+			return serviceUnavailable(res, 'Retrieving data failed.')
+		}
+		await t.commit()
+		return success(res, 'Data updated successfully', data)
+	} catch (err) {
+		console.log(err)
+		if (t) await t.rollback()
+		return internalServerError(res, 'Error has occured.', err)
+	}
+}
+
+export async function deleteEquLog(req, res) {
+	const t = await sequelize.transaction()
+	try {
+		const permissionGranted = await checkPermission(
+			req,
+			'equ',
+			'equ',
+			'DELETE'
+		)
+		if (!permissionGranted) return unauthorized(res)
+		if (!req.body.id) {
+			await t.rollback()
+			return serviceUnavailable(res, 'Deleting data failed - no ID.')
+		}
+		let data = await EquLogs.destroy({
+			where: { id: req.body.id },
 			transaction: t,
 		})
 		if (!data) {

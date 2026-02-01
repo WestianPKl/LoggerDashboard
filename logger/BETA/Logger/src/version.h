@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-#define SERIAL_NUMBER       0x12345678
+#define SERIAL_NUMBER       0x12344444
 #define BUILD_DATE          "2026-01-29"
 #define PRODUCTION_DATE     "2026-01-29"
 

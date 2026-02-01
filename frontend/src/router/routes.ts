@@ -38,6 +38,7 @@ import AdminEquipmentView, { loader as AdminEquipmentViewLoader } from '../modul
 import EquipmentVendorView, { loader as EquipmentVendorViewLoader } from '../modules/Equipment/EquipmentVendorView'
 import EquipmentModelView, { loader as EquipmentModelViewLoader } from '../modules/Equipment/EquipmentModelView'
 import EquipmentTypeView, { loader as EquipmentTypeViewLoader } from '../modules/Equipment/EquipmentTypeView'
+import EquipmentLogView, { loader as EquipmentLogViewLoader } from '../modules/Equipment/EquipmentLogView'
 import NotFoundView from '../modules/Application/NotFoundView'
 import ErrorView from '../modules/Application/ErrorView'
 import LoadingCircle from '../components/UI/LoadingCircle'
@@ -107,6 +108,12 @@ export const router = createBrowserRouter([
 				Component: EquipmentMainView,
 				id: 'equipment',
 				loader: EquipmentMainViewLoader,
+			},
+			{
+				path: '/logs/:equLoggerId',
+				Component: EquipmentLogView,
+				id: 'equipment-logs',
+				loader: EquipmentLogViewLoader,
 			},
 			{
 				path: '/data',

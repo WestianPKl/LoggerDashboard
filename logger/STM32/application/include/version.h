@@ -13,7 +13,7 @@
                                    (FW_VERSION_MINOR << 8)  | \
                                    (FW_VERSION_PATCH)))
 
-static const char FW_BUILD_DATE[] = __DATE__ " " __TIME__;
+static const char FW_BUILD_DATE[] = "2026-02-01";
 
 #define INFO_ADDR  0x080FF800U
 #define INFO_MAGIC 0x494E464FU

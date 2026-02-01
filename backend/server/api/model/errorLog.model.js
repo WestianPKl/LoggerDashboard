@@ -1,5 +1,6 @@
 import { Sequelize } from 'sequelize'
 import sequelize from '../../util/database.js'
+import Equipment from './equipment/equipment.model.js'
 
 const ErrorLog = sequelize.define(
 	'error_log',
@@ -52,5 +53,16 @@ const ErrorLog = sequelize.define(
 		tableName: 'error_log',
 	}
 )
+
+ErrorLog.belongsTo(Equipment, {
+	as: 'equipment',
+	targetKey: 'id',
+	foreignKey: 'equipmentId',
+})
+Equipment.hasMany(ErrorLog, {
+	as: 'errors',
+	targetKey: 'id',
+	foreignKey: 'equipmentId',
+})
 
 export default ErrorLog

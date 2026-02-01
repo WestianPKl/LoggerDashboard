@@ -26,6 +26,16 @@ import {
 	addEquSensorFunction,
 	deleteEquSensorFunction,
 	deleteEquipmentForced,
+	getEquStats,
+	getEquStat,
+	addEquStat,
+	updateEquStat,
+	deleteEquStat,
+	getEquLogs,
+	getEquLog,
+	addEquLog,
+	updateEquLog,
+	deleteEquLog,
 } from '../controller/equipment.controller.js'
 import {
 	dataName,
@@ -92,5 +102,15 @@ router.delete(
 	validateToken,
 	deleteEquSensorFunction
 )
+router.post('/equ-stats', validateToken, getEquStats)
+router.get('/equ-stat/:equStatId', validateToken, getEquStat)
+router.post('/equ-stat', validateToken, addEquStat)
+router.patch('/equ-stat/:equStatId', validateToken, updateEquStat)
+router.delete('/equ-stat/:equStatId', validateToken, deleteEquStat)
+router.post('/equ-logs', validateToken, getEquLogs)
+router.get('/equ-log/:equLogId', validateToken, getEquLog)
+router.post('/equ-log', validateToken, addEquLog)
+router.patch('/equ-log/:equLogId', validateToken, updateEquLog)
+router.delete('/equ-log/:equLogId', validateToken, deleteEquLog)
 
 export default router

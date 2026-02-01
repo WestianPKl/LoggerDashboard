@@ -22,7 +22,7 @@ type Props = {
 	positionAbsoluteY: number
 }
 
-export const HouseDetailsLoggerNode = ({ id, data, positionAbsoluteX, positionAbsoluteY }: Props) => {
+const HouseDetailsLoggerNode = ({ id, data, positionAbsoluteX, positionAbsoluteY }: Props) => {
 	const [detailsDialog, setDetailsDialog] = useState(false)
 	const [lastValue, setLastValue] = useState<DataLastValueViewClass[]>([])
 	const [statusColors, setStatusColors] = useState<'success.main' | 'error.main'>('success.main')
@@ -234,3 +234,5 @@ export const HouseDetailsLoggerNode = ({ id, data, positionAbsoluteX, positionAb
 		</Card>
 	)
 }
+
+export default HouseDetailsLoggerNode
