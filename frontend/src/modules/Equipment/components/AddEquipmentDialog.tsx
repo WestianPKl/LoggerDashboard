@@ -139,7 +139,7 @@ export default function AddEquipmentDialog({
 							onChange={onSerialNumberChangeHandler}
 							disabled={multiple}
 							value={serialNumber}
-							required
+							autoFocus
 						/>
 						<EquipmentVendorSelect getItem={onVendorChangeHandler} item={vendor} />
 						<EquipmentModelSelect getItem={onModelChangeHandler} item={model} />

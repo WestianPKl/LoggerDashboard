@@ -95,7 +95,6 @@ export default function AdminAddAdminRoleDialog({
 							onChange={onNameChangeHandler}
 							disabled={multiple}
 							value={name}
-							required
 							autoFocus
 						/>
 						<TextField

@@ -109,7 +109,7 @@ export default function AdminAddFunctionalityDefinitionDialog({
 							onChange={onNameChangeHandler}
 							disabled={multiple}
 							value={name}
-							required
+							autoFocus
 						/>
 						<TextField
 							sx={{ mt: '1rem', width: isMobile ? 200 : 400 }}

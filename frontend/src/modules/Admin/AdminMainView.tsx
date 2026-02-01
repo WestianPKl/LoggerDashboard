@@ -16,6 +16,7 @@ export default function AdminMainView() {
 		'equipment-vendors',
 		'equipment-models',
 		'equipment-types',
+		'data-definitions',
 	]
 	const tab = location.pathname.split('/').pop() || validTabs[0]
 	let value = validTabs.indexOf(tab)

@@ -3,11 +3,12 @@ import { Box, Typography, Icon } from '@mui/material'
 import { DataGrid, type GridColDef } from '@mui/x-data-grid'
 import type { IEquipmentLogTableProps } from '../scripts/IEquipment'
 import MergeTypeIcon from '@mui/icons-material/MergeType'
+import formatLocalDateTime from '../../../components/scripts/ComponentsInterface'
 
 export default function EquipmentLogTable({ equipment }: IEquipmentLogTableProps) {
 	const formatDate = (dateString: string | null | undefined) => {
 		if (!dateString) return 'N/A'
-		return new Date(dateString).toLocaleString()
+		return formatLocalDateTime(dateString)
 	}
 
 	return (
@@ -108,7 +109,12 @@ export default function EquipmentLogTable({ equipment }: IEquipmentLogTableProps
 								{ field: 'details', headerName: 'Details', width: 500 },
 								{ field: 'type', headerName: 'Type', width: 150 },
 								{ field: 'severity', headerName: 'Severity', width: 150 },
-								{ field: 'createdAt', headerName: 'Created At', width: 200 },
+								{
+									field: 'createdAt',
+									headerName: 'Creation date',
+									width: 160,
+									valueGetter: (_, row) => `${formatLocalDateTime(row.createdAt)}`,
+								},
 							],
 							[],
 						)}

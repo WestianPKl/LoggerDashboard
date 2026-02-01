@@ -1,4 +1,5 @@
 import type { EquipmentClass } from '../../Equipment/scripts/EquipmentClass'
+import type { DataDefinitionClass } from './DataDefinitionClass'
 import type { DataLastValueViewClass } from './DataLastValueViewClass'
 
 export interface IDataMainProps {
@@ -41,4 +42,23 @@ export interface IEventMarker {
 	name: string
 	xAxis: string
 	label: { formatter: string }
+}
+
+export interface IAddDataDefinition {
+	id?: number
+	name: string | undefined
+	unit: string | undefined
+	description: string | undefined
+}
+
+export interface IDataDefinitionTableProps {
+	dataDefinitions: DataDefinitionClass[]
+}
+
+export interface IAddDataDefinitionProps {
+	edit: boolean
+	selectedItems?: DataDefinitionClass[]
+	handleCloseAdd: () => void
+	openAddDialog: boolean
+	addItemHandler: (item: IAddDataDefinition[] | IAddDataDefinition) => void
 }

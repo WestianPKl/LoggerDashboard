@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
 	Box,
 	Typography,
@@ -15,27 +15,28 @@ import {
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
-import SettingsBackupRestoreIcon from '@mui/icons-material/SettingsBackupRestore'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { DataGrid, type GridColDef, type GridRowSelectionModel } from '@mui/x-data-grid'
-import type { IEquipmentTableProps, IAddEquipment } from '../scripts/IEquipment'
-import DevicesIcon from '@mui/icons-material/Devices'
-import { EquipmentClass } from '../scripts/EquipmentClass'
-import AddEquipmentDialog from './AddEquipmentDialog'
+import MergeTypeIcon from '@mui/icons-material/MergeType'
 import { showAlert } from '../../../store/application-store'
 import { canWrite, canDelete } from '../../../store/auth-actions'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
-import { useAddEquipmentMutation, useRestoreEquipmentMutation } from '../../../store/api/equipmentApi'
-import { useUpdateEquipmentMutation } from '../../../store/api/equipmentApi'
-import { useDeleteEquipmentMutation } from '../../../store/api/equipmentApi'
+import {
+	useAddDataDefinitionMutation,
+	useUpdateDataDefinitionMutation,
+	useDeleteDataDefinitionMutation,
+} from '../../../store/api/dataApi'
+import type { IAddDataDefinition, IDataDefinitionTableProps } from '../scripts/IData'
+import type { DataDefinitionClass } from '../scripts/DataDefinitionClass'
+import AddDataDefinitionDialog from './AddDataDefinitionDialog'
 import { useRevalidator } from 'react-router'
 import formatLocalDateTime from '../../../components/scripts/ComponentsInterface'
 
-export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTableProps) {
+export default function DataDefinitionTable({ dataDefinitions }: IDataDefinitionTableProps) {
 	const dispatch = useAppDispatch()
 	const revalidator = useRevalidator()
 
-	const [selectedItems, setSelectedItems] = useState<EquipmentClass[]>([])
+	const [selectedItems, setSelectedItems] = useState<DataDefinitionClass[]>([])
 	const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({
 		type: 'include',
 		ids: new Set(),
@@ -43,31 +44,29 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 	const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false)
 	const [openAddDialog, setOpenAddDialog] = useState<boolean>(false)
 	const [openEditDialog, setOpenEditDialog] = useState<boolean>(false)
-	const [openRestoreDialog, setOpenRestoreDialog] = useState<boolean>(false)
 
-	const isWritable = useAppSelector(state => canWrite('equ', 'equEquipment')(state))
-	const isDeletable = useAppSelector(state => canDelete('equ', 'equEquipment')(state))
+	const isWritable = useAppSelector(state => canWrite('data', 'dataDefinition')(state))
+	const isDeletable = useAppSelector(state => canDelete('data', 'dataDefinition')(state))
 
-	const [addEquipment] = useAddEquipmentMutation()
-	const [updateEquipment] = useUpdateEquipmentMutation()
-	const [deleteEquipment] = useDeleteEquipmentMutation()
-	const [restoreEquipment] = useRestoreEquipmentMutation()
+	const [addDataDefinition] = useAddDataDefinitionMutation()
+	const [updateDataDefinition] = useUpdateDataDefinitionMutation()
+	const [deleteDataDefinition] = useDeleteDataDefinitionMutation()
 
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
-	const equipmentMap = useMemo(() => {
+	const dataDefinitionMap = useMemo(() => {
 		const map = new Map()
-		equipment.forEach(item => {
+		dataDefinitions.forEach(item => {
 			if (item.id) map.set(item.id, item)
 		})
 		return map
-	}, [equipment])
+	}, [dataDefinitions])
 
 	useEffect(() => {
 		const selectedIds = [...rowSelectionModel.ids]
-		setSelectedItems(selectedIds.map(id => equipmentMap.get(Number(id))).filter(Boolean))
-	}, [rowSelectionModel, equipmentMap])
+		setSelectedItems(selectedIds.map(id => dataDefinitionMap.get(Number(id))).filter(Boolean))
+	}, [rowSelectionModel, dataDefinitionMap])
 
 	function clearObject(): void {
 		setSelectedItems([])
@@ -77,13 +76,13 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 		})
 	}
 
-	async function addItemHandler(item: IAddEquipment | IAddEquipment[]): Promise<void> {
+	async function addItemHandler(item: IAddDataDefinition | IAddDataDefinition[]): Promise<void> {
 		try {
 			setOpenAddDialog(false)
 			if (!Array.isArray(item)) {
-				await addEquipment(item).unwrap()
+				await addDataDefinition(item).unwrap()
 			}
-			dispatch(showAlert({ message: 'New equipment added', severity: 'success' }))
+			dispatch(showAlert({ message: 'New data definition added', severity: 'success' }))
 			revalidator.revalidate()
 		} catch (err: any) {
 			const message = err?.data?.message || err?.message || 'Something went wrong'
@@ -91,35 +90,17 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 		}
 	}
 
-	async function editItemHandler(items: IAddEquipment | IAddEquipment[]): Promise<void> {
+	async function editItemHandler(items: IAddDataDefinition | IAddDataDefinition[]): Promise<void> {
 		try {
 			setOpenEditDialog(false)
 			if (Array.isArray(items) && items.length >= 1) {
 				await Promise.all(
 					items.map(async item => {
-						await updateEquipment(item).unwrap()
+						await updateDataDefinition(item).unwrap()
 					}),
 				)
-				dispatch(showAlert({ message: 'Equipment edited', severity: 'success' }))
+				dispatch(showAlert({ message: 'Data definition edited', severity: 'success' }))
 				clearObject()
-				revalidator.revalidate()
-			}
-		} catch (err: any) {
-			const message = err?.data?.message || err?.message || 'Something went wrong'
-			dispatch(showAlert({ message, severity: 'error' }))
-		}
-	}
-
-	async function restoreItemHandler(): Promise<void> {
-		try {
-			setOpenRestoreDialog(false)
-			if (selectedItems.length >= 1) {
-				await Promise.all(
-					selectedItems.map(async item => {
-						await restoreEquipment(item).unwrap()
-					}),
-				)
-				dispatch(showAlert({ message: 'Equipment restored', severity: 'success' }))
 				revalidator.revalidate()
 			}
 		} catch (err: any) {
@@ -134,10 +115,10 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 			if (selectedItems.length >= 1) {
 				await Promise.all(
 					selectedItems.map(async item => {
-						await deleteEquipment({ id: item.id }).unwrap()
+						await deleteDataDefinition({ id: item.id }).unwrap()
 					}),
 				)
-				dispatch(showAlert({ message: 'Equipment deleted', severity: 'success' }))
+				dispatch(showAlert({ message: 'Data definition deleted', severity: 'success' }))
 				revalidator.revalidate()
 			}
 		} catch (err: any) {
@@ -152,10 +133,6 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 
 	function handleClickEditOpen(): void {
 		setOpenEditDialog(true)
-	}
-
-	function handleClickRestoreOpen(): void {
-		setOpenRestoreDialog(true)
 	}
 
 	function handleClickDeleteOpen(): void {
@@ -174,22 +151,18 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 		setOpenEditDialog(false)
 	}
 
-	function handleCloseRestore(): void {
-		setOpenRestoreDialog(false)
-	}
-
 	return (
 		<Box sx={{ textAlign: 'center' }}>
 			<Box sx={{ textAlign: 'left' }}>
 				<Box sx={{ display: 'flex' }}>
 					<Icon sx={{ mr: '0.5rem' }}>
-						<DevicesIcon />
+						<MergeTypeIcon />
 					</Icon>
 					<Typography variant='h6' component='p'>
-						Equipment database
+						Data definitions database
 					</Typography>
 				</Box>
-				<Typography component='span'>Your database containg all the equipment you have registered.</Typography>
+				<Typography component='span'>Your database containg all the data definitions you have registered.</Typography>
 			</Box>
 			<Box sx={{ mt: '2rem' }}>
 				<Box sx={{ mb: '1rem', textAlign: 'right' }}>
@@ -197,14 +170,14 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 						<>
 							{!isMobile ? (
 								<Button variant='contained' type='button' size='medium' onClick={handleClickAddOpen}>
-									Add new equipment
+									Add new data definition
 								</Button>
 							) : (
 								<IconButton type='button' size='small' color='primary' onClick={handleClickAddOpen}>
 									<AddIcon />
 								</IconButton>
 							)}
-							<AddEquipmentDialog
+							<AddDataDefinitionDialog
 								edit={false}
 								handleCloseAdd={handleCloseAdd}
 								openAddDialog={openAddDialog}
@@ -236,7 +209,7 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 											<EditIcon />
 										</IconButton>
 									)}
-									<AddEquipmentDialog
+									<AddDataDefinitionDialog
 										edit={true}
 										handleCloseAdd={handleCloseEdit}
 										openAddDialog={openEditDialog}
@@ -269,31 +242,6 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 									)}
 								</>
 							)}
-
-							{isDeletable && adminPanel && (
-								<>
-									{!isMobile ? (
-										<Button
-											sx={{ ml: '0.3rem' }}
-											variant='contained'
-											color='success'
-											type='button'
-											size={isMobile ? 'small' : 'medium'}
-											onClick={handleClickRestoreOpen}>
-											Restore
-										</Button>
-									) : (
-										<IconButton
-											sx={{ ml: '0.3rem' }}
-											color='error'
-											type='button'
-											size={isMobile ? 'small' : 'medium'}
-											onClick={handleClickRestoreOpen}>
-											<SettingsBackupRestoreIcon />
-										</IconButton>
-									)}
-								</>
-							)}
 							<Dialog open={openDeleteDialog} onClose={handleCloseDelete} closeAfterTransition={false}>
 								<DialogTitle>Do you want to delete selected item(s)?</DialogTitle>
 								<DialogContent>
@@ -313,69 +261,22 @@ export default function EquipmentTable({ equipment, adminPanel }: IEquipmentTabl
 									</Button>
 								</DialogActions>
 							</Dialog>
-							<Dialog open={openRestoreDialog} onClose={handleCloseRestore} closeAfterTransition={false}>
-								<DialogTitle>Do you want to restore selected item(s)?</DialogTitle>
-								<DialogContent>
-									<DialogContentText>You have selected {selectedItems.length} item(s) to restore.</DialogContentText>
-								</DialogContent>
-								<DialogActions>
-									<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={handleCloseRestore}>
-										Cancel
-									</Button>
-									<Button
-										variant='outlined'
-										size={isMobile ? 'small' : 'medium'}
-										onClick={restoreItemHandler}
-										autoFocus
-										color='success'>
-										Restore
-									</Button>
-								</DialogActions>
-							</Dialog>
 						</>
 					)}
 				</Box>
 				<DataGrid
-					rows={equipment}
+					rows={dataDefinitions}
 					columns={useMemo<GridColDef[]>(
 						() => [
-							{ field: 'id', headerName: 'ID', width: 50 },
-							{ field: 'serialNumber', headerName: 'Serial number', width: 200 },
-							{
-								field: 'vendor.name',
-								headerName: 'Vendor name',
-								width: 200,
-								valueGetter: (_, row) => `${row.vendor.name}`,
-							},
-							{
-								field: 'model.name',
-								headerName: 'Model name',
-								width: 200,
-								valueGetter: (_, row) => `${row.model.name}`,
-							},
-							{
-								field: 'type.name',
-								headerName: 'Type name',
-								width: 155,
-								valueGetter: (_, row) => `${row.type.name}`,
-							},
-							{
-								field: 'createdBy.username',
-								headerName: 'Created by',
-								width: 155,
-								valueGetter: (_, row) => `${row.createdBy.username}`,
-							},
-							{
-								field: 'updatedBy.username',
-								headerName: 'Updated by',
-								width: 155,
-								valueGetter: (_, row) => `${row.updatedBy.username}`,
-							},
+							{ field: 'id', headerName: 'ID', width: 100 },
+							{ field: 'name', headerName: 'Name', width: 360 },
+							{ field: 'unit', headerName: 'Unit', width: 200 },
+							{ field: 'description', headerName: 'Description', width: 360 },
 							{
 								field: 'createdAt',
 								headerName: 'Creation date',
 								width: 160,
-								valueGetter: (_, row) => formatLocalDateTime(row.createdAt),
+								valueGetter: (_, row) => `${formatLocalDateTime(row.createdAt)}`,
 							},
 							{
 								field: 'updatedAt',

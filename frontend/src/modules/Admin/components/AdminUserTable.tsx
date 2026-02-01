@@ -6,6 +6,7 @@ import { DataGrid, type GridColDef, type GridRowSelectionModel } from '@mui/x-da
 import type { IUserTableProps } from '../scripts/IAdmin'
 import type { UserClass } from '../../User/scripts/UserClass'
 import AdminUserPermissionDialog from './AdminUserPermissionDialog'
+import formatLocalDateTime from '../../../components/scripts/ComponentsInterface'
 
 export default function AdminUserTable({ users }: IUserTableProps) {
 	const [selectedItems, setSelectedItems] = useState<UserClass[]>([])
@@ -94,13 +95,13 @@ export default function AdminUserTable({ users }: IUserTableProps) {
 								field: 'createdAt',
 								headerName: 'Creation date',
 								width: 160,
-								valueGetter: (_, row) => `${row.createdAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
+								valueGetter: (_, row) => `${formatLocalDateTime(row.createdAt)}`,
 							},
 							{
 								field: 'updatedAt',
 								headerName: 'Update date',
 								width: 160,
-								valueGetter: (_, row) => `${row.updatedAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
+								valueGetter: (_, row) => `${formatLocalDateTime(row.updatedAt)}`,
 							},
 							{ field: 'avatar', headerName: 'Avatar', width: 360 },
 						],

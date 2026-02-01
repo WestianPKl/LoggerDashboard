@@ -353,6 +353,7 @@ int main(void)
         if (time_reached(next)) {
             next = make_timeout_time_ms(5000);
             stm32_rtc_read();
+            printf("Tick\n");
         }
 
 #if PICO_CYW43_ARCH_POLL

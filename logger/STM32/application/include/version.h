@@ -24,7 +24,7 @@ typedef struct __attribute__((packed)) {
     uint8_t  hw_major;
     uint8_t  hw_minor;
     uint8_t  reserved[2];
-    char     prod_date[8];
+    char     prod_date[10];
 } device_info_t;
 
 static inline const device_info_t* device_info_get(void)

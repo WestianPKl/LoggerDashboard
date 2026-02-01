@@ -15,7 +15,7 @@
 #define MQTT_TOPIC_PUB  "devices/2/status"
 
 // NTP/SNTP
-#define NTP_SERVER_IP "192.168.18.6"
+#define NTP_SERVER_IP "192.168.18.158"
 
 
 // UART

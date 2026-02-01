@@ -442,7 +442,7 @@ export async function addDataLastValue(req, res) {
 		} catch {
 			io = null
 		}
-		if (io) io.sockets.emit(`loggerData_${data.equLoggerId}`, 'add')
+		if (io) io.sockets.emit(`loggerData_${data.equLoggerId}`, 'refresh')
 		return success(res, 'Data added successfully', data)
 	} catch (err) {
 		console.log(err)

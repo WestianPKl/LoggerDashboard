@@ -262,7 +262,6 @@ export default function AdminFunctionalityDefinitionTable({
 										variant='outlined'
 										size={isMobile ? 'small' : 'medium'}
 										onClick={deleteItemHandler}
-										autoFocus
 										color='error'>
 										Delete
 									</Button>

@@ -81,8 +81,8 @@ export default function AddEquipmentVendorDialog({
 							label='Name'
 							onChange={onNameChangeHandler}
 							disabled={multiple}
-							value={name}
-							required
+							value={name}		
+							autoFocus
 						/>
 					</Box>
 				</DialogContent>

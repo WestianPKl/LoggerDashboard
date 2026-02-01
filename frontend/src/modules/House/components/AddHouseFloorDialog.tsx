@@ -136,7 +136,7 @@ export default function AddHouseFloorDialog({
 							onChange={e => setName(e.target.value)}
 							disabled={multiple}
 							value={name}
-							required
+							autoFocus
 						/>
 						<HouseSelect getItem={setHouse} item={house} disabled={isDashboard || multiple} />
 						<input

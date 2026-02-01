@@ -4,6 +4,7 @@ import type { IHouseEditFormProps } from '../scripts/IHouseDetails'
 import type { IAddHouseFloorData } from '../../House/scripts/IHouse'
 import classes from '../../House/components/AddHouseDialog.module.css'
 import AddHouseFloorDialog from '../../House/components/AddHouseFloorDialog'
+import formatLocalDateTime from '../../../components/scripts/ComponentsInterface'
 
 export default function HouseEditForm({ house, addHouseFloorHandler, editHouseHandler }: IHouseEditFormProps) {
 	const [name, setName] = useState<string>('')
@@ -112,7 +113,6 @@ export default function HouseEditForm({ house, addHouseFloorHandler, editHouseHa
 						label='Name'
 						onChange={onNameChangeHandler}
 						value={name}
-						required
 					/>
 					<TextField
 						sx={{ mt: '1rem', width: isMobile ? 200 : 400 }}
@@ -166,16 +166,8 @@ export default function HouseEditForm({ house, addHouseFloorHandler, editHouseHa
 					</div>
 				</div>
 				<Box>
-					<TextField
-						label='Created at'
-						disabled
-						value={house.createdAt ? house.createdAt.replace('T', ' ').replace('Z', ' ').split('.')[0] : ''}
-					/>
-					<TextField
-						label='Updated At'
-						disabled
-						value={house.updatedAt ? house.updatedAt.replace('T', ' ').replace('Z', ' ').split('.')[0] : ''}
-					/>
+					<TextField label='Created at' disabled value={house.createdAt ? formatLocalDateTime(house.createdAt) : '-'} />
+					<TextField label='Updated At' disabled value={house.updatedAt ? formatLocalDateTime(house.updatedAt) : '-'} />
 				</Box>
 				<Box>
 					<Button

@@ -98,15 +98,14 @@ export default function AdminAddAccessLevelDefinitionDialog({
 			<Box sx={{ padding: 0, margin: 0 }} onSubmit={onSubmitHandler} component='form' noValidate autoComplete='off'>
 				<DialogContent>
 					<Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-						<TextField
-							autoFocus
+						<TextField					
 							sx={{ mt: '1rem', width: isMobile ? 200 : 400 }}
 							id='name'
 							label='Name'
 							onChange={onNameChangeHandler}
 							disabled={multiple}
 							value={name}
-							required
+							autoFocus
 						/>
 						<TextField
 							sx={{ mt: '1rem', width: isMobile ? 200 : 400 }}

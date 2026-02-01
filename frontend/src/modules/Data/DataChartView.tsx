@@ -119,7 +119,7 @@ export async function loader({ params }: LoaderFunctionArgs): Promise<{
 		return {
 			equipments: equipments,
 			connectedSensors: connectedSensors,
-			equLoggerId: parseInt(params.equLoggerId),
+			equLoggerId: Number(params.equLoggerId),
 		}
 	} catch (err: any) {
 		store.dispatch(

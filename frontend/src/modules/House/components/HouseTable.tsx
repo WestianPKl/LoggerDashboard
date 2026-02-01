@@ -26,6 +26,7 @@ import { canWrite, canDelete } from '../../../store/auth-actions'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { useAddHouseMutation, useUpdateHouseMutation, useDeleteHouseMutation } from '../../../store/api/houseApi'
 import { useRevalidator } from 'react-router'
+import formatLocalDateTime from '../../../components/scripts/ComponentsInterface'
 
 export default function HouseTable({ houses }: IHouseTableProps) {
 	const dispatch = useAppDispatch()
@@ -74,13 +75,13 @@ export default function HouseTable({ houses }: IHouseTableProps) {
 				field: 'createdAt',
 				headerName: 'Creation date',
 				width: 160,
-				valueGetter: (_, row) => `${row.createdAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
+				valueGetter: (_, row) => `${formatLocalDateTime(row.createdAt)}`,
 			},
 			{
 				field: 'updatedAt',
 				headerName: 'Update date',
 				width: 160,
-				valueGetter: (_, row) => `${row.updatedAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
+				valueGetter: (_, row) => `${formatLocalDateTime(row.updatedAt)}`,
 			},
 		],
 		[],

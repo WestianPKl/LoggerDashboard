@@ -44,8 +44,8 @@ export default function AdminAccessLevelDefinitionTable({ accessLevels }: IAcces
 	const [openAddDialog, setOpenAddDialog] = useState<boolean>(false)
 	const [openEditDialog, setOpenEditDialog] = useState<boolean>(false)
 
-	const isWritable = useAppSelector(state => canWrite('adm', 'admFunctionalityDefinition')(state))
-	const isDeletable = useAppSelector(state => canDelete('adm', 'admFunctionalityDefinition')(state))
+	const isWritable = useAppSelector(state => canWrite('adm', 'admAccessLevelDefinition')(state))
+	const isDeletable = useAppSelector(state => canDelete('adm', 'admAccessLevelDefinition')(state))
 
 	const [addAccessLevelDefinition] = useAddAccessLevelDefinitionMutation()
 	const [updateAccessLevelDefinition] = useUpdateAccessLevelDefinitionMutation()
@@ -256,7 +256,6 @@ export default function AdminAccessLevelDefinitionTable({ accessLevels }: IAcces
 										variant='outlined'
 										size={isMobile ? 'small' : 'medium'}
 										onClick={deleteItemHandler}
-										autoFocus
 										color='error'>
 										Delete
 									</Button>

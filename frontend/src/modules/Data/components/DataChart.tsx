@@ -8,6 +8,7 @@ import { showAlert } from '../../../store/application-store'
 import { useGetDataLogsViewQuery } from '../../../store/api/dataApi'
 const DataChartRangeButtons = lazy(() => import('./DataChartRangeButtons'))
 const DataChartExportButtons = lazy(() => import('./DataChartExportButtons'))
+import formatLocalDateTime from '../../../components/scripts/ComponentsInterface'
 
 export default function DataChart({ equLoggerId, equSensorId }: { equLoggerId: number; equSensorId: number }) {
 	const [range, setRange] = useState<string>(() => localStorage.getItem('sensor_range') || '1h')
@@ -33,7 +34,7 @@ export default function DataChart({ equLoggerId, equSensorId }: { equLoggerId: n
 		else if (range === '1m') from = Date.now() - 30 * 24 * 60 * 60 * 1000
 		else if (range === 'all') from = 0
 		if (from !== undefined) {
-			const startDate = new Date(from).toISOString().slice(0, 19).replace('T', ' ')
+			const startDate = formatLocalDateTime(from)
 			q.$and.push({ time: { $gte: startDate } })
 		}
 		return q
@@ -109,7 +110,7 @@ export default function DataChart({ equLoggerId, equSensorId }: { equLoggerId: n
 		setTimeLeft(refreshInterval)
 	}
 
-	const times = chartData.map(d => new Date(d.timestamp).toISOString().slice(0, 16).replace('T', ' '))
+	const times = chartData.map(d => formatLocalDateTime(d.timestamp))
 	const tempData = chartData.map(d => [d.timestamp, d.temperature])
 	const humData = chartData.map(d => [d.timestamp, d.humidity])
 	const atmPressureData = chartData.map(d => [d.timestamp, d.atmPressure])
@@ -125,13 +126,15 @@ export default function DataChart({ equLoggerId, equSensorId }: { equLoggerId: n
 		.filter(d => d.event)
 		.map(d => ({
 			name: d.event!,
-			xAxis: new Date(d.timestamp).toISOString().slice(0, 16).replace('T', ' '),
+			xAxis: formatLocalDateTime(d.timestamp),
 			label: { formatter: d.event! },
 		}))
 
-	const from = chartData[0]?.timestamp
-	const to = chartData[chartData.length - 1]?.timestamp
-	const dateRangeText = from && to ? `${new Date(from).toLocaleString()} – ${new Date(to).toLocaleString()}` : ''
+	const timestamps = chartData.map(d => new Date(d.timestamp).getTime()).filter(t => !isNaN(t))
+	const minTimestamp = timestamps.length > 0 ? Math.min(...timestamps) : null
+	const maxTimestamp = timestamps.length > 0 ? Math.max(...timestamps) : null
+	const dateRangeText =
+		minTimestamp && maxTimestamp ? `${formatLocalDateTime(minTimestamp)} – ${formatLocalDateTime(maxTimestamp)}` : ''
 
 	if (!isLoading && (!chartData || chartData.length === 0)) {
 		return (
@@ -139,7 +142,7 @@ export default function DataChart({ equLoggerId, equSensorId }: { equLoggerId: n
 				<Suspense fallback={<LoadingCircle />}>
 					<DataChartRangeButtons range={range} handleRangeChange={handleRangeChange} handleReset={handleReset} />
 					<DataChartExportButtons
-						exportChartImage={() => {}}
+						exportChartImage={exportChartImage}
 						range={range}
 						chartData={chartData}
 						refreshData={refreshData}

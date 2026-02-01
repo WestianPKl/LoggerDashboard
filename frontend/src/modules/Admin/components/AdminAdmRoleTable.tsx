@@ -34,6 +34,7 @@ import {
 	useDeleteAdminRoleMutation,
 } from '../../../store/api/adminApi'
 import { useRevalidator } from 'react-router'
+import formatLocalDateTime from '../../../components/scripts/ComponentsInterface'
 
 export default function AdminAdmRoleTable({ admRoles }: IAdminRolesTableProps) {
 	const dispatch = useAppDispatch()
@@ -334,7 +335,6 @@ export default function AdminAdmRoleTable({ admRoles }: IAdminRolesTableProps) {
 										variant='outlined'
 										size={isMobile ? 'small' : 'medium'}
 										onClick={deleteItemHandler}
-										autoFocus
 										color='error'>
 										Delete
 									</Button>
@@ -366,13 +366,13 @@ export default function AdminAdmRoleTable({ admRoles }: IAdminRolesTableProps) {
 								field: 'createdAt',
 								headerName: 'Creation date',
 								width: 150,
-								valueGetter: (_, row) => `${row.createdAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
+								valueGetter: (_, row) => `${formatLocalDateTime(row.createdAt)}`,
 							},
 							{
 								field: 'updatedAt',
 								headerName: 'Update date',
 								width: 150,
-								valueGetter: (_, row) => `${row.updatedAt.replace('T', ' ').replace('Z', ' ').split('.')[0]}`,
+								valueGetter: (_, row) => `${formatLocalDateTime(row.updatedAt)}`,
 							},
 						],
 						[],

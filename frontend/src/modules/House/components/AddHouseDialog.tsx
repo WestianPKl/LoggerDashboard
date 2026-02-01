@@ -149,7 +149,7 @@ export default function AddHouseDialog({
 							onChange={e => setName(e.target.value)}
 							disabled={multiple}
 							value={name}
-							required
+							autoFocus
 						/>
 						<TextField
 							sx={{ mt: 1, width: isMobile ? 200 : 400 }}

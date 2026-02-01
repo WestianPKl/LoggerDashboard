@@ -42,6 +42,7 @@ import EquipmentLogView, { loader as EquipmentLogViewLoader } from '../modules/E
 import NotFoundView from '../modules/Application/NotFoundView'
 import ErrorView from '../modules/Application/ErrorView'
 import LoadingCircle from '../components/UI/LoadingCircle'
+import DataDefinitionView, { loader as DataDefinitionViewLoader } from '../modules/Data/DataDefinitionView'
 
 export const router = createBrowserRouter([
 	{
@@ -180,6 +181,11 @@ export const router = createBrowserRouter([
 						path: 'equipment-types',
 						Component: EquipmentTypeView,
 						loader: EquipmentTypeViewLoader,
+					},
+					{
+						path: 'data-definitions',
+						Component: DataDefinitionView,
+						loader: DataDefinitionViewLoader,
 					},
 				],
 			},

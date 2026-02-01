@@ -167,6 +167,7 @@ mqttClient.on('message', async (topic, payload) => {
 			io = null
 		}
 		if (io) io.sockets.emit(`logger_${logger.id}`, 'refresh')
+		if (io) io.sockets.emit(`loggerData_${logger.id}`, 'refresh')
 	} catch (err) {
 		await t.rollback()
 		console.error('[MQTT] Error processing message:', err)

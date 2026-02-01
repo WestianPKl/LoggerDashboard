@@ -82,7 +82,7 @@ export default function AddEquipmentModelDialog({
 							onChange={onNameChangeHandler}
 							disabled={multiple}
 							value={name}
-							required
+							autoFocus
 						/>
 					</Box>
 				</DialogContent>

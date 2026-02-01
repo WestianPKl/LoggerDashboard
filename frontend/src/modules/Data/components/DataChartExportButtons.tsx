@@ -2,6 +2,7 @@ import { Button, CircularProgress, FormControlLabel, Stack, Switch, useMediaQuer
 import type { IDataChartExportButtonsProps } from '../scripts/IData'
 import { saveAs } from 'file-saver'
 import * as XLSX from 'xlsx'
+import formatLocalDateTime from '../../../components/scripts/ComponentsInterface'
 
 export default function DataChartExportButtons({
 	exportChartImage,
@@ -30,7 +31,7 @@ export default function DataChartExportButtons({
 		]
 		chartData.forEach((d: any) => {
 			wsData.push([
-				new Date(d.timestamp).toLocaleString(),
+				formatLocalDateTime(d.timestamp),
 				d.temperature,
 				d.humidity,
 				d.atmPressure,
