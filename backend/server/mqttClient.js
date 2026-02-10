@@ -32,7 +32,6 @@ mqttClient.on('connect', () => {
 
 mqttClient.on('message', async (topic, payload) => {
 	const s = payload.toString('utf8')
-	console.log('[MQTT]', topic, s)
 	const t = await sequelize.transaction()
 
 	try {

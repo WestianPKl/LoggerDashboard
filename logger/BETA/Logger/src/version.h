@@ -1,4 +1,6 @@
-#pragma once
+#ifndef VERSION_H
+#define VERSION_H
+
 #include <stdint.h>
 
 #define SERIAL_NUMBER       0x12344444
@@ -7,3 +9,5 @@
 
 #define FW_VERSION_STRING   "0.0.1"
 #define HW_VERSION_STRING   "0.0.1"
+
+#endif

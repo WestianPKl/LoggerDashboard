@@ -325,25 +325,30 @@ int main(void)
                 wait_bme = 0;
 
                 if (mqtt_ready()) {
-                    char msg[512];
+                    char msg[320];
+
                     int n = snprintf(msg, sizeof(msg),
                         "{\"ts\":\"20%02u-%02u-%02uT%02u:%02u:%02uZ\","
-                        "\"t\":%.2f,\"h\":%.2f,\"p\":%.2f,\"v\":%.2f,"
-                        "\"sn_contr\":%lu,\"fw_contr\":\"%u.%u.%u\",\"hw_contr\":\"%u.%u\","
+                        "\"t\":%.2f,\"h\":%.2f,\"p\":%.2f,\"v\":%.2f,\"sn_contr\":%lu,\"fw_contr\":\"%u.%u.%u\",\"hw_contr\":\"%u.%u\","
                         "\"build_contr\":\"%s\",\"prod_contr\":\"%s\","
                         "\"sn_pico\":%lu,\"fw_pico\":\"%s\",\"hw_pico\":\"%s\","
                         "\"build_pico\":\"%s\",\"prod_pico\":\"%s\",\"ip_address\":\"%s\"}",
                         g_time.year, g_time.month, g_time.day,
                         g_time.hour, g_time.min, g_time.sec,
-                        g_bme.temp_c, g_bme.hum_pct, g_bme.press_hpa, g_bme.adc_v,
-                        (unsigned long)g_stm32_data.serial_number,
+                        g_bme.temp_c, g_bme.hum_pct, g_bme.press_hpa, g_bme.adc_v, (unsigned long)g_stm32_data.serial_number,
                         g_stm32_data.fw_major, g_stm32_data.fw_minor, g_stm32_data.fw_patch,
                         g_stm32_data.hw_major, g_stm32_data.hw_minor,
                         g_stm32_data.fw_build, g_stm32_data.production_date,
                         (unsigned long)SERIAL_NUMBER, FW_VERSION_STRING, HW_VERSION_STRING,
                         BUILD_DATE, PRODUCTION_DATE, ip_address);
-                    mqtt_send(MQTT_TOPIC_PUB,
-                              (uint8_t *)msg, (uint16_t)n);
+
+                    if (n < 0 || n >= (int)sizeof(msg)) {
+                        printf("JSON truncated\n");
+                    } else if (n > 316) {
+                        printf("JSON too long: %d\n", n);
+                    } else {
+                        mqtt_send(MQTT_TOPIC_PUB, (uint8_t*)msg, (uint16_t)n);
+                    }
                 } else {
                     printf("MQTT not ready!\n");
                 }
@@ -351,9 +356,8 @@ int main(void)
         }
 
         if (time_reached(next)) {
-            next = make_timeout_time_ms(5000);
+            next = make_timeout_time_ms(60000);
             stm32_rtc_read();
-            printf("Tick\n");
         }
 
 #if PICO_CYW43_ARCH_POLL

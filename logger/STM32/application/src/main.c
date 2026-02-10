@@ -535,7 +535,6 @@ static void uart1_process_rx(void)
 
 int main(void)
 {
-
     RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
     (void)RCC->AHB2ENR;
 

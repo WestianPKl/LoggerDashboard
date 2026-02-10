@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONFIG_H
+#define CONFIG_H
 
 // Wi-Fi
 #define WIFI_SSID       "TP-Link_0A7B"
@@ -23,3 +24,5 @@
 #define UART_TX_PIN     4
 #define UART_RX_PIN     5
 #define UART_BAUD       115200
+
+#endif

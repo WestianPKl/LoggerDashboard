@@ -1,4 +1,6 @@
-#pragma once
+#ifndef NET_TIME_H
+#define NET_TIME_H
+
 #include <stdint.h>
 
 typedef struct {
@@ -12,3 +14,5 @@ typedef struct {
 
 uint8_t ntp_sync(uint32_t timeout_ms);
 uint8_t ntp_get_time(ntp_time_t *t);
+
+#endif

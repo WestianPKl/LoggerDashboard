@@ -77,6 +77,8 @@ static void jump_to_app(void)
     SysTick->LOAD = 0;
     SysTick->VAL  = 0;
 
+    SCB->ICSR = SCB_ICSR_PENDSTCLR_Msk | SCB_ICSR_PENDSVCLR_Msk;
+
     for (uint32_t i = 0; i < 8; i++) {
         NVIC->ICER[i] = 0xFFFFFFFFu;
         NVIC->ICPR[i] = 0xFFFFFFFFu;
@@ -88,7 +90,7 @@ static void jump_to_app(void)
     __set_MSP(app_msp);
     __DSB(); __ISB();
 
-    __enable_irq();  
+    __enable_irq();
     app_entry();
 }
 
