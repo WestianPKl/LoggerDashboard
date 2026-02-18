@@ -300,6 +300,30 @@ export const inventoryApi = api.injectEndpoints({
 			},
 			invalidatesTags: ['InventoryShop'],
 		}),
+		setInventoryStock: build.mutation<InventoryClass, any>({
+			query: (body: any) => ({
+				url: `api/inventory/inventory/${body.id}/stock`,
+				method: 'PATCH',
+				body,
+			}),
+			transformResponse: (response: { data: InventoryClass }) => response.data,
+			transformErrorResponse: (response: { status: number; data: { message: string } }) => {
+				return { status: response.status, message: response.data.message }
+			},
+			invalidatesTags: ['Inventory'],
+		}),
+		adjustInventoryStock: build.mutation<InventoryClass, any>({
+			query: (body: any) => ({
+				url: `api/inventory/inventory/${body.id}/stock/adjust`,
+				method: 'PATCH',
+				body,
+			}),
+			transformResponse: (response: { data: InventoryClass }) => response.data,
+			transformErrorResponse: (response: { status: number; data: { message: string } }) => {
+				return { status: response.status, message: response.data.message }
+			},
+			invalidatesTags: ['Inventory'],
+		}),
 		getErrorProne: build.query<{ success: boolean }, void>({
 			query: () => 'error-prone',
 		}),

@@ -1,49 +1,61 @@
-import { useRouteError } from 'react-router'
-import { Box } from '@mui/material'
+import { useRouteError, useNavigate } from 'react-router'
+import { Box, Button, Typography } from '@mui/material'
 import Wrapper from '../../components/UI/Wrapper'
 import AppBarView from './AppBarView'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 
 export default function ErrorView() {
 	const error: any = useRouteError()
+	const navigate = useNavigate()
 
-	let title = 'An error occurred!'
-	let message = 'Something went wrong!'
+	let title = 'Wystąpił błąd'
+	let message = 'Coś poszło nie tak!'
 
 	if (error.status === 500) {
-		title = 'Internal Server Error'
-		message = error.data.message
+		title = 'Błąd serwera (500)'
+		message = error.data?.message || 'Wewnętrzny błąd serwera.'
 	}
 
 	if (error.status === 404) {
-		title = 'Not found!'
-		message = 'Could not find resource or page.'
+		title = 'Nie znaleziono (404)'
+		message = 'Nie znaleziono zasobu lub strony.'
 	}
 
 	if (error.status === 401) {
-		title = 'Unauthorized!'
-		message = 'User unauthorized!'
+		title = 'Brak autoryzacji (401)'
+		message = 'Nie masz uprawnień do tego zasobu.'
 	}
 
 	if (error.status === 422) {
-		title = 'Wrong input data'
-		message = 'Wrong input data!'
+		title = 'Nieprawidłowe dane (422)'
+		message = 'Przesłane dane są nieprawidłowe.'
 	}
 
 	return (
 		<Box component={'section'}>
 			<AppBarView />
 			<Wrapper>
-				<div
-					style={{
+				<Box
+					sx={{
 						display: 'flex',
 						flexDirection: 'column',
 						justifyContent: 'center',
 						alignItems: 'center',
 						textAlign: 'center',
+						minHeight: '50vh',
+						gap: 2,
 					}}>
-					<h1 style={{ fontSize: '4rem', margin: 0 }}>{title}</h1>
-					<h2 style={{ margin: '1rem 0' }}>{message}</h2>
-				</div>
+					<ErrorOutlineIcon sx={{ fontSize: 72, color: 'error.main' }} />
+					<Typography variant='h4' sx={{ fontWeight: 700, color: 'text.primary' }}>
+						{title}
+					</Typography>
+					<Typography variant='body1' color='text.secondary' sx={{ maxWidth: 480 }}>
+						{message}
+					</Typography>
+					<Button variant='contained' size='large' onClick={() => navigate('/')} sx={{ mt: 2 }}>
+						Wróć na stronę główną
+					</Button>
+				</Box>
 			</Wrapper>
 		</Box>
 	)

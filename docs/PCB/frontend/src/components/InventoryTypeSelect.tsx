@@ -1,6 +1,6 @@
 import { useEffect, memo } from 'react'
 import type { InventoryTypeClass } from '../modules/Inventory/scripts/InventoryType'
-import { TextField, Autocomplete, useMediaQuery, useTheme } from '@mui/material'
+import { TextField, Autocomplete } from '@mui/material'
 import { useGetInventoryTypesQuery } from '../store/api/inventoryApi'
 import { useAppDispatch } from '../store/hooks'
 import { showAlert } from '../store/application-store'
@@ -14,9 +14,6 @@ export default memo(function InventoryTypeSelect({ getItem, item }: ISelectProps
 	const dispatch = useAppDispatch()
 
 	const { data: inventoryType = [], error: inventoryTypeError } = useGetInventoryTypesQuery({})
-
-	const theme = useTheme()
-	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
 	useEffect(() => {
 		if (inventoryTypeError) {
@@ -32,15 +29,17 @@ export default memo(function InventoryTypeSelect({ getItem, item }: ISelectProps
 
 	return (
 		<Autocomplete
-			sx={{ mt: '1rem', width: isMobile ? 200 : 400 }}
+			fullWidth
+			size='small'
+			sx={{ mt: 1.5 }}
 			onChange={(_, value) => getItem(value)}
 			disablePortal
 			value={item ?? null}
 			getOptionLabel={getOptionLabel}
 			isOptionEqualToValue={(option, value) => option.id === value.id}
 			options={inventoryType}
-			slotProps={{ listbox: { sx: { maxHeight: '100px' } } }}
-			renderInput={params => <TextField {...params} label='Type' />}
+			slotProps={{ listbox: { sx: { maxHeight: 200 } } }}
+			renderInput={params => <TextField {...params} label='Typ' />}
 		/>
 	)
 })

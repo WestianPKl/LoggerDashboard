@@ -14,6 +14,7 @@ import InventorySurfaceMount from '../model/inventory/inventorySurfaceMount.mode
 import InventoryType from '../model/inventory/inventoryType.model.js'
 import InventoryStock from '../model/inventory/inventoryStock.model.js'
 import InventoryStockMovement from '../model/inventory/inventoryStockMovement.model.js'
+import { getIo } from '../../middleware/socket.js'
 
 export async function getInventoryTypes(req, res) {
 	try {
@@ -60,6 +61,17 @@ export async function addInventoryType(req, res) {
 		}
 
 		await t.commit()
+
+		let io
+		try {
+			io = getIo()
+		} catch {
+			io = null
+		}
+		if (io) {
+			io.sockets.emit('inventory', 'add')
+		}
+
 		return success(res, 'Data added successfully', data)
 	} catch (err) {
 		console.log(err)
@@ -93,6 +105,17 @@ export async function updateInventoryType(req, res) {
 		}
 
 		await t.commit()
+
+		let io
+		try {
+			io = getIo()
+		} catch {
+			io = null
+		}
+		if (io) {
+			io.sockets.emit('inventory', 'update')
+		}
+
 		return success(res, 'Data updated successfully', data)
 	} catch (err) {
 		console.log(err)
@@ -104,11 +127,13 @@ export async function updateInventoryType(req, res) {
 export async function deleteInventoryType(req, res) {
 	const t = await sequelize.transaction()
 	try {
-		if (!req.body.id) {
+		if (!req.params.inventoryTypeId) {
 			await t.rollback()
 			return serviceUnavailable(res, 'Deleting data failed - no ID.')
 		}
-		const inventoryType = await InventoryType.findByPk(req.body.id)
+		const inventoryType = await InventoryType.findByPk(
+			req.params.inventoryTypeId
+		)
 
 		if (!inventoryType) {
 			await t.rollback()
@@ -116,7 +141,7 @@ export async function deleteInventoryType(req, res) {
 		}
 
 		let data = await InventoryType.destroy({
-			where: { id: req.body.id },
+			where: { id: inventoryType.id },
 			transaction: t,
 		})
 
@@ -126,6 +151,17 @@ export async function deleteInventoryType(req, res) {
 		}
 
 		await t.commit()
+
+		let io
+		try {
+			io = getIo()
+		} catch {
+			io = null
+		}
+		if (io) {
+			io.sockets.emit('inventory', 'delete')
+		}
+
 		return success(res, 'Data deleted successfully', data)
 	} catch (err) {
 		console.log(err)
@@ -222,11 +258,13 @@ export async function updateInventoryPackage(req, res) {
 export async function deleteInventoryPackage(req, res) {
 	const t = await sequelize.transaction()
 	try {
-		if (!req.body.id) {
+		if (!req.params.inventoryPackageId) {
 			await t.rollback()
 			return serviceUnavailable(res, 'Deleting data failed - no ID.')
 		}
-		const inventoryPackage = await InventoryPackage.findByPk(req.body.id)
+		const inventoryPackage = await InventoryPackage.findByPk(
+			req.params.inventoryPackageId
+		)
 
 		if (!inventoryPackage) {
 			await t.rollback()
@@ -234,7 +272,7 @@ export async function deleteInventoryPackage(req, res) {
 		}
 
 		let data = await InventoryPackage.destroy({
-			where: { id: req.body.id },
+			where: { id: inventoryPackage.id },
 			transaction: t,
 		})
 		if (!data) {
@@ -343,13 +381,13 @@ export async function updateInventorySurfaceMount(req, res) {
 export async function deleteInventorySurfaceMount(req, res) {
 	const t = await sequelize.transaction()
 	try {
-		if (!req.body.id) {
+		if (!req.params.inventorySurfaceMountId) {
 			await t.rollback()
 			return serviceUnavailable(res, 'Deleting data failed - no ID.')
 		}
 
 		const inventorySurfaceMount = await InventorySurfaceMount.findByPk(
-			req.body.id
+			req.params.inventorySurfaceMountId
 		)
 
 		if (!inventorySurfaceMount) {
@@ -358,7 +396,7 @@ export async function deleteInventorySurfaceMount(req, res) {
 		}
 
 		let data = await InventorySurfaceMount.destroy({
-			where: { id: req.body.id },
+			where: { id: inventorySurfaceMount.id },
 			transaction: t,
 		})
 
@@ -465,11 +503,13 @@ export async function updateInventoryShop(req, res) {
 export async function deleteInventoryShop(req, res) {
 	const t = await sequelize.transaction()
 	try {
-		if (!req.body.id) {
+		if (!req.params.inventoryShopId) {
 			await t.rollback()
 			return serviceUnavailable(res, 'Deleting data failed - no ID.')
 		}
-		const inventoryShop = await InventoryShop.findByPk(req.body.id)
+		const inventoryShop = await InventoryShop.findByPk(
+			req.params.inventoryShopId
+		)
 
 		if (!inventoryShop) {
 			await t.rollback()
@@ -477,7 +517,7 @@ export async function deleteInventoryShop(req, res) {
 		}
 
 		let data = await InventoryShop.destroy({
-			where: { id: req.body.id },
+			where: { id: inventoryShop.id },
 			transaction: t,
 		})
 
@@ -679,11 +719,11 @@ export async function updateInventory(req, res) {
 export async function deleteInventory(req, res) {
 	const t = await sequelize.transaction()
 	try {
-		if (!req.body.id) {
+		if (!req.params.inventoryId) {
 			await t.rollback()
 			return serviceUnavailable(res, 'Deleting data failed - no ID.')
 		}
-		const inventory = await Inventory.findByPk(req.body.id)
+		const inventory = await Inventory.findByPk(req.params.inventoryId)
 
 		if (!inventory) {
 			await t.rollback()
@@ -691,7 +731,7 @@ export async function deleteInventory(req, res) {
 		}
 
 		let data = await Inventory.destroy({
-			where: { id: req.body.id },
+			where: { id: inventory.id },
 			transaction: t,
 		})
 		if (!data) {

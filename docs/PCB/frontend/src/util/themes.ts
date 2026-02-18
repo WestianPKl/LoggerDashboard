@@ -4,47 +4,108 @@ export const theme = createTheme({
 	palette: {
 		mode: 'light',
 		primary: {
-			main: '#677cd0',
-			light: 'rgb(190, 207, 248)',
-			dark: 'rgb(18, 64, 200)',
-			contrastText: 'rgba(0, 0, 0, 0.78)',
-		},
-		secondary: {
-			main: '#747475',
-			light: 'rgb(187, 187, 187)',
-			dark: 'rgb(81, 81, 81)',
+			main: '#5066c3',
+			light: '#becff8',
+			dark: '#1240c8',
 			contrastText: '#fff',
 		},
-		background: { default: '#fff', paper: '#fff' },
-		text: {
-			primary: '#333',
-			secondary: 'rgba(38, 38, 38, 0.7)',
-			disabled: 'rgba(39, 39, 39, 0.34)',
+		secondary: {
+			main: '#64748b',
+			light: '#94a3b8',
+			dark: '#475569',
+			contrastText: '#fff',
 		},
-		divider: '#333',
+		background: { default: '#f8fafc', paper: '#ffffff' },
+		text: {
+			primary: '#1e293b',
+			secondary: '#64748b',
+			disabled: '#94a3b8',
+		},
+		divider: '#e2e8f0',
 		error: {
-			main: '#f44336',
-			light: '#e57373',
-			dark: '#d32f2f',
+			main: '#ef4444',
+			light: '#fca5a5',
+			dark: '#dc2626',
 			contrastText: '#fff',
 		},
 		warning: {
-			main: '#ffa726',
-			light: '#ffb74d',
-			dark: '#f57c00',
-			contrastText: 'rgba(0, 0, 0, 0.87)',
+			main: '#f59e0b',
+			light: '#fcd34d',
+			dark: '#d97706',
+			contrastText: '#fff',
 		},
 		info: {
-			main: '#29b6f6',
-			light: '#4fc3f7',
-			dark: '#0288d1',
-			contrastText: 'rgba(0, 0, 0, 0.87)',
+			main: '#3b82f6',
+			light: '#93c5fd',
+			dark: '#2563eb',
+			contrastText: '#fff',
 		},
 		success: {
-			main: '#66bb6a',
-			light: '#81c784',
-			dark: '#388e3c',
-			contrastText: 'rgba(0, 0, 0, 0.87)',
+			main: '#22c55e',
+			light: '#86efac',
+			dark: '#16a34a',
+			contrastText: '#fff',
+		},
+	},
+	typography: {
+		fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+		h3: { fontWeight: 700, letterSpacing: '-0.02em' },
+		h4: { fontWeight: 700, letterSpacing: '-0.01em' },
+		h5: { fontWeight: 600 },
+		h6: { fontWeight: 600 },
+		subtitle1: { fontWeight: 500, color: '#64748b' },
+	},
+	shape: { borderRadius: 12 },
+	components: {
+		MuiAppBar: {
+			styleOverrides: {
+				root: {
+					boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+				},
+			},
+		},
+		MuiButton: {
+			styleOverrides: {
+				root: {
+					textTransform: 'none',
+					fontWeight: 600,
+					borderRadius: 8,
+				},
+			},
+			defaultProps: {
+				disableElevation: true,
+			},
+		},
+		MuiCard: {
+			styleOverrides: {
+				root: {
+					borderRadius: 12,
+					boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.06)',
+				},
+			},
+		},
+		MuiTab: {
+			styleOverrides: {
+				root: {
+					textTransform: 'none',
+					fontWeight: 600,
+					minHeight: 48,
+				},
+			},
+		},
+		MuiDialog: {
+			styleOverrides: {
+				paper: {
+					borderRadius: 16,
+				},
+			},
+		},
+		MuiChip: {
+			styleOverrides: {
+				root: {
+					fontWeight: 600,
+				},
+			},
 		},
 	},
 })

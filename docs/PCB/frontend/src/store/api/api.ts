@@ -35,6 +35,16 @@ const baseQueryWithRetry = retry(baseQueryWithAuth, { maxRetries: 0 })
 export const api = createApi({
 	reducerPath: 'splitApi',
 	baseQuery: baseQueryWithRetry as BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError>,
-	tagTypes: ['Inventory', 'InventoryType', 'InventorySurfaceMount', 'InventoryPackage', 'InventoryShop'],
+	tagTypes: [
+		'Inventory',
+		'InventoryType',
+		'InventorySurfaceMount',
+		'InventoryPackage',
+		'InventoryShop',
+		'PCB',
+		'PCBBomItems',
+		'ProductionOrders',
+		'ProductionOrderItems',
+	],
 	endpoints: () => ({}),
 })

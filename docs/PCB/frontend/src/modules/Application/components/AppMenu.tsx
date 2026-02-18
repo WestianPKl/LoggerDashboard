@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useSubmit } from 'react-router'
-import { MenuItem, Menu, } from '@mui/material'
+import { MenuItem, Menu } from '@mui/material'
 
 export default function AppMenu() {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)

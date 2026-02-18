@@ -1,6 +1,6 @@
 import { useEffect, memo } from 'react'
 import type { InventorySurfaceMountClass } from '../modules/Inventory/scripts/InventorySurfaceMount'
-import { TextField, Autocomplete, useMediaQuery, useTheme } from '@mui/material'
+import { TextField, Autocomplete } from '@mui/material'
 import { useGetInventorySurfaceMountsQuery } from '../store/api/inventoryApi'
 import { useAppDispatch } from '../store/hooks'
 import { showAlert } from '../store/application-store'
@@ -14,9 +14,6 @@ export default memo(function InventorySurfaceMountSelect({ getItem, item }: ISel
 	const dispatch = useAppDispatch()
 
 	const { data: inventorySurfaceMount = [], error: inventorySurfaceMountError } = useGetInventorySurfaceMountsQuery({})
-
-	const theme = useTheme()
-	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
 	useEffect(() => {
 		if (inventorySurfaceMountError) {
@@ -34,15 +31,17 @@ export default memo(function InventorySurfaceMountSelect({ getItem, item }: ISel
 
 	return (
 		<Autocomplete
-			sx={{ mt: '1rem', width: isMobile ? 200 : 400 }}
+			fullWidth
+			size='small'
+			sx={{ mt: 1.5 }}
 			onChange={(_, value) => getItem(value)}
 			disablePortal
 			value={item ?? null}
 			getOptionLabel={getOptionLabel}
 			isOptionEqualToValue={(option, value) => option.id === value.id}
 			options={inventorySurfaceMount}
-			slotProps={{ listbox: { sx: { maxHeight: '100px' } } }}
-			renderInput={params => <TextField {...params} label='Surface mount' />}
+			slotProps={{ listbox: { sx: { maxHeight: 200 } } }}
+			renderInput={params => <TextField {...params} label='Montaż powierzchniowy' />}
 		/>
 	)
 })

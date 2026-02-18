@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, useCallback } from 'react'
 import {
 	Box,
 	Typography,
-	Icon,
 	Button,
 	Dialog,
 	DialogActions,
@@ -24,7 +23,7 @@ import {
 	type GridSortModel,
 } from '@mui/x-data-grid'
 import type { IAddInventoryAdditionalData, IInventoryTableProps } from '../scripts/inventories'
-import MergeTypeIcon from '@mui/icons-material/MergeType'
+import InventoryIcon from '@mui/icons-material/Inventory'
 import AddInventoryDialog from './AddInventoryDialog'
 import { showAlert } from '../../../store/application-store'
 import { useAppDispatch } from '../../../store/hooks'
@@ -184,59 +183,59 @@ export default function InventoryTable({ inventory, initSort, initFilter }: IInv
 	const columns = useMemo<GridColDef[]>(
 		() => [
 			{ field: 'id', headerName: 'ID', width: 100 },
-			{ field: 'name', headerName: 'Name', width: 200, valueGetter: (_, row) => row.name ?? '-' },
+			{ field: 'name', headerName: 'Nazwa', width: 200, valueGetter: (_, row) => row.name ?? '-' },
 			{
 				field: 'manufacturerNumber',
-				headerName: 'Manufacturer Number',
+				headerName: 'Nr producenta',
 				width: 200,
 				valueGetter: (_, row) => row.manufacturerNumber ?? '-',
 			},
 			{
 				field: 'parameters',
-				headerName: 'Parameters',
+				headerName: 'Parametry',
 				width: 200,
 				valueGetter: (_, row) => row.parameters ?? '-',
 			},
 			{
 				field: 'stock.quantity',
-				headerName: 'Stock',
+				headerName: 'Stan',
 				width: 200,
 				valueGetter: (_, row) => row.stock?.quantity ?? '-',
 			},
-			{ field: 'comment', headerName: 'Comment', width: 200, valueGetter: (_, row) => row.comment ?? '-' },
+			{ field: 'comment', headerName: 'Komentarz', width: 200, valueGetter: (_, row) => row.comment ?? '-' },
 			{
 				field: 'type.name',
-				headerName: 'Type name',
+				headerName: 'Typ',
 				width: 200,
 				valueGetter: (_, row) => row.type?.name ?? '',
 			},
 			{
 				field: 'package.name',
-				headerName: 'Inventory Package',
+				headerName: 'Obudowa',
 				width: 200,
 				valueGetter: (_, row) => row.package?.name ?? '-',
 			},
 			{
 				field: 'surfaceMount.name',
-				headerName: 'Inventory Surface Mount',
+				headerName: 'Montaż',
 				width: 200,
 				valueGetter: (_, row) => row.surfaceMount?.name ?? '-',
 			},
 			{
 				field: 'shop.name',
-				headerName: 'Inventory Shop',
+				headerName: 'Sklep',
 				width: 200,
 				valueGetter: (_, row) => row.shop?.name ?? '-',
 			},
 			{
 				field: 'createdAt',
-				headerName: 'Creation date',
+				headerName: 'Data utworzenia',
 				width: 160,
 				valueGetter: (_, row) => formatLocalDateTime(row.createdAt, false),
 			},
 			{
 				field: 'updatedAt',
-				headerName: 'Update date',
+				headerName: 'Data aktualizacji',
 				width: 160,
 				valueGetter: (_, row) => `${formatLocalDateTime(row.updatedAt, false)}`,
 			},
@@ -245,24 +244,38 @@ export default function InventoryTable({ inventory, initSort, initFilter }: IInv
 	)
 
 	return (
-		<Box sx={{ textAlign: 'center' }}>
-			<Box sx={{ textAlign: 'left' }}>
-				<Box sx={{ display: 'flex' }}>
-					<Icon sx={{ mr: '0.5rem' }}>
-						<MergeTypeIcon />
-					</Icon>
-					<Typography variant='h6' component='p'>
-						Inventory database
-					</Typography>
+		<Box>
+			<Box sx={{ mb: 3 }}>
+				<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+					<Box
+						sx={{
+							width: 40,
+							height: 40,
+							borderRadius: 2,
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							backgroundColor: 'primary.light',
+							color: 'primary.dark',
+						}}>
+						<InventoryIcon fontSize='small' />
+					</Box>
+					<Box>
+						<Typography variant='h6' sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+							Baza komponentów
+						</Typography>
+						<Typography variant='body2' color='text.secondary'>
+							Wszystkie zarejestrowane komponenty elektroniczne
+						</Typography>
+					</Box>
 				</Box>
-				<Typography component='span'>Your database containing all the inventory you have registered.</Typography>
 			</Box>
 			<Box sx={{ mt: '2rem' }}>
 				<Box sx={{ mb: '1rem', textAlign: 'right' }}>
 					<>
 						{!isMobile ? (
 							<Button variant='contained' type='button' size='medium' onClick={handleClickAddOpen}>
-								Add new inventory
+							Dodaj komponent
 							</Button>
 						) : (
 							<IconButton type='button' size='small' color='primary' onClick={handleClickAddOpen}>
@@ -290,7 +303,7 @@ export default function InventoryTable({ inventory, initSort, initFilter }: IInv
 										type='button'
 										size={isMobile ? 'small' : 'medium'}
 										onClick={handleClickEditOpen}>
-										Edit
+											Edytuj
 									</Button>
 								) : (
 									<IconButton
@@ -322,7 +335,7 @@ export default function InventoryTable({ inventory, initSort, initFilter }: IInv
 										type='button'
 										size={isMobile ? 'small' : 'medium'}
 										onClick={handleClickDeleteOpen}>
-										Delete
+											Usuń
 									</Button>
 								) : (
 									<IconButton
@@ -336,22 +349,22 @@ export default function InventoryTable({ inventory, initSort, initFilter }: IInv
 								)}
 							</>
 
-							<Dialog open={openDeleteDialog} onClose={handleCloseDelete} closeAfterTransition={false}>
-								<DialogTitle>Do you want to delete selected item(s)?</DialogTitle>
+							<Dialog open={openDeleteDialog} onClose={handleCloseDelete} closeAfterTransition={false} maxWidth='xs' fullWidth>
+								<DialogTitle sx={{ fontWeight: 600 }}>Usunąć zaznaczone elementy?</DialogTitle>
 								<DialogContent>
-									<DialogContentText>You have selected {selectedItems.length} item(s) to delete.</DialogContentText>
+									<DialogContentText>Zaznaczono {selectedItems.length} element(ów) do usunięcia.</DialogContentText>
 								</DialogContent>
-								<DialogActions>
-									<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={handleCloseDelete}>
-										Cancel
+								<DialogActions sx={{ px: 3, pb: 2 }}>
+									<Button size='small' onClick={handleCloseDelete}>
+										Anuluj
 									</Button>
 									<Button
-										variant='outlined'
-										size={isMobile ? 'small' : 'medium'}
+										variant='contained'
+										size='small'
 										onClick={deleteItemHandler}
 										autoFocus
 										color='error'>
-										Delete
+										Usuń
 									</Button>
 								</DialogActions>
 							</Dialog>
@@ -373,7 +386,18 @@ export default function InventoryTable({ inventory, initSort, initFilter }: IInv
 					pageSizeOptions={[15, 30, 45]}
 					checkboxSelection={true}
 					disableRowSelectionOnClick={true}
-					sx={{ border: 0, width: '100%' }}
+					sx={{
+						border: '1px solid',
+						borderColor: 'divider',
+						borderRadius: 2,
+						width: '100%',
+						'& .MuiDataGrid-columnHeaders': {
+							backgroundColor: '#f8fafc',
+						},
+						'& .MuiDataGrid-row:hover': {
+							backgroundColor: '#f1f5f9',
+						},
+					}}
 					density='comfortable'
 					disableColumnResize={true}
 					disableColumnSelector={true}

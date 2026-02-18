@@ -1,6 +1,6 @@
 import { useEffect, memo } from 'react'
 import type { InventoryShopClass } from '../modules/Inventory/scripts/InventoryShop'
-import { TextField, Autocomplete, useMediaQuery, useTheme } from '@mui/material'
+import { TextField, Autocomplete } from '@mui/material'
 import { useGetInventoryShopsQuery } from '../store/api/inventoryApi'
 import { useAppDispatch } from '../store/hooks'
 import { showAlert } from '../store/application-store'
@@ -14,9 +14,6 @@ export default memo(function InventoryShopSelect({ getItem, item }: ISelectProps
 	const dispatch = useAppDispatch()
 
 	const { data: inventoryShop = [], error: inventoryShopError } = useGetInventoryShopsQuery({})
-
-	const theme = useTheme()
-	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
 	useEffect(() => {
 		if (inventoryShopError) {
@@ -32,15 +29,17 @@ export default memo(function InventoryShopSelect({ getItem, item }: ISelectProps
 
 	return (
 		<Autocomplete
-			sx={{ mt: '1rem', width: isMobile ? 200 : 400 }}
+			fullWidth
+			size='small'
+			sx={{ mt: 1.5 }}
 			onChange={(_, value) => getItem(value)}
 			disablePortal
 			value={item ?? null}
 			getOptionLabel={getOptionLabel}
 			isOptionEqualToValue={(option, value) => option.id === value.id}
 			options={inventoryShop}
-			slotProps={{ listbox: { sx: { maxHeight: '100px' } } }}
-			renderInput={params => <TextField {...params} label='Shop' />}
+			slotProps={{ listbox: { sx: { maxHeight: 200 } } }}
+			renderInput={params => <TextField {...params} label='Sklep' />}
 		/>
 	)
 })

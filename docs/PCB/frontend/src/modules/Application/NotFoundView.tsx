@@ -1,31 +1,34 @@
-import { Link } from 'react-router'
+import { Box, Button, Typography } from '@mui/material'
+import { useNavigate } from 'react-router'
+import SearchOffIcon from '@mui/icons-material/SearchOff'
 
 export default function NotFoundView() {
+	const navigate = useNavigate()
+
 	return (
-		<div
-			style={{
+		<Box
+			sx={{
 				display: 'flex',
 				flexDirection: 'column',
 				justifyContent: 'center',
 				alignItems: 'center',
 				textAlign: 'center',
+				minHeight: '60vh',
+				gap: 2,
 			}}>
-			<h1 style={{ fontSize: '4rem', margin: 0 }}>404</h1>
-			<h2 style={{ margin: '1rem 0' }}>Page not found</h2>
-			<Link
-				to='/'
-				style={{
-					marginTop: '2rem',
-					padding: '0.75rem 1.5rem',
-					background: 'rgb(131, 195, 195)',
-					color: '#333',
-					borderRadius: '0.5rem',
-					textDecoration: 'none',
-					fontWeight: 500,
-					fontSize: '1.1rem',
-				}}>
-				Return to Home
-			</Link>
-		</div>
+			<SearchOffIcon sx={{ fontSize: 80, color: 'text.disabled' }} />
+			<Typography variant='h2' sx={{ fontWeight: 800, color: 'text.primary' }}>
+				404
+			</Typography>
+			<Typography variant='h6' color='text.secondary'>
+				Nie znaleziono strony
+			</Typography>
+			<Typography variant='body2' color='text.secondary' sx={{ maxWidth: 400 }}>
+				Strona, której szukasz, nie istnieje lub została przeniesiona.
+			</Typography>
+			<Button variant='contained' size='large' onClick={() => navigate('/')} sx={{ mt: 2 }}>
+				Wróć na stronę główną
+			</Button>
+		</Box>
 	)
 }

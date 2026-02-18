@@ -6,9 +6,10 @@ import { inventoryApi } from '../../store/api/inventoryApi'
 import { store } from '../../store/store'
 import { showAlert } from '../../store/application-store'
 import LoadingCircle from '../../components/UI/LoadingCircle'
-import { Await, useLoaderData, data } from 'react-router'
+import { Await, useLoaderData, data, useRevalidator } from 'react-router'
 import type { GridSortModel } from '@mui/x-data-grid'
 import type { GridFilterModel } from '@mui/x-data-grid'
+import { socket } from '../../socket/socket'
 
 export default function InventoryView() {
 	const { inventories } = useLoaderData() as {
@@ -21,6 +22,19 @@ export default function InventoryView() {
 
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+
+	const revalidator = useRevalidator()
+
+	useEffect(() => {
+		function onAddInventoryEvent(): void {
+			revalidator.revalidate()
+		}
+
+		socket.on('inventory', onAddInventoryEvent)
+		return () => {
+			socket.off('inventory', onAddInventoryEvent)
+		}
+	}, [revalidator])
 
 	useEffect(() => {
 		const savedSortModel = localStorage.getItem('inventoryTableSortModel')

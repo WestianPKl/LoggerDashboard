@@ -9,6 +9,12 @@ import InventorySurfaceMountView, {
 } from '../modules/Inventory/InventorySurfaceMountView'
 import InventoryPackageView, { loader as InventoryPackageViewLoader } from '../modules/Inventory/InventoryPackageView'
 import InventoryShopView, { loader as InventoryShopViewLoader } from '../modules/Inventory/InventoryShopView'
+import PCBView, { loader as PCBViewLoader } from '../modules/PCB/PCBView'
+import PCBDetailsView, { loader as PCBDetailsViewLoader } from '../modules/PCB/PCBDetailsView'
+import ProductionView, { loader as ProductionViewLoader } from '../modules/Production/ProductionView'
+import ProductionDetailsView, {
+	loader as ProductionDetailsViewLoader,
+} from '../modules/Production/ProductionDetailsView'
 import NotFoundView from '../modules/Application/NotFoundView'
 import ErrorView from '../modules/Application/ErrorView'
 import LoadingCircle from '../components/UI/LoadingCircle'
@@ -42,7 +48,30 @@ export const router = createBrowserRouter([
 					{ path: 'inventory-shop', Component: InventoryShopView, loader: InventoryShopViewLoader },
 				],
 			},
-
+			{
+				path: '/pcb',
+				Component: PCBView,
+				loader: PCBViewLoader,
+				id: 'pcb',
+			},
+			{
+				path: '/pcb/:pcbId',
+				Component: PCBDetailsView,
+				loader: PCBDetailsViewLoader,
+				id: 'pcb-details',
+			},
+			{
+				path: '/production',
+				Component: ProductionView,
+				loader: ProductionViewLoader,
+				id: 'production',
+			},
+			{
+				path: '/production/:productionOrderId',
+				Component: ProductionDetailsView,
+				loader: ProductionDetailsViewLoader,
+				id: 'production-details',
+			},
 			{
 				path: '*',
 				Component: NotFoundView,

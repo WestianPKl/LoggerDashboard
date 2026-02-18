@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, useCallback } from 'react'
 import {
 	Box,
 	Typography,
-	Icon,
 	Button,
 	Dialog,
 	DialogActions,
@@ -18,7 +17,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import { DataGrid, type GridColDef, type GridRowSelectionModel } from '@mui/x-data-grid'
 import type { IAddInventoryAdditionalData, IInventorySurfaceMountTableProps } from '../scripts/inventories'
-import MergeTypeIcon from '@mui/icons-material/MergeType'
+import DialpadIcon from '@mui/icons-material/Dialpad'
 import AddInventorySurfaceMountDialog from './AddInventorySurfaceMountDialog'
 import { showAlert } from '../../../store/application-store'
 import { useAppDispatch } from '../../../store/hooks'
@@ -172,26 +171,38 @@ export default function InventorySurfaceMountTable({
 	}, [])
 
 	return (
-		<Box sx={{ textAlign: 'center' }}>
-			<Box sx={{ textAlign: 'left' }}>
-				<Box sx={{ display: 'flex' }}>
-					<Icon sx={{ mr: '0.5rem' }}>
-						<MergeTypeIcon />
-					</Icon>
-					<Typography variant='h6' component='p'>
-						Inventory SurfaceMounts database
-					</Typography>
+		<Box>
+			<Box sx={{ mb: 3 }}>
+				<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+					<Box
+						sx={{
+							width: 40,
+							height: 40,
+							borderRadius: 2,
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							backgroundColor: '#ccfbf1',
+							color: '#0d9488',
+						}}>
+						<DialpadIcon fontSize='small' />
+					</Box>
+					<Box>
+						<Typography variant='h6' sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+							Montaż powierzchniowy
+						</Typography>
+						<Typography variant='body2' color='text.secondary'>
+							Wszystkie zarejestrowane typy montażu
+						</Typography>
+					</Box>
 				</Box>
-				<Typography component='span'>
-					Your database containing all the inventory SurfaceMounts you have registered.
-				</Typography>
 			</Box>
 			<Box sx={{ mt: '2rem' }}>
 				<Box sx={{ mb: '1rem', textAlign: 'right' }}>
 					<>
 						{!isMobile ? (
 							<Button variant='contained' type='button' size='medium' onClick={handleClickAddOpen}>
-								Add new inventory SurfaceMount
+								Dodaj montaż
 							</Button>
 						) : (
 							<IconButton type='button' size='small' color='primary' onClick={handleClickAddOpen}>
@@ -217,7 +228,7 @@ export default function InventorySurfaceMountTable({
 										type='button'
 										size={isMobile ? 'small' : 'medium'}
 										onClick={handleClickEditOpen}>
-										Edit
+										Edytuj
 									</Button>
 								) : (
 									<IconButton
@@ -247,7 +258,7 @@ export default function InventorySurfaceMountTable({
 										type='button'
 										size={isMobile ? 'small' : 'medium'}
 										onClick={handleClickDeleteOpen}>
-										Delete
+										Usuń
 									</Button>
 								) : (
 									<IconButton
@@ -261,22 +272,22 @@ export default function InventorySurfaceMountTable({
 								)}
 							</>
 
-							<Dialog open={openDeleteDialog} onClose={handleCloseDelete} closeAfterTransition={false}>
-								<DialogTitle>Do you want to delete selected item(s)?</DialogTitle>
+							<Dialog
+								open={openDeleteDialog}
+								onClose={handleCloseDelete}
+								closeAfterTransition={false}
+								maxWidth='xs'
+								fullWidth>
+								<DialogTitle sx={{ fontWeight: 600 }}>Usunąć zaznaczone elementy?</DialogTitle>
 								<DialogContent>
-									<DialogContentText>You have selected {selectedItems.length} item(s) to delete.</DialogContentText>
+									<DialogContentText>Zaznaczono {selectedItems.length} element(ów) do usunięcia.</DialogContentText>
 								</DialogContent>
-								<DialogActions>
-									<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={handleCloseDelete}>
-										Cancel
+								<DialogActions sx={{ px: 3, pb: 2 }}>
+									<Button size='small' onClick={handleCloseDelete}>
+										Anuluj
 									</Button>
-									<Button
-										variant='outlined'
-										size={isMobile ? 'small' : 'medium'}
-										onClick={deleteItemHandler}
-										autoFocus
-										color='error'>
-										Delete
+									<Button variant='contained' size='small' onClick={deleteItemHandler} autoFocus color='error'>
+										Usuń
 									</Button>
 								</DialogActions>
 							</Dialog>
@@ -288,7 +299,7 @@ export default function InventorySurfaceMountTable({
 					columns={useMemo<GridColDef[]>(
 						() => [
 							{ field: 'id', headerName: 'ID', width: 100 },
-							{ field: 'name', headerName: 'Name', width: 360 },
+							{ field: 'name', headerName: 'Nazwa', width: 360 },
 						],
 						[],
 					)}
@@ -304,7 +315,18 @@ export default function InventorySurfaceMountTable({
 					pageSizeOptions={[15, 30, 45]}
 					checkboxSelection={true}
 					disableRowSelectionOnClick={true}
-					sx={{ border: 0, width: '100%' }}
+					sx={{
+						border: '1px solid',
+						borderColor: 'divider',
+						borderRadius: 2,
+						width: '100%',
+						'& .MuiDataGrid-columnHeaders': {
+							backgroundColor: '#f8fafc',
+						},
+						'& .MuiDataGrid-row:hover': {
+							backgroundColor: '#f1f5f9',
+						},
+					}}
 					density='comfortable'
 					disableColumnResize={true}
 					disableColumnSelector={true}

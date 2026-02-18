@@ -1,15 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import {
-	Box,
-	TextField,
-	Button,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	useMediaQuery,
-	useTheme,
-} from '@mui/material'
+import { Box, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
 import type { IAddInventoryProps } from '../scripts/inventories'
 import type { InventoryTypeClass } from '../scripts/InventoryType'
 import type { InventoryPackageClass } from '../scripts/InventoryPackage'
@@ -40,9 +30,6 @@ export default function AddInventoryDialog({
 
 	const [multiple, setMultiple] = useState(false)
 	const [itemId, setItemId] = useState<number | undefined>(undefined)
-
-	const theme = useTheme()
-	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
 	useEffect(() => {
 		if (edit) {
@@ -193,66 +180,67 @@ export default function AddInventoryDialog({
 	}
 
 	return (
-		<Dialog sx={{ width: '100%' }} open={openAddDialog} onClose={closeDialog} closeAfterTransition={false}>
-			<DialogTitle>{edit ? 'Edit inventory ' : 'Add inventory '}</DialogTitle>
+		<Dialog open={openAddDialog} onClose={closeDialog} closeAfterTransition={false} maxWidth='sm' fullWidth>
+			<DialogTitle sx={{ fontWeight: 600 }}>{edit ? 'Edytuj komponent' : 'Dodaj komponent'}</DialogTitle>
 			<Box sx={{ padding: 0, margin: 0 }} onSubmit={onSubmitHandler} component='form' noValidate autoComplete='off'>
 				<DialogContent>
-					<Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+					<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 						<TextField
-							sx={{ mt: 1, width: isMobile ? 200 : 400 }}
+							fullWidth
+							size='small'
 							id='name'
-							label='Name'
+							label='Nazwa'
 							onChange={onNameChangeHandler}
 							disabled={multiple}
 							value={name}
 							autoFocus
 						/>
 						<TextField
-							sx={{ mt: 1, width: isMobile ? 200 : 400 }}
+							fullWidth
+							size='small'
 							id='manufacturerNumber'
-							label='Manufacturer Number'
+							label='Numer producenta'
 							onChange={onManufacturerNumberChangeHandler}
 							disabled={multiple}
 							value={manufacturerNumber}
-							autoFocus
 						/>
 						<TextField
-							sx={{ mt: 1, width: isMobile ? 200 : 400 }}
+							fullWidth
+							size='small'
 							id='parameters'
-							label='Parameters'
+							label='Parametry'
 							onChange={onParametersChangeHandler}
 							disabled={multiple}
 							value={parameters}
-							autoFocus
 						/>
 						<TextField
-							sx={{ mt: 1, width: isMobile ? 200 : 400 }}
+							fullWidth
+							size='small'
 							id='stock'
-							label='Stock'
+							label='Stan magazynowy'
 							type='number'
 							onChange={onStockChangeHandler}
 							disabled={multiple}
 							value={stock}
-							autoFocus
 						/>
 						<TextField
-							sx={{ mt: 1, width: isMobile ? 200 : 400 }}
+							fullWidth
+							size='small'
 							id='lowThreshold'
-							label='Low Threshold'
+							label='Próg niskiego stanu'
 							type='number'
 							onChange={onLowThresholdChangeHandler}
 							disabled={multiple}
 							value={lowThreshold}
-							autoFocus
 						/>
 						<TextField
-							sx={{ mt: 1, width: isMobile ? 200 : 400 }}
+							fullWidth
+							size='small'
 							id='comment'
-							label='Comment'
+							label='Komentarz'
 							onChange={onCommentChangeHandler}
 							disabled={multiple}
 							value={comment}
-							autoFocus
 						/>
 
 						<InventoryTypeSelect getItem={onInventoryTypeChangeHandler} item={inventoryType} />
@@ -261,26 +249,17 @@ export default function AddInventoryDialog({
 						<InventoryShopSelect getItem={onInventoryShopChangeHandler} item={inventoryShop} />
 					</Box>
 				</DialogContent>
-				<DialogActions>
-					<Button variant='outlined' size={isMobile ? 'small' : 'medium'} onClick={closeDialog}>
-						Cancel
+				<DialogActions sx={{ px: 3, pb: 2 }}>
+					<Button size='small' onClick={closeDialog}>
+						Anuluj
 					</Button>
 					{!edit && (
-						<Button
-							variant='outlined'
-							size={isMobile ? 'small' : 'medium'}
-							type='button'
-							disabled={!name.trim()}
-							onClick={addContinueHandler}>
-							Add and continue
+						<Button size='small' type='button' disabled={!name.trim()} onClick={addContinueHandler}>
+							Dodaj i kontynuuj
 						</Button>
 					)}
-					<Button
-						variant='outlined'
-						size={isMobile ? 'small' : 'medium'}
-						type='submit'
-						disabled={!name.trim() || (edit && multiple)}>
-						{edit ? 'Save' : 'Add'}
+					<Button variant='contained' size='small' type='submit' disabled={!name.trim() || (edit && multiple)}>
+						{edit ? 'Zapisz' : 'Dodaj'}
 					</Button>
 				</DialogActions>
 			</Box>

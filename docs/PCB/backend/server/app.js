@@ -8,6 +8,8 @@ import fs from 'fs'
 import morgan from 'morgan'
 import compression from 'compression'
 import inventoryRouter from './api/routes/inventory.js'
+import pcbRouter from './api/routes/pcb.js'
+import productionRouter from './api/routes/production.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -45,6 +47,8 @@ app.use('/', express.static(path.join(__dirname, '../public')))
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
 app.use('/api/inventory', inventoryRouter)
+app.use('/api/pcb', pcbRouter)
+app.use('/api/production', productionRouter)
 
 if (process.env.NODE_ENV === 'production') {
 	app.use(express.static(path.join(__dirname, '../dist-frontend')))

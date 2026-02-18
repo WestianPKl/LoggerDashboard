@@ -1,5 +1,6 @@
 import fs from 'fs'
 import multer from 'multer'
+import path from 'path'
 import { v1 } from 'uuid'
 
 const MIME_TYPE_MAP = {
@@ -32,17 +33,15 @@ function fileFilter(req, file, cb) {
 }
 
 export const imageUpload = multer({
-	limits: 500000,
+	limits: { fileSize: 500000 },
 	storage: fileStorage,
-	fileFilter: fileFilter,
+	fileFilter,
 })
 
 export function deleteFile(filePath) {
-	if (!filePath) {
-		console.error('deleteFile: filePath is undefined!')
-		return
-	}
-	fs.unlink(filePath, (err) => {
+	if (!filePath) return
+	const abs = path.resolve(filePath)
+	fs.unlink(abs, (err) => {
 		if (err) console.error('Could not delete file:', err)
 	})
 }
