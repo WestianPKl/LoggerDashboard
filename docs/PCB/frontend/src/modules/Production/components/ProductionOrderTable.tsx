@@ -30,7 +30,7 @@ import { showAlert } from '../../../store/application-store'
 import { useAppDispatch } from '../../../store/hooks'
 import type { ProductionOrdersClass } from '../scripts/ProductionOrders'
 import {
-	useAddProductionOrderMutation,
+	useAddProductionOrdersMutation,
 	useUpdateProductionOrderMutation,
 	useDeleteProductionOrderMutation,
 } from '../../../store/api/productionApi'
@@ -53,7 +53,7 @@ export default function ProductionOrderTable({ productionOrders, initSort, initF
 	const [openAddDialog, setOpenAddDialog] = useState<boolean>(false)
 	const [openEditDialog, setOpenEditDialog] = useState<boolean>(false)
 
-	const [addProductionOrder] = useAddProductionOrderMutation()
+	const [addProductionOrders] = useAddProductionOrdersMutation()
 	const [updateProductionOrder] = useUpdateProductionOrderMutation()
 	const [deleteProductionOrder] = useDeleteProductionOrderMutation()
 
@@ -95,7 +95,8 @@ export default function ProductionOrderTable({ productionOrders, initSort, initF
 					setOpenAddDialog(false)
 				}
 				if (!Array.isArray(item)) {
-					await addProductionOrder(item).unwrap()
+					console.log(item)
+					await addProductionOrders(item).unwrap()
 				}
 				dispatch(showAlert({ message: 'New production order added', severity: 'success' }))
 				revalidator.revalidate()
@@ -104,7 +105,7 @@ export default function ProductionOrderTable({ productionOrders, initSort, initF
 				dispatch(showAlert({ message, severity: 'error' }))
 			}
 		},
-		[addProductionOrder, dispatch, revalidator],
+		[addProductionOrders, dispatch, revalidator],
 	)
 
 	const editItemHandler = useCallback(

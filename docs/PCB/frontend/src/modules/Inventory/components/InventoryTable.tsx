@@ -275,7 +275,7 @@ export default function InventoryTable({ inventory, initSort, initFilter }: IInv
 					<>
 						{!isMobile ? (
 							<Button variant='contained' type='button' size='medium' onClick={handleClickAddOpen}>
-							Dodaj komponent
+								Dodaj komponent
 							</Button>
 						) : (
 							<IconButton type='button' size='small' color='primary' onClick={handleClickAddOpen}>
@@ -303,7 +303,7 @@ export default function InventoryTable({ inventory, initSort, initFilter }: IInv
 										type='button'
 										size={isMobile ? 'small' : 'medium'}
 										onClick={handleClickEditOpen}>
-											Edytuj
+										Edytuj
 									</Button>
 								) : (
 									<IconButton
@@ -335,7 +335,7 @@ export default function InventoryTable({ inventory, initSort, initFilter }: IInv
 										type='button'
 										size={isMobile ? 'small' : 'medium'}
 										onClick={handleClickDeleteOpen}>
-											Usuń
+										Usuń
 									</Button>
 								) : (
 									<IconButton
@@ -349,7 +349,12 @@ export default function InventoryTable({ inventory, initSort, initFilter }: IInv
 								)}
 							</>
 
-							<Dialog open={openDeleteDialog} onClose={handleCloseDelete} closeAfterTransition={false} maxWidth='xs' fullWidth>
+							<Dialog
+								open={openDeleteDialog}
+								onClose={handleCloseDelete}
+								closeAfterTransition={false}
+								maxWidth='xs'
+								fullWidth>
 								<DialogTitle sx={{ fontWeight: 600 }}>Usunąć zaznaczone elementy?</DialogTitle>
 								<DialogContent>
 									<DialogContentText>Zaznaczono {selectedItems.length} element(ów) do usunięcia.</DialogContentText>
@@ -358,12 +363,7 @@ export default function InventoryTable({ inventory, initSort, initFilter }: IInv
 									<Button size='small' onClick={handleCloseDelete}>
 										Anuluj
 									</Button>
-									<Button
-										variant='contained'
-										size='small'
-										onClick={deleteItemHandler}
-										autoFocus
-										color='error'>
+									<Button variant='contained' size='small' onClick={deleteItemHandler} autoFocus color='error'>
 										Usuń
 									</Button>
 								</DialogActions>

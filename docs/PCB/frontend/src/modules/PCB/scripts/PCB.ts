@@ -6,6 +6,7 @@ export interface PCB {
 	name?: string | undefined
 	revision?: string | undefined
 	comment?: string | undefined
+	verified?: boolean | undefined
 	topUrl?: string | undefined
 	bottomUrl?: string | undefined
 	createdAt?: string | undefined
@@ -19,6 +20,7 @@ export class PCBClass implements PCB {
 	name?: string | undefined
 	revision?: string | undefined
 	comment?: string | undefined
+	verified?: boolean | undefined
 	topUrl?: string | undefined
 	bottomUrl?: string | undefined
 	createdAt?: string | undefined

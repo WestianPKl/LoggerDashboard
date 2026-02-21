@@ -111,6 +111,7 @@ export async function updatePCB(req, res) {
 		const name = req.body.name
 		const revision = req.body.revision
 		const comment = req.body.comment
+		const verified = req.body.verified
 		const pcb = await PCB.findByPk(pcbId, {
 			transaction: t,
 			lock: t.LOCK.UPDATE,
@@ -123,7 +124,8 @@ export async function updatePCB(req, res) {
 
 		pcb.name = name ?? pcb.name
 		pcb.revision = revision ?? pcb.revision
-		pcb.comment = comment ?? pcb.comment
+		pcb.comment = comment ?? null
+		pcb.verified = verified ?? pcb.verified
 
 		if (req.files?.topUrl) {
 			if (pcb.topUrl) deleteFile(pcb.topUrl)
@@ -328,9 +330,8 @@ export async function updatePCBBomItem(req, res) {
 		pcbBomItem.qtyPerBoard = qtyPerBoard ?? pcbBomItem.qtyPerBoard
 		pcbBomItem.designators = designators ?? pcbBomItem.designators
 		pcbBomItem.valueSpec = valueSpec ?? pcbBomItem.valueSpec
-		pcbBomItem.allowSubstitute =
-			allowSubstitute ?? pcbBomItem.allowSubstitute
-		pcbBomItem.comment = comment ?? pcbBomItem.comment
+		pcbBomItem.allowSubstitute = allowSubstitute
+		pcbBomItem.comment = comment ?? null
 		const data = await pcbBomItem.save({ transaction: t })
 
 		if (!data) {

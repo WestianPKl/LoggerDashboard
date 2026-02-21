@@ -1,9 +1,18 @@
 #include "dma.h"
 
+static int dma_stream_disable_timeout(DMA_Stream_TypeDef *s)
+{
+    uint32_t t = 1000000U;
+    s->CR &= ~DMA_SxCR_EN;
+    while ((s->CR & DMA_SxCR_EN) != 0U) {
+        if (--t == 0U) return -1;
+    }
+    return 0;
+}
+
 static void dma_stream_disable(DMA_Stream_TypeDef *s)
 {
-    s->CR &= ~DMA_SxCR_EN;
-    while (s->CR & DMA_SxCR_EN) {}
+    (void)dma_stream_disable_timeout(s);
 }
 
 void dma1_init(void)
@@ -140,8 +149,7 @@ void dma_i2c1_rx_init(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
     (void)RCC->AHB1ENR;
 
-    DMA1_Stream0->CR &= ~DMA_SxCR_EN;
-    while (DMA1_Stream0->CR & DMA_SxCR_EN) {}
+    dma_stream_disable(DMA1_Stream0);
 
     DMA1->LIFCR = DMA_LIFCR_CTCIF0 | DMA_LIFCR_CHTIF0 | DMA_LIFCR_CTEIF0 | DMA_LIFCR_CDMEIF0 | DMA_LIFCR_CFEIF0;
 
@@ -164,8 +172,7 @@ void dma_i2c1_tx_init(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
     (void)RCC->AHB1ENR;
 
-    DMA1_Stream1->CR &= ~DMA_SxCR_EN;
-    while (DMA1_Stream1->CR & DMA_SxCR_EN) {}
+    dma_stream_disable(DMA1_Stream1);
 
     DMA1->LIFCR = DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1;
 
@@ -187,8 +194,7 @@ void dma_i2c1_rx_start(uint32_t dst, uint16_t len)
 {
     if (len == 0U) return;
 
-    DMA1_Stream0->CR &= ~DMA_SxCR_EN;
-    while (DMA1_Stream0->CR & DMA_SxCR_EN) {}
+    dma_stream_disable(DMA1_Stream0);
 
     DMA1->LIFCR = DMA_LIFCR_CTCIF0 | DMA_LIFCR_CHTIF0 | DMA_LIFCR_CTEIF0 | DMA_LIFCR_CDMEIF0 | DMA_LIFCR_CFEIF0;
 
@@ -203,8 +209,7 @@ void dma_i2c1_tx_start(uint32_t src, uint16_t len)
 {
     if (len == 0U) return;
 
-    DMA1_Stream1->CR &= ~DMA_SxCR_EN;
-    while (DMA1_Stream1->CR & DMA_SxCR_EN) {}
+    dma_stream_disable(DMA1_Stream1);
 
     DMA1->LIFCR = DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1;
 
@@ -213,6 +218,14 @@ void dma_i2c1_tx_start(uint32_t src, uint16_t len)
     DMA1_Stream1->NDTR = len;
 
     DMA1_Stream1->CR |= DMA_SxCR_EN;
+}
+
+void dma_i2c1_abort(void)
+{
+    dma_stream_disable(DMA1_Stream0);
+    DMA1->LIFCR = DMA_LIFCR_CTCIF0 | DMA_LIFCR_CHTIF0 | DMA_LIFCR_CTEIF0 | DMA_LIFCR_CDMEIF0 | DMA_LIFCR_CFEIF0;
+    dma_stream_disable(DMA1_Stream1);
+    DMA1->LIFCR = DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1;
 }
 
 void dma_spi1_rx_init(void){

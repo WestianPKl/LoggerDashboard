@@ -35,6 +35,12 @@ const PCB = sequelize.define(
 			allowNull: true,
 			field: 'comment',
 		},
+		verified: {
+			type: Sequelize.BOOLEAN,
+			allowNull: true,
+			defaultValue: false,
+			field: 'verified',
+		},
 		createdAt: {
 			type: Sequelize.DATE,
 			allowNull: true,

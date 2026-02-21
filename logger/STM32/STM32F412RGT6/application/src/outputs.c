@@ -8,7 +8,9 @@
 #define PC3_PIN 3U
 #define PC4_PIN 4U
 
+#define PB2_PIN 2U
 #define PB12_PIN 12U
+#define PB13_PIN 13U
 #define PB14_LED 14U
 #define PB15_LED 15U
 
@@ -31,12 +33,12 @@ void portb_init(void)
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
     (void)RCC->AHB1ENR;
 
-    uint32_t mask = (3U<<(PB12_PIN*2U))|(3U<<(PB14_LED*2U))|(3U<<(PB15_LED*2U));
+    uint32_t mask = (3U << (PB2_PIN*2U)) |(3U<<(PB12_PIN*2U)) |(3U<<(PB13_PIN*2U))|(3U<<(PB14_LED*2U))|(3U<<(PB15_LED*2U));
     GPIOB->MODER &= ~mask;
-    GPIOB->MODER |=  (1U<<(PB12_PIN*2U))|(1U<<(PB14_LED*2U))|(1U<<(PB15_LED*2U));
+    GPIOB->MODER |=  (1U<<(PB2_PIN*2U))|(1U<<(PB12_PIN*2U))|(1U<<(PB13_PIN*2U))|(1U<<(PB14_LED*2U))|(1U<<(PB15_LED*2U));
 
-    GPIOB->OTYPER &= ~((1U<<PB12_PIN)|(1U<<PB14_LED)|(1U<<PB15_LED));
-    GPIOB->OSPEEDR |= (2U<<(PB12_PIN*2U))|(2U<<(PB14_LED*2U))|(2U<<(PB15_LED*2U));
+    GPIOB->OTYPER &= ~((1U<<PB2_PIN)|(1U<<PB12_PIN)|(1U<<PB13_PIN)|(1U<<PB14_LED)|(1U<<PB15_LED));
+    GPIOB->OSPEEDR |= (2U<<(PB2_PIN*2U))|(2U<<(PB12_PIN*2U))|(2U<<(PB13_PIN*2U))|(2U<<(PB14_LED*2U))|(2U<<(PB15_LED*2U));
     GPIOB->PUPDR &= ~mask;
 }
 

@@ -18,6 +18,7 @@ void dma_i2c1_rx_init(void);
 void dma_i2c1_tx_init(void);
 void dma_i2c1_rx_start(uint32_t dst, uint16_t len);
 void dma_i2c1_tx_start(uint32_t src, uint16_t len);
+void dma_i2c1_abort(void);
 
 void dma_spi1_rx_init(void);
 void dma_spi1_tx_init(void);

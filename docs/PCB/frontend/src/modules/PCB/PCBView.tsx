@@ -1,7 +1,7 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 const PCBTable = lazy(() => import('./components/PCBTable'))
 import { PCBClass } from './scripts/PCB'
-import { Box, Container, Typography} from '@mui/material'
+import { Box, Container, Typography } from '@mui/material'
 import { store } from '../../store/store'
 import { showAlert } from '../../store/application-store'
 import LoadingCircle from '../../components/UI/LoadingCircle'

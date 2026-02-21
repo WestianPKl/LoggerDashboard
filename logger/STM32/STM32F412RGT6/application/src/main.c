@@ -16,6 +16,8 @@
 #include "rtc.h"
 #include "bme280.h"
 #include "spi.h"
+#include "rtc_locale.h"
+#include "ina.h"
 
 #define STATUS_OK       0x40
 #define ERROR_RESPONSE  0x7F
@@ -24,15 +26,41 @@ void btn1_handler(void);
 void btn2_handler(void);
 
 volatile uint32_t tick_10ms = 0;
-volatile uint32_t lcd_refresh_flag = 0;
-volatile uint32_t sht40_measure_flag_1s = 1;
-volatile uint32_t sht40_measure_flag_10min = 0;
+volatile uint8_t lcd_reinit_5s_flag = 0;
+static uint16_t tick_10ms_5s = 0;
+volatile uint8_t lcd_refresh_flag = 0;
+volatile uint8_t measure_flag_1s = 1;
+volatile uint8_t measure_flag_10min = 0;
+volatile uint8_t sht40_error_flag = 0;
+volatile uint8_t bme280_error_flag = 0;
+volatile uint8_t second_marker = 0;
+volatile uint8_t backlight_on = 1;
+volatile uint8_t backlight_toggle_flag = 0;
+volatile uint8_t backlight_timer = 0;
 // volatile uint8_t hb = 0;
 
 struct {
     int16_t temperature;
     uint16_t humidity;
-} measurement;
+} measurement_sht40;
+
+struct
+{
+    int32_t temperature;
+    uint32_t humidity;
+    uint32_t pressure;
+} measurement_bme280;
+
+struct
+{
+    uint8_t year;
+    uint8_t month;
+    uint8_t day;
+    uint8_t weekday;
+    uint8_t hours;
+    uint8_t minutes;
+    uint8_t seconds;
+} datetime;
 
 volatile uint8_t rtc_wakeup_flag = 0;
 volatile uint8_t rtc_alarm_flag = 0;
@@ -277,14 +305,28 @@ static void handle_request(const uint8_t *req, uint8_t use_uart1)
         }
         case 0x0301: /* Read Temperature/Humidity/Pressure (BME280) */
         {
-            bme280_trigger_forced();
+            uint8_t id = bme280_read_id();
+            if (id != 0x60) {
+                uint8_t err = 1;
+                handle_response(ERROR_RESPONSE, cmd, param_addr, &err, 1, use_uart1);
+                break;
+            }
 
-            systick_delay_ms(50);
+            bme280_trigger_forced();
+            systick_delay_ms(10);
 
             int32_t temp_c;
             uint32_t hum_pct, press_q24_8;
+
             if (bme280_read_data(&temp_c, &hum_pct, &press_q24_8) != 0) {
-                handle_response(ERROR_RESPONSE, cmd, param_addr, NULL, 0, use_uart1);
+                uint8_t err = 2;
+                handle_response(ERROR_RESPONSE, cmd, param_addr, &err, 1, use_uart1);
+                break;
+            }
+
+            if (temp_c < -4000 || temp_c > 8500 || hum_pct > 102400U || press_q24_8 == 0) {
+                uint8_t err = 3;
+                handle_response(ERROR_RESPONSE, cmd, param_addr, &err, 1, use_uart1);
                 break;
             }
 
@@ -482,7 +524,10 @@ static void handle_request(const uint8_t *req, uint8_t use_uart1)
             uint8_t minutes = req[9];
             uint8_t seconds = req[10];
 
-            if (month < 1U || month > 12U ||
+            
+
+            if (year > 99U ||
+                month < 1U || month > 12U ||
                 day   < 1U || day   > 31U ||
                 weekday < 1U || weekday > 7U ||
                 hours > 23U || minutes > 59U || seconds > 59U) {
@@ -536,6 +581,43 @@ static void handle_request(const uint8_t *req, uint8_t use_uart1)
             }
             uint8_t data[7] = { 0xFF, mo, dd, wd, hh, mi, ss };
             handle_response(STATUS_OK, cmd, param_addr, data, 7, use_uart1);
+            break;
+        }
+        case 0x7000: /* INA226 read */
+        {
+            uint16_t id = 0, cal = 0;
+            int r = ina226_id(&id, &cal);
+            if (r < 0) {
+                uint8_t err = (uint8_t)(-r);
+                handle_response(ERROR_RESPONSE, cmd, param_addr, &err, 1, use_uart1);
+                break;
+            }
+            uint32_t bus_uV = ina226_bus_uV();
+            int32_t shunt_uV = ina226_shunt_uV();
+            int32_t current_uA = ina226_current_uA();
+            uint32_t power_uW = ina226_power_uW();
+
+            uint8_t data[18];
+            data[0] = (bus_uV >> 24) & 0xFF;
+            data[1] = (bus_uV >> 16) & 0xFF;
+            data[2] = (bus_uV >> 8) & 0xFF;
+            data[3] = bus_uV & 0xFF;
+            data[4] = (shunt_uV >> 24) & 0xFF;
+            data[5] = (shunt_uV >> 16) & 0xFF;
+            data[6] = (shunt_uV >> 8) & 0xFF;
+            data[7] = shunt_uV & 0xFF;
+            data[8] = (current_uA >> 24) & 0xFF;
+            data[9] = (current_uA >> 16) & 0xFF;
+            data[10] = (current_uA >> 8) & 0xFF;
+            data[11] = current_uA & 0xFF;
+            data[12] = (power_uW >> 24) & 0xFF;
+            data[13] = (power_uW >> 16) & 0xFF;
+            data[14] = (power_uW >> 8) & 0xFF;
+            data[15] = power_uW & 0xFF;
+            data[16] = (id >> 8) & 0xFF;
+            data[17] = id & 0xFF;
+
+            handle_response(STATUS_OK, cmd, param_addr, data, 18, use_uart1);
             break;
         }
         default:
@@ -600,8 +682,6 @@ int main(void)
 
     timer13_init_10ms();
 
-    __enable_irq();
-
     timer3_pwm_ch1_init(84, 1000);
     timer3_pwm_ch2_init(84, 1000);
     timer3_pwm_ch3_init(84, 1000);
@@ -633,11 +713,13 @@ int main(void)
     dma_spi1_rx_init();
     dma_spi1_tx_init();
 
+    __enable_irq();
+
     bme280_init();
 
+    ina226_init(0x40, 500, 2000);
+
     lcd_init();
-    lcd_set_cursor(0,0);
-    lcd_send_string("Hello");
 
     while (1) {
         if (btn1_pressed) { btn1_pressed = 0; btn1_handler(); }
@@ -646,44 +728,141 @@ int main(void)
         uart2_process_rx();
         uart1_process_rx();
 
-        if(sht40_measure_flag_1s){
-            sht40_measure_flag_1s = 0;
-           sht40_data_read_int(&measurement.temperature, &measurement.humidity);
+        if(measure_flag_1s){
+            measure_flag_1s = 0;
+
+            if (lcd_reinit_5s_flag) {
+                lcd_reinit_5s_flag = 0;
+
+                if (!lcd_is_present()) {
+                    lcd_mark_present(1);
+                    lcd_init();
+                    if (lcd_is_present()) {
+                        backlight_toggle_flag = 1;
+                        backlight_on = 1;
+                        lcd_clear();
+                    }
+                }
+            }
+
+            int16_t  temp_c_x100 = 0;
+            uint16_t rh_x100     = 0;
+
+            uint8_t e = sht40_data_read_int(&temp_c_x100, &rh_x100);
+            if (e != 0) {
+                measurement_sht40.temperature = 0;
+                measurement_sht40.humidity    = 0;
+                sht40_error_flag = 1;
+
+            } else {
+                sht40_error_flag = 0;
+                measurement_sht40.temperature = temp_c_x100;
+                measurement_sht40.humidity    = rh_x100;
+            }
+
+            rtc_read_date(&datetime.year, &datetime.month, &datetime.day, &datetime.weekday);
+            rtc_read_time(&datetime.hours, &datetime.minutes, &datetime.seconds);
+
+            rtc_utc_to_warsaw(&datetime.year, &datetime.month, &datetime.day, &datetime.weekday,
+                &datetime.hours, &datetime.minutes, &datetime.seconds);
+
+
+            int32_t  temp_c;
+            uint32_t hum_x1024, press_q24_8;
+
+            bme280_error_flag = 1;
+
+            uint8_t id = bme280_read_id();
+            if (id == 0x60) {
+
+                bme280_trigger_forced();
+                systick_delay_ms(10);
+
+                if (bme280_read_data(&temp_c, &hum_x1024, &press_q24_8) == 0) {
+
+                    uint32_t hum_x100 = (hum_x1024 * 100U) / 1024U;
+
+                    if (!(temp_c < -4000 || temp_c > 8500 || hum_x100 > 10000 || press_q24_8 == 0)) {
+                        measurement_bme280.temperature = temp_c;
+                        measurement_bme280.humidity    = hum_x100;
+                        measurement_bme280.pressure    = press_q24_8;
+                        bme280_error_flag = 0;
+                    }
+                }
+            }
+
         }
 
-        if (lcd_refresh_flag) {
+        if (backlight_toggle_flag) {
+            backlight_toggle_flag = 0;
+            lcd_backlight(backlight_on);
+        }
+
+        if (lcd_refresh_flag && lcd_is_present()) {
             lcd_refresh_flag = 0;
+            if (second_marker) second_marker = 0;
+            else                second_marker = 1;
 
-            lcd_set_cursor(0, 1);
-            lcd_send_string("TH:");
+            uint16_t current_year = 2000 + datetime.year;
+
+            lcd_set_cursor(0, 0);
+            lcd_send_decimal(current_year, 4);
+            lcd_send_string("-");
+            lcd_send_decimal(datetime.month, 2);
+            lcd_send_string("-");
+            lcd_send_decimal(datetime.day, 2);
             lcd_send_string(" ");
-            lcd_send_temp_1dp_from_x100(measurement.temperature);
-            lcd_send_string(" ");
-            lcd_send_hum_1dp_from_x100(measurement.humidity);
-            lcd_send_string("  ");
+            lcd_send_decimal(datetime.hours, 2);
+            if(second_marker) lcd_send_string(":");
+            else lcd_send_string(" ");
+            lcd_send_decimal(datetime.minutes, 2);
+
+            if (sht40_error_flag) {
+                lcd_set_cursor(0, 1);
+                lcd_send_string("SHT40 ERROR   ");
+            } else {
+                lcd_set_cursor(0, 1);
+                lcd_send_string("TH:");
+                lcd_send_string(" ");
+                lcd_send_temp_1dp_from_x100(measurement_sht40.temperature);
+                lcd_send_string(" ");
+                lcd_send_hum_1dp_from_x100(measurement_sht40.humidity);
+                lcd_send_string("  ");
+            }
+
+            // if (bme280_error_flag) {
+            //     lcd_set_cursor(0, 1);
+            //     lcd_send_string("BME280 ERROR  ");
+            // } else {
+            //     lcd_set_cursor(0, 1);
+            //     lcd_send_string("TH:");
+            //     lcd_send_string(" ");
+            //     lcd_send_temp_1dp_from_x100((int16_t)measurement_bme280.temperature);
+            //     lcd_send_string(" ");
+            //     lcd_send_hum_1dp_from_x100((uint16_t)measurement_bme280.humidity);
+            //     lcd_send_string(" ");
+            // }
         }
 
-        if(sht40_measure_flag_10min){
-            sht40_measure_flag_10min = 0;
-            sht40_data_read_int(&measurement.temperature, &measurement.humidity);
+        if(measure_flag_10min){
+            measure_flag_10min = 0;
         }
-
-
     }
 }
 
 void btn1_handler(void)
 {
-    systick_delay_ms(20);
+    systick_delay_ms(10);
     if (GPIOB->IDR & (1U << 0U)) return;
 
-    if (led1_state) { pin_set_low('B', 14U); led1_state = 0; }
-    else            { pin_set_high('B',14U); led1_state = 1; }
+    backlight_on = 1;
+    backlight_timer = 0;
+    backlight_toggle_flag = 1;
 }
 
 void btn2_handler(void)
 {
-    systick_delay_ms(20);
+    systick_delay_ms(10);
     if (GPIOB->IDR & (1U << 1U)) return;
 
     if (led2_state) { pin_set_low('B', 15U); led2_state = 0; }
@@ -723,20 +902,6 @@ void DMA2_Stream7_IRQHandler(void)
     }
 }
 
-void DMA1_Stream1_IRQHandler(void)
-{
-    if (DMA1->LISR & DMA_LISR_TEIF1) {
-        DMA1->LIFCR = DMA_LIFCR_CTEIF1 | DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1;
-        i2c1_dma_err = 1;
-        i2c1_dma_tx_done = 1;
-        return;
-    }
-    if (DMA1->LISR & DMA_LISR_TCIF1) {
-        DMA1->LIFCR = DMA_LIFCR_CTCIF1;
-        i2c1_dma_tx_done = 1;
-    }
-}
-
 void DMA1_Stream0_IRQHandler(void)
 {
     if (DMA1->LISR & DMA_LISR_TEIF0) {
@@ -751,26 +916,49 @@ void DMA1_Stream0_IRQHandler(void)
     }
 }
 
+void DMA1_Stream1_IRQHandler(void)
+{
+    if (DMA1->LISR & DMA_LISR_TEIF1) {
+        DMA1->LIFCR = DMA_LIFCR_CTEIF1 | DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1;
+        i2c1_dma_err = 1;
+        i2c1_dma_tx_done = 1;
+        return;
+    }
+    if (DMA1->LISR & DMA_LISR_TCIF1) {
+        DMA1->LIFCR = DMA_LIFCR_CTCIF1;
+        i2c1_dma_tx_done = 1;
+    }
+}
+
 void TIM8_UP_TIM13_IRQHandler(void)
 {
     if (TIM13->SR & TIM_SR_UIF) {
         TIM13->SR &= ~TIM_SR_UIF;
 
         tick_10ms++;
-
-        // if ((tick_10ms % 50U) == 0U) {
-        //     hb ^= 1;
-        //     if (hb) pin_set_high('B', 14U);
-        //     else    pin_set_low('B', 14U);
-        // }
+        tick_10ms_5s++;
+        if (tick_10ms_5s >= 500U) {
+            tick_10ms_5s = 0;
+            lcd_reinit_5s_flag = 1;
+        }
 
         if ((tick_10ms % 100U) == 0U) {
-            sht40_measure_flag_1s = 1;
+            measure_flag_1s = 1;
             lcd_refresh_flag = 1;
+
+            if (backlight_on) {
+                backlight_timer++;
+
+                if (backlight_timer >= 20U) {
+                    backlight_on = 0;
+                    backlight_timer = 0;
+                    backlight_toggle_flag = 1;
+                }
+            }
         }
 
         if ((tick_10ms % 60000U) == 0U) {
-            sht40_measure_flag_10min = 1;
+            measure_flag_10min = 1;
         }
     }
 }

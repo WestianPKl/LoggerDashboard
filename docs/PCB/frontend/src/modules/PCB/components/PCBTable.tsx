@@ -205,6 +205,12 @@ export default function PCBTable({ pcb, initSort, initFilter }: IPCBTableProps) 
 				valueGetter: (_, row) => row.revision ?? '-',
 			},
 			{ field: 'comment', headerName: 'Komentarz', width: 300, valueGetter: (_, row) => row.comment ?? '-' },
+			{
+				field: 'verified',
+				headerName: 'Zweryfikowany',
+				width: 160,
+				valueGetter: (_, row) => (row.verified ? 'Tak' : 'Nie'),
+			},
 			{ field: 'topUrl', headerName: 'Obraz góra', width: 150, valueGetter: (_, row) => (row.topUrl ? 'Tak' : 'Nie') },
 			{
 				field: 'bottomUrl',

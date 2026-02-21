@@ -43,7 +43,7 @@ static uint8_t sht40_read_raw(uint16_t *rawT, uint16_t *rawRH)
     if (!rawT || !rawRH) return 1;
 
     uint8_t cmd = SHT40_CMD_SINGLE_SHOT_HIGHREP;
-    if (i2c1_write_raw(SHT40_ADDR, &cmd, 1) != 1) {
+    if (i2c1_write_raw_dma(SHT40_ADDR, &cmd, 1) != 1) {
         return 2;
     }
     systick_delay_ms(15);
@@ -59,12 +59,13 @@ static uint8_t sht40_read_raw(uint16_t *rawT, uint16_t *rawRH)
     return 0;
 }
 
-void sht40_single_shot_measurement(uint8_t *data)
+uint8_t sht40_single_shot_measurement(uint8_t *data)
 {
     uint8_t cmd = SHT40_CMD_SINGLE_SHOT_HIGHREP;
-    i2c1_write_raw(SHT40_ADDR, &cmd, 1);
+    if (i2c1_write_raw_dma(SHT40_ADDR, &cmd, 1) != 1) return 1;
     systick_delay_ms(15);
-    i2c1_read_raw_dma(SHT40_ADDR, data, 6);
+    if (i2c1_read_raw_dma(SHT40_ADDR, data, 6) != 1) return 2;
+    return 0;
 }
 
 uint8_t sht40_read_data(float *temp_c, float *rh)

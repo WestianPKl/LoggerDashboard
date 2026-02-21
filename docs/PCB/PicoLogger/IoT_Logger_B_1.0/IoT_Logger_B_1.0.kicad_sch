@@ -4632,7 +4632,7 @@
 			)
 		)
 	)
-	(global_label "JTAG_JTRST"
+	(global_label "GPIOB4"
 		(shape output)
 		(at 171.45 128.27 0)
 		(fields_autoplaced yes)
@@ -4644,7 +4644,7 @@
 		)
 		(uuid "4ef17056-aeed-46ac-a611-854276a9bf3e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 185.0789 128.27 0)
+			(at 181.39 128.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)

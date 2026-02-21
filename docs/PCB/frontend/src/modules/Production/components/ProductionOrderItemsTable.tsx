@@ -16,6 +16,8 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
+import ChecklistIcon from '@mui/icons-material/Checklist'
+import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing'
 import {
 	DataGrid,
 	type GridColDef,
@@ -33,6 +35,8 @@ import {
 	useAddProductionOrderItemMutation,
 	useUpdateProductionOrderItemMutation,
 	useDeleteProductionOrderItemMutation,
+	useRecheckMutation,
+	useProduceMutation,
 } from '../../../store/api/productionApi'
 import { useRevalidator } from 'react-router'
 
@@ -59,6 +63,8 @@ export default function ProductionOrderItemsTable({
 	const [addProductionOrderItem] = useAddProductionOrderItemMutation()
 	const [updateProductionOrderItem] = useUpdateProductionOrderItemMutation()
 	const [deleteProductionOrderItem] = useDeleteProductionOrderItemMutation()
+	const [recheck] = useRecheckMutation()
+	const [produce] = useProduceMutation()
 
 	const theme = useTheme()
 	const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -90,6 +96,28 @@ export default function ProductionOrderItemsTable({
 			ids: new Set(),
 		})
 	}, [])
+
+	async function recheckProduction(): Promise<void> {
+		try {
+			await recheck({ productionOrderId }).unwrap()
+			dispatch(showAlert({ message: 'Zlecenie ponownie sprawdzone', severity: 'success' }))
+			revalidator.revalidate()
+		} catch (err: any) {
+			const message = err?.data?.message || err?.message || 'Coś poszło nie tak'
+			dispatch(showAlert({ message, severity: 'error' }))
+		}
+	}
+
+	async function produceProduction(): Promise<void> {
+		try {
+			await produce({ productionOrderId }).unwrap()
+			dispatch(showAlert({ message: 'Zlecenie wyprodukowane', severity: 'success' }))
+			revalidator.revalidate()
+		} catch (err: any) {
+			const message = err?.data?.message || err?.message || 'Coś poszło nie tak'
+			dispatch(showAlert({ message, severity: 'error' }))
+		}
+	}
 
 	async function addItemHandler(item: IAddProductionOrderItemsData | IAddProductionOrderItemsData[]): Promise<void> {
 		try {
@@ -269,6 +297,24 @@ export default function ProductionOrderItemsTable({
 			<Box sx={{ mt: '2rem' }}>
 				<Box sx={{ mb: '1rem', textAlign: 'right' }}>
 					<>
+						{!isMobile ? (
+							<Button sx={{ mr: 2 }} variant='contained' type='button' size='medium' onClick={recheckProduction}>
+								Sprawdź
+							</Button>
+						) : (
+							<IconButton type='button' size='small' color='primary' onClick={recheckProduction}>
+								<ChecklistIcon />
+							</IconButton>
+						)}
+						{!isMobile ? (
+							<Button sx={{ mr: 2 }} variant='contained' type='button' size='medium' onClick={produceProduction}>
+								Wyprodukuj
+							</Button>
+						) : (
+							<IconButton type='button' size='small' color='primary' onClick={produceProduction}>
+								<PrecisionManufacturingIcon />
+							</IconButton>
+						)}
 						{!isMobile ? (
 							<Button variant='contained' type='button' size='medium' onClick={handleClickAddOpen}>
 								Dodaj pozycję
