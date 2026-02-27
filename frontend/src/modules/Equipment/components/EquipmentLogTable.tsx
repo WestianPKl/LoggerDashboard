@@ -32,11 +32,11 @@ export default function EquipmentLogTable({ equipment }: IEquipmentLogTableProps
 						<Typography variant='body2'>Build date: {equipment.stats?.buildContr ?? 'N/A'}</Typography>
 						<Typography variant='body2'>Production date: {equipment.stats?.prodContr ?? 'N/A'}</Typography>
 					</Box>
-
 					<Box sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
 						<Typography variant='subtitle1' fontWeight='bold' gutterBottom>
 							Communication Module
 						</Typography>
+						<Typography variant='body2'>IP address: {equipment.stats?.ipAddress ?? 'N/A'}</Typography>
 						<Typography variant='body2'>S/N: {equipment.stats?.snCom ?? 'N/A'}</Typography>
 						<Typography variant='body2'>Firmware: {equipment.stats?.fwCom ?? 'N/A'}</Typography>
 						<Typography variant='body2'>HW version: {equipment.stats?.hwCom ?? 'N/A'}</Typography>
@@ -66,9 +66,36 @@ export default function EquipmentLogTable({ equipment }: IEquipmentLogTableProps
 						columns={useMemo<GridColDef[]>(
 							() => [
 								{ field: 'id', headerName: 'ID', width: 100 },
-								{ field: 'message', headerName: 'Message', width: 1000 },
+								{
+									field: 'message',
+									headerName: 'Message',
+									width: 1000,
+									valueGetter: (_: any, row: any) => {
+										try {
+											const raw = row.message ?? ''
+											const jsonText = raw
+												.replace(/\{\/\*\s*/g, '')
+												.replace(/\s*\*\/\}/g, '')
+												.replace(/^Status update:\s*/i, '')
+												.trim()
+
+											const obj = JSON.parse(jsonText) as Record<string, unknown>
+
+											return Object.entries(obj)
+												.map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : String(v)}`)
+												.join(', ')
+										} catch {
+											return ''
+										}
+									},
+								},
 								{ field: 'type', headerName: 'Type', width: 150 },
-								{ field: 'createdAt', headerName: 'Created At', width: 200 },
+								{
+									field: 'createdAt',
+									headerName: 'Created At',
+									width: 200,
+									valueGetter: (_, row) => `${formatLocalDateTime(row.createdAt)}`,
+								},
 							],
 							[],
 						)}

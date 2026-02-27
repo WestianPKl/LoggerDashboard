@@ -1,28 +1,16 @@
 import time, ntptime
-from machine import Pin, RTC, UART
+from machine import UART
 from wireless import WiFi
 from stm32_uart import STM32UART
 from program import Program
 
-SLEEP_GPIO = 1
-STM32_GPIO = 19
-LED_GPIO = 22
 
 SSID = "TP-Link_0A7B"
 PASSWORD = "12345678"
-
 NTP_SERVER_IP = "192.168.18.158"
 
 
 def main():
-    stm32_gpio = Pin(STM32_GPIO, Pin.OUT)
-    led = Pin(LED_GPIO, Pin.OUT)
-
-    # wake = Pin(SLEEP_GPIO, Pin.IN, Pin.PULL_DOWN)
-    # esp32.wake_on_ext0(wake, esp32.WAKEUP_ANY_HIGH)
-
-    led.on()
-
     wifi = WiFi(SSID, PASSWORD)
 
     program = Program()
@@ -49,8 +37,6 @@ def main():
             )
             program.set_client(None)
 
-    rtc = RTC()
-
     if program.get_client() is not None:
         program.send_errors()
         try:
@@ -58,8 +44,11 @@ def main():
                 "START",
                 "STATUS",
                 {
-                    "ipAddress": ip_address,
-                    "controllerSw": program.status_data.get("version", ""),
+                    "communication_sw": program.status_data.get("version", ""),
+                    "communication_build": program.status_data.get("build", ""),
+                    "logger_id": program.status_data.get("logger_id", ""),
+                    "sensor_id": program.status_data.get("sensor_id", ""),
+                    "ip_address": ip_address,
                 },
             )
         except Exception as e:
@@ -73,86 +62,89 @@ def main():
 
         program.stm32 = stm32
 
-        stm32_gpio.value(1)
+        time.sleep(4)
 
-        data = {
-            "controllerSw": program.status_data.get("version", ""),
-            "loggerId": program.status_data.get("loggerId", ""),
-            "sensorId": program.status_data.get("sensorId", ""),
-            "ipAddress": ip_address,
-        }
+        stm32.req_ping()
+        program.set_time()
+        time.sleep(0.1)
+        control_date = stm32.req_rtc_read()
+        while control_date.startswith("2000"):
+            program.set_time()
+            time.sleep(0.1)
+            control_date = stm32.req_rtc_read()
 
-        if stm32.req_get_input_states(0x03):
-            serial = stm32.req_serial()
-            fw, hw = stm32.req_fw_hw_version()
-            build_data = stm32.req_build_date()
-            prod_date = stm32.req_prod_date()
-            v0, v1 = stm32.req_adc()
-            t, h = stm32.req_sht40()
-            tb, hb, pb = stm32.req_bme280()
-
-            date_time = rtc.datetime()
-            wd = date_time[3]
-            wd = (wd % 7) + 1
-            stm32.req_rtc_write(
-                date_time[0] - 2000,
-                date_time[1],
-                date_time[2],
-                wd,
-                date_time[4],
-                date_time[5],
-                date_time[6],
-            )
-            time.sleep_ms(30)
-            date = stm32.req_rtc_read()
-
-            v0_voltage = stm32.adc_to_voltage(v0)
-            v1_voltage = stm32.adc_to_voltage(v1)
-
-            data.update(
-                {
-                    "serial": serial,
-                    "chipSw": fw,
-                    "hw": hw,
-                    "build_date": build_data,
-                    "prod_date": prod_date,
-                    "adc": [v0, v1],
-                    "adc_voltage": [v0_voltage, v1_voltage],
-                    "vin": [
-                        stm32.vadc_to_vin(v0_voltage),
-                        stm32.vadc_to_vin(v1_voltage),
-                    ],
-                    "sht40": {"temperature": t, "humidity": h},
-                    "bme280": {
-                        "temperature": tb,
-                        "humidity": hb,
-                        "pressure": pb,
-                    },
-                    "rtc": date,
-                    "bme280_error": int(tb == 0 and hb == 0 and pb == 0),
-                    "sht40_error": int(t == 0 and h == 0),
-                }
-            )
-
-        if program.get_client() is not None:
-            try:
-                program.send_status("DATA", "DATA", data)
-            except Exception as e:
-                program.error_management("MQTT", "Failed to send DATA: {}".format(e))
-        stm32_gpio.value(0)
     except Exception as e:
         program.error_management("STM32", "STM32 communication failed: {}".format(e))
 
-    led.off()
-    # machine.deepsleep()
+    wifi_reconnect_ms = 5000
+    mqtt_reconnect_ms = 5000
+    last_wifi_try = time.ticks_ms()
+    last_mqtt_try = time.ticks_ms()
+    ntp_done_after_wifi = False
+
     while True:
-        if program.get_client() is not None:
+        now = time.ticks_ms()
+
+        if not wifi.is_connected():
+            ntp_done_after_wifi = False
+            c = program.get_client()
+            if c is not None:
+                try:
+                    c.disconnect()
+                except:
+                    pass
+                program.set_client(None)
+
+            if time.ticks_diff(now, last_wifi_try) >= wifi_reconnect_ms:
+                last_wifi_try = now
+                try:
+                    wifi.connect(timeout=5)
+                    ip_address = wifi.get_ip()
+                    program.set_ip_address(ip_address)
+                except Exception as e:
+                    program.error_management("WIFI", "Reconnect failed: {}".format(e))
+
+            time.sleep(0.2)
+            continue
+
+        if not ntp_done_after_wifi:
             try:
-                program.get_client().check_msg()
+                ntptime.host = NTP_SERVER_IP
+                ntptime.settime()
+                program.set_time()
+                ntp_done_after_wifi = True
+            except Exception as e:
+                program.error_management("NTP", "settime failed: {}".format(e))
+
+        if program.get_client() is None:
+            if time.ticks_diff(now, last_mqtt_try) >= mqtt_reconnect_ms:
+                last_mqtt_try = now
+                try:
+                    program.mqtt_initialization()
+                    program.send_errors()
+                    program.send_status(
+                        "RECONNECTED", "STATUS", {"ip_address": wifi.get_ip()}
+                    )
+                except Exception as e:
+                    program.error_management("MQTT", "Reconnect failed: {}".format(e))
+                    program.set_client(None)
+
+        if program.pending_read:
+            program.pending_read = False
+            program.read_data()
+
+        c = program.get_client()
+        if c is not None:
+            try:
+                c.check_msg()
             except Exception as e:
                 program.error_management("MQTT", "MQTT check_msg failed: {}".format(e))
+                try:
+                    c.disconnect()
+                except:
+                    pass
                 program.set_client(None)
-        time.sleep(0.05)
+        time.sleep(0.01)
 
 
 if __name__ == "__main__":

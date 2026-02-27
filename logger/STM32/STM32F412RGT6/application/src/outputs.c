@@ -26,6 +26,8 @@ void portc_init(void)
     GPIOC->OTYPER &= ~((1U<<PC0_PIN)|(1U<<PC1_PIN)|(1U<<PC2_PIN)|(1U<<PC3_PIN)|(1U<<PC4_PIN));
     GPIOC->OSPEEDR |= (2U<<(PC0_PIN*2U))|(2U<<(PC1_PIN*2U))|(2U<<(PC2_PIN*2U))|(2U<<(PC3_PIN*2U))|(2U<<(PC4_PIN*2U));
     GPIOC->PUPDR &= ~mask;
+
+    pin_set_low('C', PC4_PIN);
 }
 
 void portb_init(void)

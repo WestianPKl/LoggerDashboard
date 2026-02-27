@@ -1,7 +1,6 @@
 import machine, time, ujson, os
-from machine import RTC
+from machine import RTC, Pin
 from mqtt_simple import MQTTClient
-from stm32_uart import STM32UART
 
 MQTT_SERVER = "192.168.18.6"
 MQTT_PORT = 1883
@@ -9,16 +8,31 @@ MQTT_USER = "pico_user"
 MQTT_PASSWORD = "HASLO"
 MQTT_KEEPALIVE = 7200
 
+STATUS_GPIO = 18
+STM32_GPIO = 19
+LED_GPIO = 22
+
 
 class Program:
     def __init__(self):
         self.client = None
         self.status_data = {}
         self.load_data()
-        self.device_id = str(self.status_data.get("loggerId", "2"))
-        self.topic_status = f"devices/{self.device_id}/status"
+        self.device_id = str(self.status_data.get("logger_id", ""))
+        self.topic_status = f"devices/{self.device_id}/status".encode()
         self.ip_address = None
-        self.stm32: STM32UART = None
+        self.stm32_gpio = Pin(STM32_GPIO, Pin.OUT)
+        self.led = Pin(LED_GPIO, Pin.OUT)
+        self.pending_read = False
+        self.irq_dropped = 0
+        self.last_irq_ms = 0
+        self.status = Pin(STATUS_GPIO, Pin.IN, Pin.PULL_DOWN)
+        self.status.irq(
+            handler=self._irq_status,
+            trigger=Pin.IRQ_RISING,
+        )
+        self.rtc = RTC()
+        self.stm32 = None
         self.errors = {}
 
         self.input_channels = [
@@ -45,6 +59,16 @@ class Program:
             (0x04, "TIM4_CH4"),
         ]
 
+    def _irq_status(self, pin):
+        now = time.ticks_ms()
+        if self.pending_read:
+            self.irq_dropped += 1
+            return
+        if time.ticks_diff(now, self.last_irq_ms) < 50:
+            return
+        self.last_irq_ms = now
+        self.pending_read = True
+
     def get_client(self):
         return self.client
 
@@ -56,29 +80,29 @@ class Program:
 
     def mqtt_initialization(self):
         self.client = MQTTClient(
-            client_id=self.device_id,
+            client_id=str(self.device_id).encode(),
             server=MQTT_SERVER,
             port=MQTT_PORT,
-            user=MQTT_USER,
-            password=MQTT_PASSWORD,
+            user=MQTT_USER.encode(),
+            password=MQTT_PASSWORD.encode(),
             keepalive=MQTT_KEEPALIVE,
         )
 
         self.client.set_callback(self.message_mqtt)
         self.client.connect()
-        self.client.subscribe(f"devices/{self.device_id}/cmd")
+        self.client.subscribe(f"devices/{self.device_id}/cmd".encode())
         return self.client
 
-    def send_status(self, result, typeData="STATUS", info=None):
+    def send_status(self, result, typeData="STATUS", info=None, timestamp=None):
         payload = {
             "result": result,
             "info": info,
             "type": typeData,
-            "timestamp": time.time(),
+            "timestamp": time.time() if timestamp is None else timestamp,
         }
         if self.client is None:
             raise Exception("MQTT client is not connected")
-        self.client.publish(self.topic_status, ujson.dumps(payload))
+        self.client.publish(self.topic_status, ujson.dumps(payload).encode())
 
     def _find_channel(self, channels, name):
         for ch_id, ch_name in channels:
@@ -92,35 +116,42 @@ class Program:
             cmd = data.get("cmd")
             params = data.get("params", {})
             if cmd == "PING":
-                self.send_status("ALIVE", "STATUS")
+                self.send_status(
+                    "ALIVE",
+                    "STATUS",
+                    {
+                        "communication_sw": self.status_data.get("version", ""),
+                        "communication_build": self.status_data.get("build", ""),
+                        "logger_id": self.status_data.get("logger_id", ""),
+                        "sensor_id": self.status_data.get("sensor_id", ""),
+                        "ip_address": self.ip_address,
+                    },
+                )
             elif cmd == "RESET":
                 machine.reset()
             elif cmd == "SYNC_TIME":
-                rtc = RTC()
-                date_time = rtc.datetime()
-                wd = date_time[3]
-                wd = (wd % 7) + 1
+                dt = self.set_time()
                 sync_time = "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}Z".format(
-                    date_time[0],
-                    date_time[1],
-                    date_time[2],
-                    date_time[4],
-                    date_time[5],
-                    date_time[6],
+                    dt[0],
+                    dt[1],
+                    dt[2],
+                    dt[4],
+                    dt[5],
+                    dt[6],
                 )
-                self.stm32.req_rtc_write(
-                    date_time[0] - 2000,
-                    date_time[1],
-                    date_time[2],
-                    wd,
-                    date_time[4],
-                    date_time[5],
-                    date_time[6],
-                )
-                time.sleep_ms(30)
                 date = self.stm32.req_rtc_read()
                 self.send_status(
-                    "TIME_SYNCED", "STATUS", {"rtc_time": date, "sync_time": sync_time}
+                    "TIME_SYNCED",
+                    "STATUS",
+                    {
+                        "rtc_time": date,
+                        "sync_time": sync_time,
+                        "communication_sw": self.status_data.get("version", ""),
+                        "communication_build": self.status_data.get("build", ""),
+                        "logger_id": self.status_data.get("logger_id", ""),
+                        "sensor_id": self.status_data.get("sensor_id", ""),
+                        "ip_address": self.ip_address,
+                    },
                 )
             elif cmd == "READ_INPUTS":
                 inputs = {}
@@ -140,7 +171,15 @@ class Program:
                 self.send_status(
                     "OUTPUT_SET",
                     "STATUS",
-                    {"channel": params.get("channel"), "value": params.get("value", 0)},
+                    {
+                        "channel": params.get("channel"),
+                        "value": params.get("value", 0),
+                        "communication_sw": self.status_data.get("version", ""),
+                        "communication_build": self.status_data.get("build", ""),
+                        "logger_id": self.status_data.get("logger_id", ""),
+                        "sensor_id": self.status_data.get("sensor_id", ""),
+                        "ip_address": self.ip_address,
+                    },
                 )
             elif cmd == "SET_PWM":
                 channel_id = self._find_channel(
@@ -157,6 +196,11 @@ class Program:
                     {
                         "channel": params.get("channel"),
                         "duty_cycle": params.get("duty_cycle", 0),
+                        "communication_sw": self.status_data.get("version", ""),
+                        "communication_build": self.status_data.get("build", ""),
+                        "logger_id": self.status_data.get("logger_id", ""),
+                        "sensor_id": self.status_data.get("sensor_id", ""),
+                        "ip_address": self.ip_address,
                     },
                 )
             elif cmd == "RGB":
@@ -170,6 +214,11 @@ class Program:
                         "r": params.get("r", 0),
                         "g": params.get("g", 0),
                         "b": params.get("b", 0),
+                        "communication_sw": self.status_data.get("version", ""),
+                        "communication_build": self.status_data.get("build", ""),
+                        "logger_id": self.status_data.get("logger_id", ""),
+                        "sensor_id": self.status_data.get("sensor_id", ""),
+                        "ip_address": self.ip_address,
                     },
                 )
             elif cmd == "BUZZER":
@@ -182,6 +231,11 @@ class Program:
                     {
                         "freq": params.get("freq", 1000),
                         "volume": params.get("volume", 100),
+                        "communication_sw": self.status_data.get("version", ""),
+                        "communication_build": self.status_data.get("build", ""),
+                        "logger_id": self.status_data.get("logger_id", ""),
+                        "sensor_id": self.status_data.get("sensor_id", ""),
+                        "ip_address": self.ip_address,
                     },
                 )
             elif cmd == "READ_INA":
@@ -197,6 +251,11 @@ class Program:
                         "current": current,
                         "power": power,
                         "id": id,
+                        "communication_sw": self.status_data.get("version", ""),
+                        "communication_build": self.status_data.get("build", ""),
+                        "logger_id": self.status_data.get("logger_id", ""),
+                        "sensor_id": self.status_data.get("sensor_id", ""),
+                        "ip_address": self.ip_address,
                     },
                 )
             else:
@@ -208,16 +267,18 @@ class Program:
         try:
             with open(filename, "r") as f:
                 self.status_data = ujson.load(f)
-                if "pendingErrors" not in self.status_data or not isinstance(
-                    self.status_data["pendingErrors"], list
+                if "pending_errors" not in self.status_data or not isinstance(
+                    self.status_data["pending_errors"], list
                 ):
-                    self.status_data["pendingErrors"] = []
+                    self.status_data["pending_errors"] = []
         except Exception:
             self.status_data = {
-                "version": "",
-                "loggerId": "",
-                "sensorId": "",
-                "pendingErrors": [],
+                "communication_sw": "",
+                "logger_id": "",
+                "sensor_id": "",
+                "communication_build": "",
+                "ip_address": "",
+                "pending_errors": [],
             }
 
     def save_data(self, filename="status.json"):
@@ -230,9 +291,9 @@ class Program:
         return {"timestamp": time.time(), "source": source, "msg": str(msg)}
 
     def error_queue(self, payload, max_len=50):
-        self.status_data["pendingErrors"].append(payload)
-        if len(self.status_data["pendingErrors"]) > max_len:
-            self.status_data["pendingErrors"] = self.status_data["pendingErrors"][
+        self.status_data["pending_errors"].append(payload)
+        if len(self.status_data["pending_errors"]) > max_len:
+            self.status_data["pending_errors"] = self.status_data["pending_errors"][
                 -max_len:
             ]
         try:
@@ -254,13 +315,81 @@ class Program:
     def send_errors(self):
         if self.client is None:
             return
-        if not self.status_data.get("pendingErrors"):
+        if not self.status_data.get("pending_errors"):
             return
         try:
             self.send_status(
-                "ERRORS_FLUSH", "ERROR", {"items": self.status_data["pendingErrors"]}
+                "ERRORS_FLUSH", "ERROR", {"items": self.status_data["pending_errors"]}
             )
-            self.status_data["pendingErrors"] = []
+            self.status_data["pending_errors"] = []
             self.save_data()
         except Exception as e:
             self.errors["SEND_ERRORS"] = e
+
+    def set_time(self):
+        dt = self.rtc.datetime()
+        wd = (dt[3] % 7) + 1
+        self.stm32.req_rtc_write(dt[0] - 2000, dt[1], dt[2], wd, dt[4], dt[5], dt[6])
+        return dt
+
+    def read_data(self):
+        t0 = time.time()
+
+        self.stm32_gpio.value(1)
+        self.led.on()
+
+        data = {
+            "communication_sw": self.status_data.get("version", ""),
+            "communication_build": self.status_data.get("build", ""),
+            "logger_id": self.status_data.get("logger_id", ""),
+            "sensor_id": self.status_data.get("sensor_id", ""),
+            "ip_address": self.ip_address,
+            "irq_dropped": self.irq_dropped,
+        }
+
+        try:
+            if self.stm32.req_get_input_states(0x03):
+                self.set_time()
+                serial = self.stm32.req_serial()
+                fw, hw = self.stm32.req_fw_hw_version()
+                build_data = self.stm32.req_build_date()
+                prod_date = self.stm32.req_prod_date()
+                v0, v1 = self.stm32.req_adc()
+                t, h = self.stm32.req_sht40()
+                tb, hb, pb = self.stm32.req_bme280()
+                date = self.stm32.req_rtc_read()
+
+                v0_voltage = self.stm32.adc_to_voltage(v0)
+                v1_voltage = self.stm32.adc_to_voltage(v1)
+
+                data.update(
+                    {
+                        "controller_serial": serial,
+                        "controller_sw": fw,
+                        "controller_hw": hw,
+                        "controller_build_date": build_data,
+                        "controller_prod_date": prod_date,
+                        "adc": [v0, v1],
+                        "adc_voltage": [v0_voltage, v1_voltage],
+                        "vin": [
+                            self.stm32.vadc_to_vin(v0_voltage),
+                            self.stm32.vadc_to_vin(v1_voltage),
+                        ],
+                        "sht40": {"temperature": t, "humidity": h},
+                        "bme280": {"temperature": tb, "humidity": hb, "pressure": pb},
+                        "rtc": date,
+                        "bme280_error": int(tb == 0 and hb == 0 and pb == 0),
+                        "sht40_error": int(t == 0 and h == 0),
+                        "stm32_error": 0,
+                    }
+                )
+            else:
+                data.update({"stm32_error": 1})
+
+            if self.client is not None:
+                self.send_status("DATA", "DATA", data, timestamp=t0)
+        except Exception as e:
+            self.error_management("READ_DATA", str(e))
+        finally:
+            self.stm32_gpio.value(0)
+            self.led.off()

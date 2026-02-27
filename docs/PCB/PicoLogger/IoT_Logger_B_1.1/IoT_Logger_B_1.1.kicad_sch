@@ -7187,7 +7187,7 @@
 				)
 			)
 		)
-		(property "Value" "10kR"
+		(property "Value" "10k"
 			(at 87.376 101.6 90)
 			(effects
 				(font
@@ -8661,7 +8661,7 @@
 				)
 			)
 		)
-		(property "Value" "10kR"
+		(property "Value" "10k"
 			(at 85.09 73.66 90)
 			(effects
 				(font

@@ -3231,7 +3231,7 @@
 				)
 			)
 		)
-		(property "Value" "1k"
+		(property "Value" "1kR"
 			(at 68.58 69.85 90)
 			(effects
 				(font
@@ -3776,7 +3776,7 @@
 				)
 			)
 		)
-		(property "Value" "100k"
+		(property "Value" "100kR"
 			(at 72.39 73.66 90)
 			(effects
 				(font
@@ -4305,7 +4305,7 @@
 				)
 			)
 		)
-		(property "Value" "10k"
+		(property "Value" "10kR"
 			(at 120.65 67.31 90)
 			(effects
 				(font
@@ -4512,7 +4512,7 @@
 				)
 			)
 		)
-		(property "Value" "10k"
+		(property "Value" "10kR"
 			(at 120.65 72.39 90)
 			(effects
 				(font

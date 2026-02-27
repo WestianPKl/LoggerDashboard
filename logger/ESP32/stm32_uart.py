@@ -139,19 +139,7 @@ class STM32UART:
         return data
 
     def req_ping(self):
-        resp = self.uart_loop_application(self.uart_message_application(0x00, 0x00))
-        parsed = self.parse_resp(resp)
-        if not parsed:
-            return ["", "", "", "", "", ""]
-        addr, status, cmd, param, payload, crc = parsed
-        return [
-            hex(addr),
-            hex(status),
-            hex(cmd),
-            hex(param),
-            payload.hex(),
-            hex(crc),
-        ]
+        return self._send_cmd(0x00, 0x00, check_status=False) is not None
 
     def req_serial(self):
         p = self._send_cmd(0x01, 0x00, check_status=False)

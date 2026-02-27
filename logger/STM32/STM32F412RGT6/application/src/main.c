@@ -28,6 +28,9 @@ void btn2_handler(void);
 volatile uint32_t tick_10ms = 0;
 volatile uint8_t lcd_reinit_5s_flag = 0;
 static uint16_t tick_10ms_5s = 0;
+volatile uint8_t esp32_on = 0;
+volatile uint8_t esp32_toggle_flag = 0;
+volatile uint16_t esp32_timer = 0;
 volatile uint8_t lcd_refresh_flag = 0;
 volatile uint8_t measure_flag_1s = 1;
 volatile uint8_t measure_flag_10min = 0;
@@ -124,8 +127,6 @@ static volatile uint16_t uart1_rx_old_pos = 0;
 #define UART1_RX_FRAME_LEN FRAME_LEN_APP
 static uint8_t uart1_frame_acc[UART1_RX_FRAME_LEN];
 static uint8_t uart1_frame_idx = 0;
-
-
 
 static int uart2_dma_send(const uint8_t *data, uint16_t len);
 static int uart1_dma_send(const uint8_t *data, uint16_t len);
@@ -363,8 +364,6 @@ static void handle_request(const uint8_t *req, uint8_t use_uart1)
             led1_state = val;
             uint8_t data[1] = { led1_state };
             handle_response(STATUS_OK, cmd, param_addr, data, 1, use_uart1);
-            // LED 1 is reserved for internal use (heartbeat), so we do not allow external control over it
-            // handle_response(ERROR_RESPONSE, cmd, param_addr, NULL, 0, use_uart1);
             break;
         }
         case 0x0402: /* Write LED2: req[4] = VALUE */
@@ -499,8 +498,7 @@ static void handle_request(const uint8_t *req, uint8_t use_uart1)
             uint8_t year, month, day, weekday;
             uint8_t hours, minutes, seconds;
 
-            rtc_read_date(&year, &month, &day, &weekday);
-            rtc_read_time(&hours, &minutes, &seconds);
+            rtc_read_datetime(&year, &month, &day, &weekday, &hours, &minutes, &seconds);
 
             uint8_t data[7];
             data[0] = year;
@@ -524,8 +522,6 @@ static void handle_request(const uint8_t *req, uint8_t use_uart1)
             uint8_t minutes = req[9];
             uint8_t seconds = req[10];
 
-            
-
             if (year > 99U ||
                 month < 1U || month > 12U ||
                 day   < 1U || day   > 31U ||
@@ -535,7 +531,15 @@ static void handle_request(const uint8_t *req, uint8_t use_uart1)
                 break;
             }
 
-            rtc_set_datetime(year, month, day, weekday, hours, minutes, seconds);
+            __disable_irq();
+            int rc = rtc_set_datetime(year, month, day, weekday, hours, minutes, seconds);
+            __enable_irq();
+
+            if (rc != 0) {
+                uint8_t err = (uint8_t)(-rc);
+                handle_response(ERROR_RESPONSE, cmd, param_addr, &err, 1, use_uart1);
+                break;
+            }
 
             uint8_t data[7] = { year, month, day, weekday, hours, minutes, seconds };
             handle_response(STATUS_OK, cmd, param_addr, data, 7, use_uart1);
@@ -707,6 +711,10 @@ int main(void)
     dma_i2c1_rx_init();
     dma_i2c1_tx_init();
 
+    lcd_init();
+    lcd_set_cursor(0, 0);
+    lcd_send_string("Initializing...");
+
     rtc_init();
 
     spi1_init();
@@ -718,8 +726,6 @@ int main(void)
     bme280_init();
 
     ina226_init(0x40, 500, 2000);
-
-    lcd_init();
 
     while (1) {
         if (btn1_pressed) { btn1_pressed = 0; btn1_handler(); }
@@ -760,8 +766,8 @@ int main(void)
                 measurement_sht40.humidity    = rh_x100;
             }
 
-            rtc_read_date(&datetime.year, &datetime.month, &datetime.day, &datetime.weekday);
-            rtc_read_time(&datetime.hours, &datetime.minutes, &datetime.seconds);
+            rtc_read_datetime(&datetime.year, &datetime.month, &datetime.day, &datetime.weekday,
+                &datetime.hours, &datetime.minutes, &datetime.seconds);
 
             rtc_utc_to_warsaw(&datetime.year, &datetime.month, &datetime.day, &datetime.weekday,
                 &datetime.hours, &datetime.minutes, &datetime.seconds);
@@ -804,31 +810,40 @@ int main(void)
             else                second_marker = 1;
 
             uint16_t current_year = 2000 + datetime.year;
+            
+            if (current_year > 2000){
+                lcd_set_cursor(0, 0);
+                lcd_send_decimal(current_year, 4);
+                lcd_send_string("-");
+                lcd_send_decimal(datetime.month, 2);
+                lcd_send_string("-");
+                lcd_send_decimal(datetime.day, 2);
+                lcd_send_string(" ");
+                lcd_send_decimal(datetime.hours, 2);
+                if(second_marker) lcd_send_string(":");
+                else lcd_send_string(" ");
+                lcd_send_decimal(datetime.minutes, 2);
 
-            lcd_set_cursor(0, 0);
-            lcd_send_decimal(current_year, 4);
-            lcd_send_string("-");
-            lcd_send_decimal(datetime.month, 2);
-            lcd_send_string("-");
-            lcd_send_decimal(datetime.day, 2);
-            lcd_send_string(" ");
-            lcd_send_decimal(datetime.hours, 2);
-            if(second_marker) lcd_send_string(":");
-            else lcd_send_string(" ");
-            lcd_send_decimal(datetime.minutes, 2);
-
-            if (sht40_error_flag) {
-                lcd_set_cursor(0, 1);
-                lcd_send_string("SHT40 ERROR   ");
+                if (sht40_error_flag) {
+                    lcd_set_cursor(0, 1);
+                    lcd_send_string("SHT40 ERROR   ");
+                } else {
+                    lcd_set_cursor(0, 1);
+                    lcd_send_string("TH:");
+                    lcd_send_string(" ");
+                    lcd_send_temp_1dp_from_x100(measurement_sht40.temperature);
+                    lcd_send_string(" ");
+                    lcd_send_hum_1dp_from_x100(measurement_sht40.humidity);
+                    lcd_send_string("  ");
+                }
             } else {
+                lcd_set_cursor(0, 0);
+                lcd_send_string("Initializing... ");
                 lcd_set_cursor(0, 1);
-                lcd_send_string("TH:");
-                lcd_send_string(" ");
-                lcd_send_temp_1dp_from_x100(measurement_sht40.temperature);
-                lcd_send_string(" ");
-                lcd_send_hum_1dp_from_x100(measurement_sht40.humidity);
-                lcd_send_string("  ");
+                lcd_send_string("                ");
             }
+
+
 
             // if (bme280_error_flag) {
             //     lcd_set_cursor(0, 1);
@@ -844,8 +859,12 @@ int main(void)
             // }
         }
 
-        if(measure_flag_10min){
+        if (measure_flag_10min) {
             measure_flag_10min = 0;
+
+            esp32_status_set(0);
+            esp32_timer = 1;
+            esp32_on = 1;
         }
     }
 }
@@ -957,7 +976,20 @@ void TIM8_UP_TIM13_IRQHandler(void)
             }
         }
 
-        if ((tick_10ms % 60000U) == 0U) {
+        if (esp32_timer > 0) {
+            esp32_timer--;
+            if (esp32_timer == 0) {
+                if (esp32_on) {
+                    esp32_status_set(1);
+                    esp32_timer = 2;
+                    esp32_on = 0;
+                } else {
+                    esp32_status_set(0);
+                }
+            }
+        }
+
+        if ((tick_10ms % 52000U) == 0U) {
             measure_flag_10min = 1;
         }
     }

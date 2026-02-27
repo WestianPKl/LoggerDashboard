@@ -3667,7 +3667,7 @@
 				)
 			)
 		)
-		(property "Value" "1kR"
+		(property "Value" "1k"
 			(at 68.58 69.85 90)
 			(effects
 				(font
@@ -4212,7 +4212,7 @@
 				)
 			)
 		)
-		(property "Value" "100kR"
+		(property "Value" "100k"
 			(at 72.39 73.66 90)
 			(effects
 				(font
@@ -4741,7 +4741,7 @@
 				)
 			)
 		)
-		(property "Value" "10kR"
+		(property "Value" "10k"
 			(at 118.11 67.31 90)
 			(effects
 				(font
@@ -4882,7 +4882,7 @@
 				)
 			)
 		)
-		(property "Value" "100kR"
+		(property "Value" "100k"
 			(at 72.39 92.71 90)
 			(effects
 				(font
@@ -5100,7 +5100,7 @@
 				)
 			)
 		)
-		(property "Value" "10kR"
+		(property "Value" "10k"
 			(at 118.11 72.39 90)
 			(effects
 				(font
@@ -5328,7 +5328,7 @@
 				)
 			)
 		)
-		(property "Value" "1kR"
+		(property "Value" "1k"
 			(at 68.58 88.9 90)
 			(effects
 				(font

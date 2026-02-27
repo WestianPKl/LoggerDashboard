@@ -1,4 +1,5 @@
 #include "rtc.h"
+#include "systick.h"
 
 #define RTC_WPR_KEY1 0xCAU
 #define RTC_WPR_KEY2 0x53U
@@ -7,15 +8,29 @@
 #define RTC_PREDIV_S 255U
 
 #define RTC_BKP_MAGIC 0x32F2A4B1U
-#define RTC_TIMEOUT   500000U
 
-static int wait_mask_set(volatile uint32_t *reg, uint32_t mask)
+#define RTC_TIMEOUT_LOOP   500000U
+#define LSE_STARTUP_MS     3000U
+#define LSI_STARTUP_MS     200U
+
+volatile uint8_t rtc_busy = 0;
+
+static int wait_mask_set_loop(volatile uint32_t *reg, uint32_t mask, uint32_t timeout)
 {
-    uint32_t t = RTC_TIMEOUT;
+    uint32_t t = timeout;
     while (((*reg) & mask) == 0U) {
         if (--t == 0U) return -1;
     }
     return 0;
+}
+
+static int wait_flag_ms(volatile uint32_t *reg, uint32_t mask, uint32_t timeout_ms)
+{
+    while (timeout_ms--) {
+        if (((*reg) & mask) != 0U) return 0;
+        systick_delay_ms(1);
+    }
+    return -1;
 }
 
 static uint8_t to_bcd(uint8_t v)
@@ -25,6 +40,23 @@ static uint8_t to_bcd(uint8_t v)
 
 static inline uint32_t bcd_units(uint8_t bcd) { return (uint32_t)(bcd & 0x0FU); }
 static inline uint32_t bcd_tens(uint8_t bcd)  { return (uint32_t)((bcd >> 4) & 0x0FU); }
+
+static void rtc_backup_domain_unlock(void)
+{
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    (void)RCC->APB1ENR;
+
+    PWR->CR |= PWR_CR_DBP;
+    while ((PWR->CR & PWR_CR_DBP) == 0U) {}
+}
+
+static void rtc_backup_domain_reset(void)
+{
+    RCC->BDCR |= RCC_BDCR_BDRST;
+    __DSB(); __ISB();
+    RCC->BDCR &= ~RCC_BDCR_BDRST;
+    __DSB(); __ISB();
+}
 
 void rtc_write_protect_disable(void)
 {
@@ -40,7 +72,7 @@ void rtc_write_protect_enable(void)
 static int rtc_enter_init_mode(void)
 {
     RTC->ISR |= RTC_ISR_INIT;
-    return wait_mask_set(&RTC->ISR, RTC_ISR_INITF);
+    return wait_mask_set_loop(&RTC->ISR, RTC_ISR_INITF, RTC_TIMEOUT_LOOP);
 }
 
 static void rtc_exit_init_mode(void)
@@ -50,8 +82,11 @@ static void rtc_exit_init_mode(void)
 
 static int rtc_wait_for_synchro(void)
 {
+    rtc_write_protect_disable();
     RTC->ISR &= ~RTC_ISR_RSF;
-    return wait_mask_set(&RTC->ISR, RTC_ISR_RSF);
+    rtc_write_protect_enable();
+
+    return wait_mask_set_loop(&RTC->ISR, RTC_ISR_RSF, RTC_TIMEOUT_LOOP);
 }
 
 static void rtc_exti_enable_rising(uint32_t line)
@@ -75,44 +110,56 @@ void rtc_exti_clear(uint32_t line)
     EXTI->PR = (1UL << line);
 }
 
-static void rtc_backup_domain_unlock(void)
-{
-    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
-    (void)RCC->APB1ENR;
-
-    PWR->CR |= PWR_CR_DBP;
-    while ((PWR->CR & PWR_CR_DBP) == 0U) {}
-}
-
-static int rtc_start_lse_and_select(void)
+static int rtc_select_clock_lse(void)
 {
     const uint32_t RTCSEL_LSE = (1U << RCC_BDCR_RTCSEL_Pos);
 
     uint32_t rtcsel = (RCC->BDCR & RCC_BDCR_RTCSEL_Msk);
     uint32_t rtcen  = (RCC->BDCR & RCC_BDCR_RTCEN);
 
-    if (rtcen && (rtcsel == RTCSEL_LSE)) {
-        return 0;
-    }
-
     if (rtcen && (rtcsel != 0U) && (rtcsel != RTCSEL_LSE)) {
-        RCC->BDCR |= RCC_BDCR_BDRST;
-        RCC->BDCR &= ~RCC_BDCR_BDRST;
+        rtc_backup_domain_reset();
     }
 
     RCC->BDCR |= RCC_BDCR_LSEON;
-    if (wait_mask_set(&RCC->BDCR, RCC_BDCR_LSERDY) < 0) return -1;
+
+    if (wait_flag_ms(&RCC->BDCR, RCC_BDCR_LSERDY, LSE_STARTUP_MS) < 0) {
+        return -1;
+    }
 
     RCC->BDCR &= ~RCC_BDCR_RTCSEL_Msk;
     RCC->BDCR |=  RTCSEL_LSE;
+    RCC->BDCR |=  RCC_BDCR_RTCEN;
+    return 0;
+}
 
-    RCC->BDCR |= RCC_BDCR_RTCEN;
+static int rtc_select_clock_lsi(void)
+{
+    const uint32_t RTCSEL_LSI = (2U << RCC_BDCR_RTCSEL_Pos);
+
+    uint32_t rtcsel = (RCC->BDCR & RCC_BDCR_RTCSEL_Msk);
+    uint32_t rtcen  = (RCC->BDCR & RCC_BDCR_RTCEN);
+
+    if (rtcen && (rtcsel != 0U) && (rtcsel != RTCSEL_LSI)) {
+        rtc_backup_domain_reset();
+    }
+
+    RCC->CSR |= RCC_CSR_LSION;
+
+    if (wait_flag_ms(&RCC->CSR, RCC_CSR_LSIRDY, LSI_STARTUP_MS) < 0) {
+        if (wait_mask_set_loop(&RCC->CSR, RCC_CSR_LSIRDY, RTC_TIMEOUT_LOOP) < 0) {
+            return -1;
+        }
+    }
+
+    RCC->BDCR &= ~RCC_BDCR_RTCSEL_Msk;
+    RCC->BDCR |=  RTCSEL_LSI;
+    RCC->BDCR |=  RCC_BDCR_RTCEN;
     return 0;
 }
 
 static uint8_t rtc_is_configured(void)
 {
-
     if ((RCC->BDCR & RCC_BDCR_RTCEN) == 0U) return 0U;
     return (RTC->BKP0R == RTC_BKP_MAGIC) ? 1U : 0U;
 }
@@ -122,14 +169,25 @@ void rtc_init(void)
     rtc_backup_domain_unlock();
 
     if (rtc_is_configured()) {
-        rtc_write_protect_disable();
-        (void)rtc_wait_for_synchro();
-        rtc_write_protect_enable();
-        return;
+
+        uint32_t rtcsel = (RCC->BDCR & RCC_BDCR_RTCSEL_Msk) >> RCC_BDCR_RTCSEL_Pos;
+
+        if (rtcsel == 2U) {
+            RCC->BDCR |= RCC_BDCR_LSEON;
+            if (wait_flag_ms(&RCC->BDCR, RCC_BDCR_LSERDY, LSE_STARTUP_MS) == 0) {
+                rtc_backup_domain_reset();
+            } else {
+                (void)rtc_wait_for_synchro();
+                return;
+            }
+        } else {
+            (void)rtc_wait_for_synchro();
+            return;
+        }
     }
 
-    if (rtc_start_lse_and_select() < 0) {
-        return;
+    if (rtc_select_clock_lse() < 0) {
+        (void)rtc_select_clock_lsi();
     }
 
     rtc_write_protect_disable();
@@ -150,9 +208,7 @@ void rtc_init(void)
 
     rtc_write_protect_enable();
 
-    rtc_write_protect_disable();
     (void)rtc_wait_for_synchro();
-    rtc_write_protect_enable();
 }
 
 void rtc_write_time(uint8_t hours, uint8_t minutes, uint8_t seconds)
@@ -179,9 +235,7 @@ void rtc_write_time(uint8_t hours, uint8_t minutes, uint8_t seconds)
     rtc_exit_init_mode();
     rtc_write_protect_enable();
 
-    rtc_write_protect_disable();
     (void)rtc_wait_for_synchro();
-    rtc_write_protect_enable();
 }
 
 void rtc_write_date(uint8_t year, uint8_t month, uint8_t date, uint8_t weekday)
@@ -210,29 +264,37 @@ void rtc_write_date(uint8_t year, uint8_t month, uint8_t date, uint8_t weekday)
     rtc_exit_init_mode();
     rtc_write_protect_enable();
 
-    rtc_write_protect_disable();
     (void)rtc_wait_for_synchro();
-    rtc_write_protect_enable();
 }
 
 int rtc_set_datetime(uint8_t year, uint8_t month, uint8_t date, uint8_t weekday,
                      uint8_t hours, uint8_t minutes, uint8_t seconds)
 {
+    rtc_busy = 1;
 
     rtc_backup_domain_unlock();
-    rtc_write_protect_disable();
-    uint8_t yb = to_bcd(year % 100U);
-    uint8_t mb = to_bcd(month);
-    uint8_t db = to_bcd(date);
 
-    uint8_t hb = to_bcd(hours);
+    if (year > 99U ||
+        month < 1U || month > 12U ||
+        date  < 1U || date  > 31U ||
+        weekday < 1U || weekday > 7U ||
+        hours > 23U || minutes > 59U || seconds > 59U) {
+        rtc_busy = 0;
+        return -3;
+    }
+
+    uint8_t yb  = to_bcd((uint8_t)(year % 100U));
+    uint8_t mb  = to_bcd(month);
+    uint8_t db  = to_bcd(date);
+    uint8_t hb  = to_bcd(hours);
     uint8_t mib = to_bcd(minutes);
-    uint8_t sb = to_bcd(seconds);
+    uint8_t sb  = to_bcd(seconds);
 
     rtc_write_protect_disable();
 
     if (rtc_enter_init_mode() < 0) {
         rtc_write_protect_enable();
+        rtc_busy = 0;
         return -1;
     }
 
@@ -248,10 +310,11 @@ int rtc_set_datetime(uint8_t year, uint8_t month, uint8_t date, uint8_t weekday,
         (bcd_tens(sb)  << RTC_TR_ST_Pos)  | (bcd_units(sb) << RTC_TR_SU_Pos);
 
     rtc_exit_init_mode();
+    rtc_write_protect_enable();
 
     (void)rtc_wait_for_synchro();
 
-    rtc_write_protect_enable();
+    rtc_busy = 0;
     return 0;
 }
 
@@ -294,6 +357,43 @@ void rtc_read_date(uint8_t *year, uint8_t *month, uint8_t *date, uint8_t *weekda
     *weekday = (uint8_t)((dr1 & RTC_DR_WDU_Msk) >> RTC_DR_WDU_Pos);
 }
 
+void rtc_read_datetime(uint8_t *year, uint8_t *month, uint8_t *day, uint8_t *weekday,
+                       uint8_t *hours, uint8_t *minutes, uint8_t *seconds)
+{
+    if (!year || !month || !day || !weekday || !hours || !minutes || !seconds) return;
+
+    uint32_t tr1, tr2, dr1, dr2;
+    do {
+        tr1 = RTC->TR;
+        dr1 = RTC->DR;
+        tr2 = RTC->TR;
+        dr2 = RTC->DR;
+    } while (tr1 != tr2 || dr1 != dr2);
+
+    uint8_t ht = (uint8_t)((tr1 & RTC_TR_HT_Msk)  >> RTC_TR_HT_Pos);
+    uint8_t hu = (uint8_t)((tr1 & RTC_TR_HU_Msk)  >> RTC_TR_HU_Pos);
+    uint8_t mt = (uint8_t)((tr1 & RTC_TR_MNT_Msk) >> RTC_TR_MNT_Pos);
+    uint8_t mu = (uint8_t)((tr1 & RTC_TR_MNU_Msk) >> RTC_TR_MNU_Pos);
+    uint8_t st = (uint8_t)((tr1 & RTC_TR_ST_Msk)  >> RTC_TR_ST_Pos);
+    uint8_t su = (uint8_t)((tr1 & RTC_TR_SU_Msk)  >> RTC_TR_SU_Pos);
+
+    *hours   = (uint8_t)(ht * 10U + hu);
+    *minutes = (uint8_t)(mt * 10U + mu);
+    *seconds = (uint8_t)(st * 10U + su);
+
+    uint8_t yt = (uint8_t)((dr1 & RTC_DR_YT_Msk) >> RTC_DR_YT_Pos);
+    uint8_t yu = (uint8_t)((dr1 & RTC_DR_YU_Msk) >> RTC_DR_YU_Pos);
+    uint8_t mot = (uint8_t)((dr1 & RTC_DR_MT_Msk) >> RTC_DR_MT_Pos);
+    uint8_t mou = (uint8_t)((dr1 & RTC_DR_MU_Msk) >> RTC_DR_MU_Pos);
+    uint8_t dt = (uint8_t)((dr1 & RTC_DR_DT_Msk) >> RTC_DR_DT_Pos);
+    uint8_t du = (uint8_t)((dr1 & RTC_DR_DU_Msk) >> RTC_DR_DU_Pos);
+
+    *year    = (uint8_t)(yt * 10U + yu);
+    *month   = (uint8_t)(mot * 10U + mou);
+    *day     = (uint8_t)(dt * 10U + du);
+    *weekday = (uint8_t)((dr1 & RTC_DR_WDU_Msk) >> RTC_DR_WDU_Pos);
+}
+
 void rtc_alarmA_disable(void)
 {
     rtc_write_protect_disable();
@@ -301,7 +401,7 @@ void rtc_alarmA_disable(void)
     RTC->CR &= ~RTC_CR_ALRAIE;
 
     RTC->CR &= ~RTC_CR_ALRAE;
-    (void)wait_mask_set(&RTC->ISR, RTC_ISR_ALRAWF);
+    (void)wait_mask_set_loop(&RTC->ISR, RTC_ISR_ALRAWF, RTC_TIMEOUT_LOOP);
 
     RTC->ISR &= ~RTC_ISR_ALRAF;
 
@@ -320,7 +420,7 @@ int rtc_alarmA_set_hms(uint8_t h, uint8_t m, uint8_t s, uint8_t daily)
     rtc_write_protect_disable();
 
     RTC->CR &= ~RTC_CR_ALRAE;
-    if (wait_mask_set(&RTC->ISR, RTC_ISR_ALRAWF) < 0) {
+    if (wait_mask_set_loop(&RTC->ISR, RTC_ISR_ALRAWF, RTC_TIMEOUT_LOOP) < 0) {
         rtc_write_protect_enable();
         return -2;
     }
@@ -367,7 +467,7 @@ int rtc_alarmA_set_day_hms(uint8_t day, uint8_t hours, uint8_t minutes, uint8_t 
     rtc_write_protect_disable();
 
     RTC->CR &= ~RTC_CR_ALRAE;
-    if (wait_mask_set(&RTC->ISR, RTC_ISR_ALRAWF) < 0) {
+    if (wait_mask_set_loop(&RTC->ISR, RTC_ISR_ALRAWF, RTC_TIMEOUT_LOOP) < 0) {
         rtc_write_protect_enable();
         return -2;
     }
@@ -488,7 +588,7 @@ void rtc_wakeup_disable(void)
     RTC->CR &= ~RTC_CR_WUTIE;
 
     RTC->CR &= ~RTC_CR_WUTE;
-    (void)wait_mask_set(&RTC->ISR, RTC_ISR_WUTWF);
+    (void)wait_mask_set_loop(&RTC->ISR, RTC_ISR_WUTWF, RTC_TIMEOUT_LOOP);
 
     RTC->ISR &= ~RTC_ISR_WUTF;
 
@@ -502,7 +602,7 @@ int rtc_wakeup_start_seconds(uint16_t seconds)
     rtc_write_protect_disable();
 
     RTC->CR &= ~RTC_CR_WUTE;
-    if (wait_mask_set(&RTC->ISR, RTC_ISR_WUTWF) < 0) {
+    if (wait_mask_set_loop(&RTC->ISR, RTC_ISR_WUTWF, RTC_TIMEOUT_LOOP) < 0) {
         rtc_write_protect_enable();
         return -2;
     }

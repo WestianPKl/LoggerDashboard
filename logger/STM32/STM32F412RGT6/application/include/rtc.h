@@ -16,8 +16,11 @@ void rtc_write_date(uint8_t year, uint8_t month, uint8_t date, uint8_t weekday);
 
 void rtc_read_time(uint8_t *hours, uint8_t *minutes, uint8_t *seconds);
 void rtc_read_date(uint8_t *year, uint8_t *month, uint8_t *date, uint8_t *weekday);
+
+void rtc_read_datetime(uint8_t *year,uint8_t *month,uint8_t *day,uint8_t *weekday,
+                    uint8_t *hours,uint8_t *minutes,uint8_t *seconds);
 int rtc_set_datetime(uint8_t year, uint8_t month, uint8_t date, uint8_t weekday,
-                     uint8_t hours, uint8_t minutes, uint8_t seconds);
+                    uint8_t hours, uint8_t minutes, uint8_t seconds);
 
 void rtc_wakeup_disable(void);
 int  rtc_wakeup_start_seconds(uint16_t seconds);

@@ -58,6 +58,7 @@ export async function loader({ params }: LoaderFunctionArgs): Promise<{
 		if (!promise) {
 			throw data('Data not Found', { status: 404 })
 		}
+		console.log(promise)
 		return { equipment: promise, equLoggerId: Number(params.equLoggerId) }
 	} catch (err: any) {
 		store.dispatch(
